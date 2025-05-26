@@ -3,7 +3,9 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import Image from 'next/image'
 import './globals.css'
-import { FaShoppingCart, FaHeart, FaEnvelope, FaInstagram, FaFacebook, FaTwitter } from 'react-icons/fa'
+import { FaEnvelope, FaInstagram, FaFacebook, FaTwitter } from 'react-icons/fa'
+import CartWrapper from './components/CartWrapper'
+import CartIcon from './components/CartIcon'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -20,6 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} bg-[#FFF5E6]`}>
+        <CartWrapper>
         <nav className="bg-[#4A3419] text-[#FFF5E6] sticky top-0 z-50 shadow-lg transition-all duration-300">
           <div className="container mx-auto flex justify-between items-center py-3 px-4">
             <a href="/" className="flex items-center gap-2 text-2xl font-bold transition-transform duration-300 transform hover:scale-105">
@@ -55,12 +58,7 @@ export default function RootLayout({
                 </a>
               </div>
               <div className="flex items-center space-x-3">
-                <a href="#" className="hover:text-[#E8C39E] transition-transform duration-300 transform hover:scale-110">
-                  <FaHeart className="text-xl" />
-                </a>
-                <a href="#" className="hover:text-[#E8C39E] transition-transform duration-300 transform hover:scale-110">
-                  <FaShoppingCart className="text-xl" />
-                </a>
+                  <CartIcon />
               </div>
             </div>
           </div>
@@ -103,6 +101,11 @@ export default function RootLayout({
                     Contact Us
                   </a>
                 </li>
+                  <li>
+                    <a href="/cart" className="hover:text-[#E8C39E] transition-all duration-200 hover:pl-2">
+                      Shopping Cart
+                    </a>
+                  </li>
               </ul>
             </div>
             <div className="space-y-4">
@@ -126,6 +129,7 @@ export default function RootLayout({
             <p>© 2024 Caydi's Creations. All rights reserved.</p>
           </div>
         </footer>
+        </CartWrapper>
       </body>
     </html>
   )

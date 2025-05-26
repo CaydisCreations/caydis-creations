@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { FaSearch, FaHeart, FaShoppingCart, FaStar, FaTimes } from 'react-icons/fa'
+import { FaSearch, FaShoppingCart, FaStar, FaTimes } from 'react-icons/fa'
+import { useCart } from '../context/CartContext'
 
 const products = [
   {
@@ -52,16 +53,26 @@ const products = [
     description: 'Stylish and warm beanie hat for winter. One-size-fits-most design for ultimate comfort.',
     category: 'Accessories',
     rating: 4.6
+  },
+  {
+    id: 7,
+    name: 'Sample Keychain',
+    price: 1.00,
+    description: 'A cute and affordable crochet keychain. Perfect as a small gift or add-on!',
+    category: 'Accessories',
+    rating: 5.0
   }
 ];
 
-export default function Products() {
+function ProductsContent() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [filteredProducts, setFilteredProducts] = useState(products);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [quantity, setQuantity] = useState(1);
+  const { addToCart } = useCart();
 
   // Filter products based on selected category and search term
   useEffect(() => {
@@ -87,10 +98,29 @@ export default function Products() {
   const handleProductClick = (product) => {
     setSelectedProduct(product);
     setModalOpen(true);
+    setQuantity(1); // Reset quantity when opening modal
   };
 
   const closeModal = () => {
     setModalOpen(false);
+  };
+
+  const handleAddToCart = (e, product) => {
+    e.stopPropagation(); // Prevents triggering handleProductClick when clicking the button
+    addToCart(product, 1);
+  };
+
+  const handleAddToCartFromModal = () => {
+    addToCart(selectedProduct, quantity);
+    setModalOpen(false);
+  };
+
+  const incrementQuantity = () => {
+    setQuantity(prev => prev + 1);
+  };
+
+  const decrementQuantity = () => {
+    setQuantity(prev => (prev > 1 ? prev - 1 : 1));
   };
 
   const categories = ['All', 'Home Decor', 'Baby', 'Accessories'];
@@ -205,20 +235,15 @@ export default function Products() {
                     </span>
                   </div>
                   <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-white to-transparent"></div>
-                  <div className="hidden group-hover:flex absolute right-0 bottom-0 space-x-1 p-2">
+                  <div className="hidden group-hover:flex absolute right-0 bottom-0 p-2">
                     <motion.button
-                      className="p-2 bg-[#4A3419] text-white rounded-full hover:bg-[#6B4B26]"
+                      className="p-2 bg-[#4A3419] text-white rounded-full hover:bg-[#6B4B26] flex items-center gap-1"
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
-                    >
-                      <FaHeart size={14} />
-                    </motion.button>
-                    <motion.button
-                      className="p-2 bg-[#4A3419] text-white rounded-full hover:bg-[#6B4B26]"
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
+                      onClick={(e) => handleAddToCart(e, product)}
                     >
                       <FaShoppingCart size={14} />
+                      <span className="text-xs">Add</span>
                     </motion.button>
                   </div>
                 </motion.div>
@@ -283,20 +308,29 @@ export default function Products() {
                     <span className="font-medium text-[#4A3419]">Standard</span>
                   </div>
                 </div>
-                <div className="flex gap-4">
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center justify-center border border-gray-200 rounded-lg p-2">
+                    <button 
+                      onClick={decrementQuantity} 
+                      className="w-8 h-8 flex items-center justify-center bg-[#E8C39E] text-[#4A3419] rounded-full hover:bg-[#d6b28e]"
+                    >
+                      -
+                    </button>
+                    <span className="mx-4 text-lg font-medium text-[#4A3419]">{quantity}</span>
+                    <button 
+                      onClick={incrementQuantity} 
+                      className="w-8 h-8 flex items-center justify-center bg-[#E8C39E] text-[#4A3419] rounded-full hover:bg-[#d6b28e]"
+                    >
+                      +
+                    </button>
+                  </div>
                   <motion.button 
-                    className="flex-1 bg-[#4A3419] text-white py-3 rounded-lg font-bold hover:bg-[#6B4B26] transition-colors duration-300"
+                    className="w-full bg-[#4A3419] text-white py-3 rounded-lg font-bold hover:bg-[#6B4B26] transition-colors duration-300 flex items-center justify-center gap-2"
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
+                    onClick={handleAddToCartFromModal}
                   >
-                    Add to Cart
-                  </motion.button>
-                  <motion.button 
-                    className="p-3 border-2 border-[#4A3419] rounded-lg text-[#4A3419] hover:bg-[#E8C39E] transition-colors duration-300"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <FaHeart />
+                    <FaShoppingCart /> Add to Cart
                   </motion.button>
                 </div>
               </div>
@@ -306,4 +340,8 @@ export default function Products() {
       </AnimatePresence>
     </div>
   )
+}
+
+export default function ProductsPage() {
+  return <ProductsContent />;
 } 

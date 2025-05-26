@@ -3,39 +3,59 @@
 import React, { useState } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { FaRecycle, FaCut, FaHeart, FaArrowRight, FaGift, FaStar } from 'react-icons/fa'
-
-export default function Home() {
-  const [modalOpen, setModalOpen] = useState(false);
-  const [activeProduct, setActiveProduct] = useState(null);
+import { FaRecycle, FaTools, FaArrowRight, FaGift, FaStar, FaShoppingCart } from 'react-icons/fa'
+import { useCart } from './context/CartContext'
 
   const products = [
     {
       id: 1,
       name: 'Cozy Blanket',
       price: 89.99,
-      description: 'A warm and comfortable blanket made from recycled cotton and wool. Perfect for cold nights.',
-      category: 'Home Decor'
+    description: 'A warm and comfortable blanket perfect for cold nights, made from recycled cotton yarn.',
+    category: 'Home Decor',
+    rating: 4.8
     },
     {
       id: 2,
       name: 'Baby Set',
       price: 49.99,
-      description: 'Adorable set including hat, booties, and mittens. Made with soft recycled yarns, safe for sensitive skin.',
-      category: 'Baby'
+    description: 'Adorable set including hat, booties, and mittens. Perfect for welcoming a new arrival!',
+    category: 'Baby',
+    rating: 5.0
     },
     {
       id: 3,
       name: 'Winter Scarf',
       price: 34.99,
-      description: 'Soft and stylish scarf to keep you warm. Each scarf is unique, created from reclaimed fabrics.',
-      category: 'Accessories'
+    description: 'Soft and stylish scarf to keep you warm. Makes an excellent gift!',
+    category: 'Accessories',
+    rating: 4.9
     }
   ];
+
+function HomeContent() {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [activeProduct, setActiveProduct] = useState(null);
+  const [quantity, setQuantity] = useState(1);
+  const { addToCart } = useCart();
 
   const handleProductClick = (product) => {
     setActiveProduct(product);
     setModalOpen(true);
+    setQuantity(1); // Reset quantity when opening modal
+  };
+
+  const handleAddToCart = () => {
+    addToCart(activeProduct, quantity);
+    setModalOpen(false);
+  };
+
+  const incrementQuantity = () => {
+    setQuantity(prev => prev + 1);
+  };
+
+  const decrementQuantity = () => {
+    setQuantity(prev => (prev > 1 ? prev - 1 : 1));
   };
 
   return (
@@ -132,9 +152,9 @@ export default function Home() {
         >
           <div className="flex items-center mb-4">
             <div className="bg-[#4A3419] p-3 rounded-full mr-4">
-              <FaHeart className="text-[#FFF5E6] text-xl" />
+              <FaTools className="text-[#FFF5E6] text-xl" />
             </div>
-            <h2 className="text-2xl font-bold text-[#4A3419]">Made with Love</h2>
+            <h2 className="text-2xl font-bold text-[#4A3419]">Quality Craftsmanship</h2>
           </div>
           <p className="text-[#4A3419]">Every stitch is made with care and passion for the craft. Quality and attention to detail is our priority!</p>
           <motion.button 
@@ -242,20 +262,30 @@ export default function Home() {
                 </span>
               </div>
               <p className="text-gray-700 mb-6">{activeProduct.description}</p>
-              <div className="flex space-x-4">
+              
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center justify-center border border-gray-200 rounded-lg p-2">
+                  <button 
+                    onClick={decrementQuantity} 
+                    className="w-8 h-8 flex items-center justify-center bg-[#E8C39E] text-[#4A3419] rounded-full hover:bg-[#d6b28e]"
+                  >
+                    -
+                  </button>
+                  <span className="mx-4 text-lg font-medium text-[#4A3419]">{quantity}</span>
+                  <button 
+                    onClick={incrementQuantity} 
+                    className="w-8 h-8 flex items-center justify-center bg-[#E8C39E] text-[#4A3419] rounded-full hover:bg-[#d6b28e]"
+                  >
+                    +
+                  </button>
+                </div>
                 <motion.button 
-                  className="flex-1 bg-[#4A3419] text-white py-3 rounded-lg font-medium"
+                  className="flex items-center justify-center gap-2 bg-[#4A3419] text-white py-3 rounded-lg font-medium"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
+                  onClick={handleAddToCart}
                 >
-                  Add to Cart
-                </motion.button>
-                <motion.button 
-                  className="flex items-center justify-center bg-white border-2 border-[#4A3419] text-[#4A3419] p-3 rounded-lg"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <FaHeart />
+                  <FaShoppingCart /> Add to Cart
                 </motion.button>
               </div>
             </div>
@@ -264,4 +294,8 @@ export default function Home() {
       )}
     </div>
   )
+}
+
+export default function HomePage() {
+  return <HomeContent />;
 } 
