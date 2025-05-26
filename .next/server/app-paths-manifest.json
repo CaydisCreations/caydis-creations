@@ -1,8 +1,6 @@
 {
-  "/not-found": "app/not-found.js",
-  "/page": "app/page.js",
-  "/about/page": "app/about/page.js",
-  "/gallery/page": "app/gallery/page.js",
-  "/products/page": "app/products/page.js",
-  "/contact/page": "app/contact/page.js"
+  "/cancel/page": "app/cancel/page.js",
+  "/api/checkout_sessions/route": "app/api/checkout_sessions/route.js",
+  "/cart/page": "app/cart/page.js",
+  "/products/page": "app/products/page.js"
 }
