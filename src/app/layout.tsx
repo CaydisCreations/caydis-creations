@@ -21,6 +21,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" type="image/png" href="/logoCaydisCreation.PNG" />
+      </head>
       <body className={`${inter.className} bg-[#FFF5E6]`}>
         <CartWrapper>
         <nav className="bg-[#4A3419] text-[#FFF5E6] sticky top-0 z-50 shadow-lg transition-all duration-300">
