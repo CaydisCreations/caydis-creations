@@ -32,6 +32,18 @@ export default function RecycleClothesPage() {
           </p>
         </motion.section>
 
+        {/* Google Form Button at Top */}
+        <div className="flex justify-center mb-8">
+          <a
+            href="https://forms.google.com/temp-recycle-form"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block bg-[#E8C39E] text-[#4A3419] px-8 py-4 rounded-lg font-bold text-lg hover:bg-[#d6b28e] transition-colors duration-300"
+          >
+            Start Your Recycle Project <FaArrowRight className="inline ml-2" />
+          </a>
+        </div>
+
         {/* How It Works Section */}
         <motion.section 
           initial={{ opacity: 0, y: 30 }}
