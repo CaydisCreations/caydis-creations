@@ -1,5 +1,4 @@
 import React from 'react'
-import Image from 'next/image'
 
 export default function About() {
   return (
@@ -11,11 +10,10 @@ export default function About() {
 
       <div className="grid md:grid-cols-2 gap-8 items-center">
         <div className="relative h-96">
-          <Image
-            src="/caydiPFP.jpg"
+          <img
+            src="/caydiSittingPFP.jpg"
             alt="Caydi's Profile"
-            fill
-            className="object-contain rounded-xl shadow-lg"
+            className="object-contain rounded-xl shadow-lg w-full h-full"
           />
         </div>
         <div className="space-y-4">

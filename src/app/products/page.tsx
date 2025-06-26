@@ -53,14 +53,6 @@ const products = [
     description: 'Stylish and warm beanie hat for winter. One-size-fits-most design for ultimate comfort.',
     category: 'Accessories',
     rating: 4.6
-  },
-  {
-    id: 7,
-    name: 'Sample Keychain',
-    price: 1.00,
-    description: 'A cute and affordable crochet keychain. Perfect as a small gift or add-on!',
-    category: 'Accessories',
-    rating: 5.0
   }
 ];
 

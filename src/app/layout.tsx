@@ -44,6 +44,14 @@ export default function RootLayout({
                   Products
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#E8C39E] group-hover:w-full transition-all duration-300"></span>
                 </a>
+                <a href="/customize-orders" className="hover:text-[#E8C39E] relative group py-2">
+                  Customize Orders
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#E8C39E] group-hover:w-full transition-all duration-300"></span>
+                </a>
+                <a href="/recycle-clothes" className="hover:text-[#E8C39E] relative group py-2">
+                  Recycle Clothes To Crochet Items
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#E8C39E] group-hover:w-full transition-all duration-300"></span>
+                </a>
                 <a href="/gallery" className="hover:text-[#E8C39E] relative group py-2">
                   Gallery
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#E8C39E] group-hover:w-full transition-all duration-300"></span>
@@ -89,6 +97,21 @@ export default function RootLayout({
                 <li>
                   <a href="/products" className="hover:text-[#E8C39E] transition-all duration-200 hover:pl-2">
                     Products
+                  </a>
+                </li>
+                <li>
+                  <a href="/customize-orders" className="hover:text-[#E8C39E] transition-all duration-200 hover:pl-2">
+                    Customize Orders
+                  </a>
+                </li>
+                <li>
+                  <a href="/recycle-clothes" className="hover:text-[#E8C39E] transition-all duration-200 hover:pl-2">
+                    Recycle Clothes To Crochet Items
+                  </a>
+                </li>
+                <li>
+                  <a href="/gallery" className="hover:text-[#E8C39E] transition-all duration-200 hover:pl-2">
+                    Gallery
                   </a>
                 </li>
                 <li>
