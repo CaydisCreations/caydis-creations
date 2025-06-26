@@ -100,77 +100,68 @@ function HomeContent() {
 
       {/* Feature Cards with Hover Effects */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <motion.div 
-          className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border-b-4 border-transparent hover:border-[#4A3419]"
-          whileHover={{ scale: 1.02 }}
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="flex items-center mb-4">
-            <div className="bg-[#4A3419] p-3 rounded-full mr-4">
-              <FaHeart className="text-[#FFF5E6] text-xl" />
+        <Link href="/about" className="group">
+          <motion.div 
+            className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border-b-4 border-transparent hover:border-[#4A3419] cursor-pointer h-full flex flex-col"
+            whileHover={{ scale: 1.02 }}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="flex items-center mb-4">
+              <div className="bg-[#4A3419] p-3 rounded-full mr-4">
+                <FaHeart className="text-[#FFF5E6] text-xl" />
+              </div>
+              <h2 className="text-2xl font-bold text-[#4A3419]">Made With Love</h2>
             </div>
-            <h2 className="text-2xl font-bold text-[#4A3419]">Made With Love</h2>
-          </div>
-          <p className="text-[#4A3419]">Every stitch is made with care and passion for the craft. Quality and attention to detail is our priority!</p>
-          <Link href="/about">
-            <motion.button 
-              className="mt-4 flex items-center text-[#4A3419] font-medium hover:text-[#E8C39E]"
-              whileHover={{ x: 5 }}
-            >
+            <p className="text-[#4A3419] flex-1">Every stitch is made with care and passion for the craft. Quality and attention to detail is our priority!</p>
+            <span className="mt-4 flex items-center text-[#4A3419] font-medium group-hover:text-[#E8C39E] transition-colors">
               Our story <FaArrowRight className="ml-2" />
-            </motion.button>
-          </Link>
-        </motion.div>
+            </span>
+          </motion.div>
+        </Link>
 
-        <motion.div 
-          className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border-b-4 border-transparent hover:border-[#4A3419]"
-          whileHover={{ scale: 1.02 }}
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          <div className="flex items-center mb-4">
-            <div className="bg-[#4A3419] p-3 rounded-full mr-4">
-              <FaGift className="text-[#FFF5E6] text-xl" />
+        <Link href="/customize-orders" className="group">
+          <motion.div 
+            className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border-b-4 border-transparent hover:border-[#4A3419] cursor-pointer h-full flex flex-col"
+            whileHover={{ scale: 1.02 }}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <div className="flex items-center mb-4">
+              <div className="bg-[#4A3419] p-3 rounded-full mr-4">
+                <FaGift className="text-[#FFF5E6] text-xl" />
+              </div>
+              <h2 className="text-2xl font-bold text-[#4A3419]">Customize Orders</h2>
             </div>
-            <h2 className="text-2xl font-bold text-[#4A3419]">Customize Orders</h2>
-          </div>
-          <p className="text-[#4A3419]">Want something unique? We take custom orders to bring your vision to life. Each piece is tailored to your preferences!</p>
-          <Link href="/customize-orders">
-            <motion.button 
-              className="mt-4 flex items-center text-[#4A3419] font-medium hover:text-[#E8C39E]"
-              whileHover={{ x: 5 }}
-            >
+            <p className="text-[#4A3419] flex-1">Want something unique? We take custom orders to bring your vision to life. Each piece is tailored to your preferences!</p>
+            <span className="mt-4 flex items-center text-[#4A3419] font-medium group-hover:text-[#E8C39E] transition-colors">
               Request custom item <FaArrowRight className="ml-2" />
-            </motion.button>
-          </Link>
-        </motion.div>
+            </span>
+          </motion.div>
+        </Link>
 
-        <motion.div 
-          className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border-b-4 border-transparent hover:border-[#4A3419]"
-          whileHover={{ scale: 1.02 }}
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-        >
-          <div className="flex items-center mb-4">
-            <div className="bg-[#4A3419] p-3 rounded-full mr-4">
-              <FaRecycle className="text-[#FFF5E6] text-xl" />
+        <Link href="/recycle-clothes" className="group">
+          <motion.div 
+            className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border-b-4 border-transparent hover:border-[#4A3419] cursor-pointer h-full flex flex-col"
+            whileHover={{ scale: 1.02 }}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
+            <div className="flex items-center mb-4">
+              <div className="bg-[#4A3419] p-3 rounded-full mr-4">
+                <FaRecycle className="text-[#FFF5E6] text-xl" />
+              </div>
+              <h2 className="text-2xl font-bold text-[#4A3419]">Recycle Clothes To Crochet Items</h2>
             </div>
-            <h2 className="text-2xl font-bold text-[#4A3419]">Recycle Clothes To Crochet Items</h2>
-          </div>
-          <p className="text-[#4A3419]">We take your old clothes and recycle them into a product you will love. Recyclable crochet items made just for you!</p>
-          <Link href="/recycle-clothes">
-            <motion.button 
-              className="mt-4 flex items-center text-[#4A3419] font-medium hover:text-[#E8C39E]"
-              whileHover={{ x: 5 }}
-            >
+            <p className="text-[#4A3419] flex-1">We take your old clothes and recycle them into a product you will love. Recyclable crochet items made just for you!</p>
+            <span className="mt-4 flex items-center text-[#4A3419] font-medium group-hover:text-[#E8C39E] transition-colors">
               Learn more <FaArrowRight className="ml-2" />
-            </motion.button>
-          </Link>
-        </motion.div>
+            </span>
+          </motion.div>
+        </Link>
       </section>
 
       {/* Featured Products Section */}

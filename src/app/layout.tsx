@@ -52,7 +52,7 @@ export default function RootLayout({
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#E8C39E] group-hover:w-full transition-all duration-300"></span>
                 </a>
                 <a href="/recycle-clothes" className="hover:text-[#E8C39E] relative group py-2">
-                  Recycle Clothes To Crochet Items
+                  Recycled Yarn
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#E8C39E] group-hover:w-full transition-all duration-300"></span>
                 </a>
                 <a href="/gallery" className="hover:text-[#E8C39E] relative group py-2">
@@ -109,7 +109,7 @@ export default function RootLayout({
                 </li>
                 <li>
                   <a href="/recycle-clothes" className="hover:text-[#E8C39E] transition-all duration-200 hover:pl-2">
-                    Recycle Clothes To Crochet Items
+                    Recycled Yarn
                   </a>
                 </li>
                 <li>

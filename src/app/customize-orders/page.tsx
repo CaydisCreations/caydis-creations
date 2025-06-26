@@ -32,6 +32,18 @@ export default function CustomizeOrdersPage() {
           </p>
         </motion.section>
 
+        {/* Google Form Button at Top */}
+        <div className="flex justify-center mb-8">
+          <a
+            href="https://forms.google.com/temp-custom-form"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block bg-[#E8C39E] text-[#4A3419] px-8 py-4 rounded-lg font-bold text-lg hover:bg-[#d6b28e] transition-colors duration-300"
+          >
+            Start Your Custom Order <FaArrowRight className="inline ml-2" />
+          </a>
+        </div>
+
         {/* Gallery Preview Section */}
         <motion.section 
           initial={{ opacity: 0, y: 30 }}
@@ -84,7 +96,7 @@ export default function CustomizeOrdersPage() {
               </div>
               <h3 className="text-xl font-bold text-[#4A3419] mb-3">Home Decor</h3>
               <p className="text-[#4A3419]">
-                Blankets, pillows, wall hangings, and decorative pieces that add warmth to your space.
+                Blankets and decorative pieces that add warmth to your space.
               </p>
             </motion.div>
 
@@ -116,23 +128,7 @@ export default function CustomizeOrdersPage() {
               </div>
               <h3 className="text-xl font-bold text-[#4A3419] mb-3">Baby Items</h3>
               <p className="text-[#4A3419]">
-                Special blankets, hats, booties, and toys made with love for little ones.
-              </p>
-            </motion.div>
-
-            <motion.div 
-              className="bg-white p-6 rounded-lg shadow-md text-center"
-              whileHover={{ scale: 1.05 }}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.8 }}
-            >
-              <div className="bg-[#E8C39E] p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <FaPalette className="text-[#4A3419] text-2xl" />
-              </div>
-              <h3 className="text-xl font-bold text-[#4A3419] mb-3">Unique Designs</h3>
-              <p className="text-[#4A3419]">
-                One-of-a-kind pieces that reflect your personality and preferences.
+                Special blankets and hats made with love for little ones.
               </p>
             </motion.div>
 
@@ -149,22 +145,6 @@ export default function CustomizeOrdersPage() {
               <h3 className="text-xl font-bold text-[#4A3419] mb-3">Gift Items</h3>
               <p className="text-[#4A3419]">
                 Thoughtful gifts for special occasions and loved ones.
-              </p>
-            </motion.div>
-
-            <motion.div 
-              className="bg-white p-6 rounded-lg shadow-md text-center"
-              whileHover={{ scale: 1.05 }}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 1.0 }}
-            >
-              <div className="bg-[#E8C39E] p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <FaGift className="text-[#4A3419] text-2xl" />
-              </div>
-              <h3 className="text-xl font-bold text-[#4A3419] mb-3">Your Vision</h3>
-              <p className="text-[#4A3419]">
-                Something completely unique? Let's discuss your ideas and make them reality.
               </p>
             </motion.div>
           </div>
