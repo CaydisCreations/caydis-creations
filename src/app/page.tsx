@@ -3,8 +3,9 @@
 import React, { useState } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { FaRecycle, FaTools, FaArrowRight, FaGift, FaStar, FaShoppingCart } from 'react-icons/fa'
+import { FaRecycle, FaTools, FaArrowRight, FaGift, FaStar, FaShoppingCart, FaHeart } from 'react-icons/fa'
 import { useCart } from './context/CartContext'
+import Link from 'next/link'
 
   const products = [
     {
@@ -108,17 +109,19 @@ function HomeContent() {
         >
           <div className="flex items-center mb-4">
             <div className="bg-[#4A3419] p-3 rounded-full mr-4">
-              <FaRecycle className="text-[#FFF5E6] text-xl" />
+              <FaHeart className="text-[#FFF5E6] text-xl" />
             </div>
-            <h2 className="text-2xl font-bold text-[#4A3419]">Recycled Crochet Items</h2>
+            <h2 className="text-2xl font-bold text-[#4A3419]">Made With Love</h2>
           </div>
-          <p className="text-[#4A3419]">We take your old clothes and recycle them into a product you will love. Recyclable crochet items made just for you!</p>
-          <motion.button 
-            className="mt-4 flex items-center text-[#4A3419] font-medium hover:text-[#E8C39E]"
-            whileHover={{ x: 5 }}
-          >
-            Learn more <FaArrowRight className="ml-2" />
-          </motion.button>
+          <p className="text-[#4A3419]">Every stitch is made with care and passion for the craft. Quality and attention to detail is our priority!</p>
+          <Link href="/about">
+            <motion.button 
+              className="mt-4 flex items-center text-[#4A3419] font-medium hover:text-[#E8C39E]"
+              whileHover={{ x: 5 }}
+            >
+              Our story <FaArrowRight className="ml-2" />
+            </motion.button>
+          </Link>
         </motion.div>
 
         <motion.div 
@@ -132,15 +135,17 @@ function HomeContent() {
             <div className="bg-[#4A3419] p-3 rounded-full mr-4">
               <FaGift className="text-[#FFF5E6] text-xl" />
             </div>
-            <h2 className="text-2xl font-bold text-[#4A3419]">Custom Orders</h2>
+            <h2 className="text-2xl font-bold text-[#4A3419]">Customize Orders</h2>
           </div>
           <p className="text-[#4A3419]">Want something unique? We take custom orders to bring your vision to life. Each piece is tailored to your preferences!</p>
-          <motion.button 
-            className="mt-4 flex items-center text-[#4A3419] font-medium hover:text-[#E8C39E]"
-            whileHover={{ x: 5 }}
-          >
-            Request custom item <FaArrowRight className="ml-2" />
-          </motion.button>
+          <Link href="/customize-orders">
+            <motion.button 
+              className="mt-4 flex items-center text-[#4A3419] font-medium hover:text-[#E8C39E]"
+              whileHover={{ x: 5 }}
+            >
+              Request custom item <FaArrowRight className="ml-2" />
+            </motion.button>
+          </Link>
         </motion.div>
 
         <motion.div 
@@ -152,17 +157,19 @@ function HomeContent() {
         >
           <div className="flex items-center mb-4">
             <div className="bg-[#4A3419] p-3 rounded-full mr-4">
-              <FaTools className="text-[#FFF5E6] text-xl" />
+              <FaRecycle className="text-[#FFF5E6] text-xl" />
             </div>
-            <h2 className="text-2xl font-bold text-[#4A3419]">Quality Craftsmanship</h2>
+            <h2 className="text-2xl font-bold text-[#4A3419]">Recycle Clothes To Crochet Items</h2>
           </div>
-          <p className="text-[#4A3419]">Every stitch is made with care and passion for the craft. Quality and attention to detail is our priority!</p>
-          <motion.button 
-            className="mt-4 flex items-center text-[#4A3419] font-medium hover:text-[#E8C39E]"
-            whileHover={{ x: 5 }}
-          >
-            Our story <FaArrowRight className="ml-2" />
-          </motion.button>
+          <p className="text-[#4A3419]">We take your old clothes and recycle them into a product you will love. Recyclable crochet items made just for you!</p>
+          <Link href="/recycle-clothes">
+            <motion.button 
+              className="mt-4 flex items-center text-[#4A3419] font-medium hover:text-[#E8C39E]"
+              whileHover={{ x: 5 }}
+            >
+              Learn more <FaArrowRight className="ml-2" />
+            </motion.button>
+          </Link>
         </motion.div>
       </section>
 
