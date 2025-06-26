@@ -303,7 +303,9 @@ function GalleryContent() {
                   <div className="relative aspect-video bg-black">
                     <video
                       src={selectedMedia.url}
-                      controls
+                      loop
+                      autoPlay
+                      playsInline
                       className="w-full h-full object-contain"
                       poster={selectedMedia.thumbnail}
                     />
