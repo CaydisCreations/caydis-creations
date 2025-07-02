@@ -12,7 +12,8 @@ const products = [
     price: 89.99,
     description: 'A warm and comfortable blanket perfect for cold nights, made from recycled cotton yarn.',
     category: 'Home Decor',
-    rating: 4.8
+    rating: 4.8,
+    image: '/logoCaydisCreation.PNG',
   },
   {
     id: 100,
@@ -20,7 +21,8 @@ const products = [
     price: 1.00,
     description: 'A special $1 product for testing checkout and payments.',
     category: 'Accessories',
-    rating: 5.0
+    rating: 5.0,
+    image: 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/BrownHats/IMG_5920.jpeg',
   },
   {
     id: 2,
@@ -28,7 +30,8 @@ const products = [
     price: 49.99,
     description: 'Adorable set including hat, booties, and mittens. Perfect for welcoming a new arrival!',
     category: 'Baby',
-    rating: 5.0
+    rating: 5.0,
+    image: '/logoCaydisCreation.PNG',
   },
   {
     id: 3,
@@ -36,7 +39,8 @@ const products = [
     price: 34.99,
     description: 'Soft and stylish scarf to keep you warm. Makes an excellent gift for friends and family.',
     category: 'Accessories',
-    rating: 4.7
+    rating: 4.7,
+    image: '/logoCaydisCreation.PNG',
   },
   {
     id: 4,
@@ -44,7 +48,8 @@ const products = [
     price: 29.99,
     description: 'Decorative throw pillows with intricate patterns. These add a cozy touch to any home!',
     category: 'Home Decor',
-    rating: 4.5
+    rating: 4.5,
+    image: '/logoCaydisCreation.PNG',
   },
   {
     id: 5,
@@ -52,7 +57,8 @@ const products = [
     price: 45.99,
     description: 'Soft and gentle blanket for your little one. Made with love, care, and quality materials.',
     category: 'Baby',
-    rating: 4.9
+    rating: 4.9,
+    image: '/logoCaydisCreation.PNG',
   },
   {
     id: 6,
@@ -60,7 +66,8 @@ const products = [
     price: 24.99,
     description: 'Stylish and warm beanie hat for winter. One-size-fits-most design for ultimate comfort.',
     category: 'Accessories',
-    rating: 4.6
+    rating: 4.6,
+    image: '/logoCaydisCreation.PNG',
   }
 ];
 
@@ -217,11 +224,9 @@ function ProductsContent() {
                   transition={{ duration: 0.3 }}
                   onClick={() => handleProductClick(product)}
                 >
-                  {/* Product image placeholder */}
+                  {/* Product image */}
                   <div className="bg-[#E8C39E] h-48 rounded-md mb-4 overflow-hidden relative">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <FaStar className="text-[#4A3419] text-4xl opacity-20" />
-                    </div>
+                    <img src={product.image} alt={product.name} className="object-contain w-full h-full" />
                     <div className="absolute top-0 right-0 bg-[#4A3419] text-white px-2 py-1 m-2 rounded-full text-sm">
                       {product.rating} ★
                     </div>
@@ -271,10 +276,7 @@ function ProductsContent() {
             >
               <div className="relative">
                 <div className="bg-[#E8C39E] h-64 relative">
-                  {/* Product image placeholder */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <FaStar className="text-[#4A3419] text-6xl opacity-20" />
-                  </div>
+                  <img src={selectedProduct.image} alt={selectedProduct.name} className="object-contain w-full h-full" />
                 </div>
                 <button 
                   className="absolute top-4 right-4 bg-white p-2 rounded-full shadow-lg hover:bg-[#E8C39E] transition-colors duration-300"

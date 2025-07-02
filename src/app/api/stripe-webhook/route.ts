@@ -23,9 +23,11 @@ export async function POST(req: NextRequest) {
     // Retrieve line items
     const lineItems = await stripe.checkout.sessions.listLineItems(session.id, { limit: 100 })
     // Compose order details
-    const itemsHtml = lineItems.data.map(item =>
-      `<li><b>${item.description}</b> — Qty: ${item.quantity} — $${((item.amount_total || 0) / 100).toFixed(2)}</li>`
-    ).join('')
+    const itemsHtml = lineItems.data.map(item => {
+      // For now, use the logo image for all products to avoid linter/type errors
+      const imageUrl = 'https://caydiscreation.com/logoCaydisCreation.PNG';
+      return `<li style=\"margin-bottom:16px;display:flex;align-items:center;\">\n<img src=\"${imageUrl}\" alt=\"${item.description}\" style=\"max-width:60px;max-height:60px;margin-right:12px;border-radius:8px;object-fit:contain;\" />\n<b>${item.description}</b> — Qty: ${item.quantity} — $${((item.amount_total || 0) / 100).toFixed(2)}</li>`;
+    }).join('');
     // Send email
     try {
       await resend.emails.send({
@@ -33,6 +35,9 @@ export async function POST(req: NextRequest) {
         to: session.customer_details?.email || session.customer_email || 'admin@caydiscreations.com',
         subject: "Your Caydi's Creations Order Confirmation",
         html: `
+          <div style="text-align:center; margin-bottom: 24px;">
+            <img src="https://caydiscreation.com/logoCaydisCreation.PNG" alt="Caydi's Creations Logo" style="max-width:180px; width:100%; height:auto; margin-bottom: 16px;" />
+          </div>
           <h2>Thank you for your purchase!</h2>
           <p>Hi ${session.customer_details?.name || 'there'},</p>
           <p>Your order was successful. Here are your order details:</p>
@@ -44,8 +49,8 @@ export async function POST(req: NextRequest) {
             ${session.customer_details?.address?.city || ''}, ${session.customer_details?.address?.state || ''} ${session.customer_details?.address?.postal_code || ''}<br/>
             ${session.customer_details?.address?.country || ''}
           </p>
-          <p>If you have any questions, reply to this email or contact us at caydicreations@gmail.com.</p>
-          <p>Thank you for supporting handmade!</p>
+          <p>If you have any questions, contact us at caydicreations@gmail.com.</p>
+          <p>Thank you for supporting Caydi's Creations handmade products!</p>
         `
       })
     } catch (err: any) {
