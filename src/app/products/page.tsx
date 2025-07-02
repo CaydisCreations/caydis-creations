@@ -18,8 +18,8 @@ const products = [
   {
     id: 100,
     name: 'Test Product',
-    price: 1.00,
-    description: 'A special $1 product for testing checkout and payments.',
+    price: 0.10,
+    description: 'A special $0.10 product for testing checkout and payments.',
     category: 'Accessories',
     rating: 5.0,
     image: 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/BrownHats/IMG_5920.jpeg',

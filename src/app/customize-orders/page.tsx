@@ -1,11 +1,17 @@
 'use client'
 
-import React from 'react'
-import { motion } from 'framer-motion'
+import React, { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { FaGift, FaPalette, FaHeart, FaArrowRight, FaImages, FaStar } from 'react-icons/fa'
 import Link from 'next/link'
 
 export default function CustomizeOrdersPage() {
+  const [activeTab, setActiveTab] = useState('What We Can Create Together');
+  const tabs = [
+    'What We Can Create Together',
+    'Time Frames',
+  ];
+
   return (
     <div className="min-h-screen bg-[#FFF5E6] py-12">
       <div className="max-w-4xl mx-auto px-4">
@@ -35,7 +41,7 @@ export default function CustomizeOrdersPage() {
         {/* Google Form Button at Top */}
         <div className="flex justify-center mb-8">
           <a
-            href="https://forms.google.com/temp-custom-form"
+            href="https://forms.gle/pMRpV5CstQ6mKhHN8"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block bg-[#E8C39E] text-[#4A3419] px-8 py-4 rounded-lg font-bold text-lg hover:bg-[#d6b28e] transition-colors duration-300"
@@ -44,7 +50,7 @@ export default function CustomizeOrdersPage() {
           </a>
         </div>
 
-        {/* Gallery Preview Section */}
+        {/* Gallery Preview Section (See My Experience) */}
         <motion.section 
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -73,83 +79,121 @@ export default function CustomizeOrdersPage() {
           </div>
         </motion.section>
 
-        {/* What We Can Create Section */}
-        <motion.section 
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="mb-16"
-        >
-          <h2 className="text-3xl font-bold text-[#4A3419] text-center mb-12">
+        {/* What We Can Create Together & Time Frames Toggle Section */}
+        <div className="flex justify-center mb-8 gap-4">
+          <button
+            className={`px-6 py-2 rounded-full font-bold transition-colors duration-300 ${activeTab === 'What We Can Create Together' ? 'bg-[#4A3419] text-[#FFF5E6]' : 'bg-[#E8C39E] text-[#4A3419]'}`}
+            onClick={() => setActiveTab('What We Can Create Together')}
+          >
             What We Can Create Together
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <motion.div 
-              className="bg-white p-6 rounded-lg shadow-md text-center"
-              whileHover={{ scale: 1.05 }}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.5 }}
-            >
-              <div className="bg-[#E8C39E] p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <FaHeart className="text-[#4A3419] text-2xl" />
-              </div>
-              <h3 className="text-xl font-bold text-[#4A3419] mb-3">Home Decor</h3>
-              <p className="text-[#4A3419]">
-                Blankets and decorative pieces that add warmth to your space.
-              </p>
-            </motion.div>
+          </button>
+          <button
+            className={`px-6 py-2 rounded-full font-bold transition-colors duration-300 ${activeTab === 'Time Frames' ? 'bg-[#4A3419] text-[#FFF5E6]' : 'bg-[#E8C39E] text-[#4A3419]'}`}
+            onClick={() => setActiveTab('Time Frames')}
+          >
+            Time Frames
+          </button>
+        </div>
 
-            <motion.div 
-              className="bg-white p-6 rounded-lg shadow-md text-center"
-              whileHover={{ scale: 1.05 }}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.6 }}
+        {activeTab === 'What We Can Create Together' && (
+          <motion.section 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="mb-16"
+          >
+            <h2 className="text-3xl font-bold text-[#4A3419] text-center mb-12">
+              What We Can Create Together
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <motion.div 
+                className="bg-white p-6 rounded-lg shadow-md text-center"
+                whileHover={{ scale: 1.05 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.5 }}
+              >
+                <div className="bg-[#E8C39E] p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                  <FaHeart className="text-[#4A3419] text-2xl" />
+                </div>
+                <h3 className="text-xl font-bold text-[#4A3419] mb-3">Home Decor</h3>
+                <p className="text-[#4A3419]">
+                  Blankets and decorative pieces that add warmth to your space.
+                </p>
+              </motion.div>
+              <motion.div 
+                className="bg-white p-6 rounded-lg shadow-md text-center"
+                whileHover={{ scale: 1.05 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.6 }}
+              >
+                <div className="bg-[#E8C39E] p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                  <FaGift className="text-[#4A3419] text-2xl" />
+                </div>
+                <h3 className="text-xl font-bold text-[#4A3419] mb-3">Accessories</h3>
+                <p className="text-[#4A3419]">
+                  Scarves, hats, bags, and other accessories that showcase your personal style.
+                </p>
+              </motion.div>
+              <motion.div 
+                className="bg-white p-6 rounded-lg shadow-md text-center"
+                whileHover={{ scale: 1.05 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.7 }}
+              >
+                <div className="bg-[#E8C39E] p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                  <FaStar className="text-[#4A3419] text-2xl" />
+                </div>
+                <h3 className="text-xl font-bold text-[#4A3419] mb-3">Baby Items</h3>
+                <p className="text-[#4A3419]">
+                  Special blankets and hats made with love for little ones.
+                </p>
+              </motion.div>
+              <motion.div 
+                className="bg-white p-6 rounded-lg shadow-md text-center"
+                whileHover={{ scale: 1.05 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.9 }}
+              >
+                <div className="bg-[#E8C39E] p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                  <FaHeart className="text-[#4A3419] text-2xl" />
+                </div>
+                <h3 className="text-xl font-bold text-[#4A3419] mb-3">Gift Items</h3>
+                <p className="text-[#4A3419]">
+                  Thoughtful gifts for special occasions and loved ones.
+                </p>
+              </motion.div>
+            </div>
+          </motion.section>
+        )}
+        <AnimatePresence mode="wait">
+          {activeTab === 'Time Frames' && (
+            <motion.div
+              key="time-frames"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5 }}
+              className="bg-white rounded-lg shadow-md p-8 mb-16"
             >
-              <div className="bg-[#E8C39E] p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <FaGift className="text-[#4A3419] text-2xl" />
-              </div>
-              <h3 className="text-xl font-bold text-[#4A3419] mb-3">Accessories</h3>
-              <p className="text-[#4A3419]">
-                Scarves, hats, bags, and other accessories that showcase your personal style.
-              </p>
+              <h2 className="text-3xl font-bold text-[#4A3419] mb-4">Time Range For How Long Items Take To Make</h2>
+              <p className="text-[#4A3419] mb-6">All products range depending on the type of item, these times are not set in stone.</p>
+              <ul className="text-lg text-[#4A3419] space-y-2">
+                <li><b>Beanies:</b> 1-2 days</li>
+                <li><b>Scarves:</b> 2-3 days</li>
+                <li><b>Scrunchies:</b> 1 day</li>
+                <li><b>Thick yarn Blanket:</b> 2-4 days</li>
+                <li><b>Bags:</b> 2-4 days</li>
+                <li><b>Cardigans:</b> 2 weeks minimum</li>
+                <li><b>Sweaters:</b> 2 weeks minimum</li>
+              </ul>
             </motion.div>
-
-            <motion.div 
-              className="bg-white p-6 rounded-lg shadow-md text-center"
-              whileHover={{ scale: 1.05 }}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.7 }}
-            >
-              <div className="bg-[#E8C39E] p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <FaStar className="text-[#4A3419] text-2xl" />
-              </div>
-              <h3 className="text-xl font-bold text-[#4A3419] mb-3">Baby Items</h3>
-              <p className="text-[#4A3419]">
-                Special blankets and hats made with love for little ones.
-              </p>
-            </motion.div>
-
-            <motion.div 
-              className="bg-white p-6 rounded-lg shadow-md text-center"
-              whileHover={{ scale: 1.05 }}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.9 }}
-            >
-              <div className="bg-[#E8C39E] p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <FaHeart className="text-[#4A3419] text-2xl" />
-              </div>
-              <h3 className="text-xl font-bold text-[#4A3419] mb-3">Gift Items</h3>
-              <p className="text-[#4A3419]">
-                Thoughtful gifts for special occasions and loved ones.
-              </p>
-            </motion.div>
-          </div>
-        </motion.section>
-
+          )}
+        </AnimatePresence>
+        
         {/* Customization Process */}
         <motion.section 
           initial={{ opacity: 0, y: 30 }}
@@ -277,7 +321,7 @@ export default function CustomizeOrdersPage() {
             Let's bring your vision to life with a custom crochet piece made just for you.
           </p>
           <motion.a 
-            href="https://forms.google.com/temp-custom-form"
+            href="https://forms.gle/pMRpV5CstQ6mKhHN8"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block bg-[#E8C39E] text-[#4A3419] px-8 py-4 rounded-lg font-bold text-lg hover:bg-[#d6b28e] transition-colors duration-300"

@@ -1,11 +1,25 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { FaRecycle, FaTshirt, FaYarn, FaHeart, FaArrowRight } from 'react-icons/fa'
 import Link from 'next/link'
 
+const duffleBagImages = [
+  '/duffleBag/IMG_6982.jpg',
+  '/duffleBag/IMG_6990.jpg',
+  '/duffleBag/IMG_6989.jpg',
+  '/duffleBag/IMG_6988.jpg',
+  '/duffleBag/IMG_6987.jpg',
+  '/duffleBag/IMG_6986.jpg',
+  '/duffleBag/IMG_6985.jpg',
+];
+
 export default function RecycleClothesPage() {
+  const [carouselIndex, setCarouselIndex] = useState(0);
+  const prevImage = () => setCarouselIndex(i => (i === 0 ? duffleBagImages.length - 1 : i - 1));
+  const nextImage = () => setCarouselIndex(i => (i === duffleBagImages.length - 1 ? 0 : i + 1));
+
   return (
     <div className="min-h-screen bg-[#FFF5E6] py-12">
       <div className="max-w-4xl mx-auto px-4">
@@ -35,7 +49,7 @@ export default function RecycleClothesPage() {
         {/* Google Form Button at Top */}
         <div className="flex justify-center mb-8">
           <a
-            href="https://forms.google.com/temp-recycle-form"
+            href="https://docs.google.com/forms/d/e/1FAIpQLSdfpc5gVq_5kexzuQATl-mTg4b8eRRPUjTi2A9K89NrhMmH9A/viewform"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block bg-[#E8C39E] text-[#4A3419] px-8 py-4 rounded-lg font-bold text-lg hover:bg-[#d6b28e] transition-colors duration-300"
@@ -48,7 +62,7 @@ export default function RecycleClothesPage() {
         <motion.section 
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
+          transition={{ duration: 0.8, delay: 0.1 }}
           className="mb-16"
         >
           <h2 className="text-3xl font-bold text-[#4A3419] text-center mb-12">
@@ -105,11 +119,64 @@ export default function RecycleClothesPage() {
           </div>
         </motion.section>
 
+        {/* Types of Items We Can Make Section */}
+        <motion.section 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.15 }}
+          className="mb-16"
+        >
+          <h2 className="text-3xl font-bold text-[#4A3419] text-center mb-8">
+            Types of Items We Can Make
+          </h2>
+          <div className="bg-white p-8 rounded-lg shadow-md text-[#4A3419] text-lg space-y-2">
+            <ul className="list-disc ml-6">
+              <li>Bags (see duffle bag example below)</li>
+              <li>Small baskets</li>
+              <li>Coasters</li>
+              <li>Thin blankets</li>
+            </ul>
+          </div>
+        </motion.section>
+
+        {/* Duffle Bag Example Section with Carousel */}
+        <motion.section 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="mb-16"
+        >
+          <h2 className="text-3xl font-bold text-[#4A3419] text-center mb-8">
+            Duffle Bag Example
+          </h2>
+          <div className="bg-white p-8 rounded-lg shadow-md flex flex-col md:flex-row items-center gap-8">
+            <div className="relative w-full max-w-xs flex-shrink-0">
+              <img src={duffleBagImages[carouselIndex]} alt={`Duffle Bag Example ${carouselIndex + 1}`} className="w-full rounded-lg shadow-md object-contain" />
+              {duffleBagImages.length > 1 && (
+                <>
+                  <button onClick={prevImage} className="absolute left-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-70 rounded-full p-2 text-[#4A3419] hover:bg-opacity-100">&#8592;</button>
+                  <button onClick={nextImage} className="absolute right-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-70 rounded-full p-2 text-[#4A3419] hover:bg-opacity-100">&#8594;</button>
+                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                    {duffleBagImages.map((_, i) => (
+                      <span key={i} className={`inline-block w-2 h-2 rounded-full ${i === carouselIndex ? 'bg-[#4A3419]' : 'bg-[#E8C39E]'}`}></span>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+            <div className="text-[#4A3419] text-lg">
+              <p className="mb-2"><b>This duffle bag was made out of t-shirts (mainly cotton, some polyester).</b></p>
+              <p className="mb-2">It was made out of about 13 shirts/balls of yarn.</p>
+              <p className="mb-2">Plain shirts and shirts without side seams work best for this type of project.</p>
+            </div>
+          </div>
+        </motion.section>
+
         {/* What We Accept Section */}
         <motion.section 
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
+          transition={{ duration: 0.8, delay: 0.25 }}
           className="mb-16"
         >
           <h2 className="text-3xl font-bold text-[#4A3419] text-center mb-8">
@@ -120,24 +187,32 @@ export default function RecycleClothesPage() {
               <div>
                 <h3 className="text-xl font-bold text-[#4A3419] mb-4">✅ Perfect for Recycling:</h3>
                 <ul className="space-y-2 text-[#4A3419]">
+                  <li>• Wool shirts</li>
                   <li>• Cotton t-shirts and shirts</li>
-                  <li>• Wool sweaters and cardigans</li>
+                  <li>• Polyester, acrylic, velvet</li>
                   <li>• Cotton dresses and skirts</li>
                   <li>• Natural fiber clothing</li>
-                  <li>• Baby clothes and blankets</li>
-                  <li>• Scarves and accessories</li>
+                  <li>• Thin blankets</li>
                 </ul>
               </div>
               <div>
                 <h3 className="text-xl font-bold text-[#4A3419] mb-4">❌ Not Suitable:</h3>
                 <ul className="space-y-2 text-[#4A3419]">
-                  <li>• Synthetic fabrics (polyester, nylon)</li>
-                  <li>• Heavily stained or damaged items</li>
-                  <li>• Items with strong odors</li>
-                  <li>• Leather or suede</li>
-                  <li>• Items with metal components</li>
+                  <li>• Fur</li>
+                  <li>• Denim</li>
+                  <li>• Leather</li>
+                  <li>• Lace</li>
+                  <li>• Suede</li>
+                  <li>• Items with strong odors or metal components</li>
                 </ul>
               </div>
+            </div>
+            <div className="mt-6 text-[#4A3419]">
+              <p className="mb-2"><b>Tips for Best Results:</b></p>
+              <ul className="list-disc ml-6">
+                <li>Try not to send shirts with seams on the sides (see duffle bag example below).</li>
+                <li>Try to send plain shirts with no or little design (see duffle bag example below).</li>
+              </ul>
             </div>
           </div>
         </motion.section>
@@ -146,7 +221,7 @@ export default function RecycleClothesPage() {
         <motion.section 
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.6 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
           className="mb-16"
         >
           <h2 className="text-3xl font-bold text-[#4A3419] text-center mb-8">
@@ -231,7 +306,7 @@ export default function RecycleClothesPage() {
             Let's create something beautiful together from your cherished garments.
           </p>
           <motion.a 
-            href="https://forms.google.com/temp-recycle-form"
+            href="https://docs.google.com/forms/d/e/1FAIpQLSdfpc5gVq_5kexzuQATl-mTg4b8eRRPUjTi2A9K89NrhMmH9A/viewform"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block bg-[#E8C39E] text-[#4A3419] px-8 py-4 rounded-lg font-bold text-lg hover:bg-[#d6b28e] transition-colors duration-300"
