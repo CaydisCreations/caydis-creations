@@ -7,6 +7,7 @@ const nextConfig = {
       'caydiscreations.s3.us-east-2.amazonaws.com',
     ],
   },
+  trailingSlash: false,
 }
 
 module.exports = nextConfig 
