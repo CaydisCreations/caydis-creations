@@ -1,4 +1,15 @@
+'use client'
+
+import { useEffect } from 'react'
+import { useCart } from '../context/CartContext'
+
 export default function SuccessPage() {
+  const { clearCart } = useCart()
+
+  useEffect(() => {
+    clearCart()
+  }, [clearCart])
+
   return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center text-center">
       <h1 className="text-4xl font-bold text-[#4A3419] mb-4">Thank you for your purchase!</h1>

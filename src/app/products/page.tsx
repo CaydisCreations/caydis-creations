@@ -15,6 +15,14 @@ const products = [
     rating: 4.8
   },
   {
+    id: 100,
+    name: 'Test Product',
+    price: 1.00,
+    description: 'A special $1 product for testing checkout and payments.',
+    category: 'Accessories',
+    rating: 5.0
+  },
+  {
     id: 2,
     name: 'Baby Set',
     price: 49.99,
