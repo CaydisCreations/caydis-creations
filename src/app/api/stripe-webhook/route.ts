@@ -24,8 +24,19 @@ export async function POST(req: NextRequest) {
     const lineItems = await stripe.checkout.sessions.listLineItems(session.id, { limit: 100 })
     // Compose order details
     const itemsHtml = lineItems.data.map(item => {
-      // For now, use the logo image for all products to avoid linter/type errors
-      const imageUrl = 'https://caydiscreation.com/logoCaydisCreation.PNG';
+      // Use the product image from metadata if available, otherwise fallback to logo
+      let imageUrl = 'https://caydiscreation.com/logoCaydisCreation.PNG';
+      if (
+        item.price &&
+        item.price.product &&
+        typeof item.price.product === 'object' &&
+        'metadata' in item.price.product &&
+        item.price.product.metadata &&
+        typeof item.price.product.metadata === 'object' &&
+        item.price.product.metadata.image
+      ) {
+        imageUrl = item.price.product.metadata.image;
+      }
       return `<li style=\"margin-bottom:16px;display:flex;align-items:center;\">\n<img src=\"${imageUrl}\" alt=\"${item.description}\" style=\"max-width:60px;max-height:60px;margin-right:12px;border-radius:8px;object-fit:contain;\" />\n<b>${item.description}</b> — Qty: ${item.quantity} — $${((item.amount_total || 0) / 100).toFixed(2)}</li>`;
     }).join('');
     // Send email
@@ -35,8 +46,8 @@ export async function POST(req: NextRequest) {
         to: session.customer_details?.email || session.customer_email || 'admin@caydiscreations.com',
         subject: "Your Caydi's Creations Order Confirmation",
         html: `
-          <div style="text-align:center; margin-bottom: 24px;">
-            <img src="https://caydiscreation.com/logoCaydisCreation.PNG" alt="Caydi's Creations Logo" style="max-width:180px; width:100%; height:auto; margin-bottom: 16px;" />
+          <div style="display:flex; align-items:center; justify-content:flex-end; min-height:120px; margin-bottom:24px;">
+            <img src="https://caydiscreation.com/logoCaydisCreation.PNG" alt="Caydi's Creations Logo" style="max-width:120px; width:120px; height:auto; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08); background:#fff; margin-top:32px;" />
           </div>
           <h2>Thank you for your purchase!</h2>
           <p>Hi ${session.customer_details?.name || 'there'},</p>

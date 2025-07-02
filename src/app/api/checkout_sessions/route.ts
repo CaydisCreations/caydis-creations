@@ -22,6 +22,11 @@ export async function POST(req: NextRequest) {
                 ? item.image
                 : `https://caydiscreation.com${item.image || '/logoCaydisCreation.PNG'}`
             ],
+            metadata: {
+              image: item.image && item.image.startsWith('http')
+                ? item.image
+                : `https://caydiscreation.com${item.image || '/logoCaydisCreation.PNG'}`
+            }
           },
           unit_amount: Math.round(item.price * 100),
         },
