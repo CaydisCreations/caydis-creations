@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useState, useContext, ReactNode, useEffect } from 'react'
+import { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react'
 
 // Cart item interface
 export interface CartItem {
@@ -22,6 +22,7 @@ interface CartContextType {
   clearCart: () => void
   getCartTotal: () => number
   getCartCount: () => number
+  isLoaded: boolean
 }
 
 // Create context
@@ -30,30 +31,40 @@ const CartContext = createContext<CartContextType | undefined>(undefined)
 // Provider component
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([])
+  const [isLoaded, setIsLoaded] = useState(false)
 
   // Load cart from localStorage on initialization
   useEffect(() => {
     try {
       const savedCart = localStorage.getItem('cart')
       if (savedCart) {
-        setCartItems(JSON.parse(savedCart))
+        const parsedCart = JSON.parse(savedCart)
+        if (Array.isArray(parsedCart)) {
+          setCartItems(parsedCart)
+        }
       }
     } catch (error) {
       console.error('Error loading cart from localStorage:', error)
+      // Clear corrupted localStorage
+      localStorage.removeItem('cart')
+    } finally {
+      setIsLoaded(true)
     }
   }, [])
 
   // Save cart to localStorage whenever it changes
   useEffect(() => {
-    try {
-      localStorage.setItem('cart', JSON.stringify(cartItems))
-    } catch (error) {
-      console.error('Error saving cart to localStorage:', error)
+    if (isLoaded) {
+      try {
+        localStorage.setItem('cart', JSON.stringify(cartItems))
+      } catch (error) {
+        console.error('Error saving cart to localStorage:', error)
+      }
     }
-  }, [cartItems])
+  }, [cartItems, isLoaded])
 
   // Add item to cart
-  const addToCart = (product: any, quantity: number = 1) => {
+  const addToCart = useCallback((product: any, quantity: number = 1) => {
     setCartItems(currentItems => {
       // Check if product is already in cart
       const existingItem = currentItems.find(item => item.id === product.id)
@@ -70,17 +81,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
         return [...currentItems, { ...product, quantity }]
       }
     })
-  }
+  }, [])
 
   // Remove item from cart
-  const removeFromCart = (productId: number) => {
+  const removeFromCart = useCallback((productId: number) => {
     setCartItems(currentItems => 
       currentItems.filter(item => item.id !== productId)
     )
-  }
+  }, [])
 
   // Update item quantity
-  const updateQuantity = (productId: number, quantity: number) => {
+  const updateQuantity = useCallback((productId: number, quantity: number) => {
     if (quantity <= 0) {
       // If quantity is 0 or less, remove item
       removeFromCart(productId)
@@ -94,22 +105,22 @@ export function CartProvider({ children }: { children: ReactNode }) {
           : item
       )
     )
-  }
+  }, [removeFromCart])
 
   // Clear entire cart
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     setCartItems([])
-  }
+  }, [])
 
   // Calculate total price
-  const getCartTotal = () => {
+  const getCartTotal = useCallback(() => {
     return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0)
-  }
+  }, [cartItems])
 
   // Get total number of items
-  const getCartCount = () => {
+  const getCartCount = useCallback(() => {
     return cartItems.reduce((count, item) => count + item.quantity, 0)
-  }
+  }, [cartItems])
 
   return (
     <CartContext.Provider value={{
@@ -119,7 +130,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       updateQuantity,
       clearCart,
       getCartTotal,
-      getCartCount
+      getCartCount,
+      isLoaded
     }}>
       {children}
     </CartContext.Provider>

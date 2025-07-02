@@ -1,6 +1,34 @@
-import React from 'react'
+'use client'
+
+import React, { useState } from 'react'
 
 export default function Contact() {
+  const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const data = new FormData(form);
+    setStatus('idle');
+    try {
+      const res = await fetch('https://formspree.io/f/mpwrbkgw', {
+        method: 'POST',
+        body: data,
+        headers: {
+          Accept: 'application/json',
+        },
+      });
+      if (res.ok) {
+        setStatus('success');
+        form.reset();
+      } else {
+        setStatus('error');
+      }
+    } catch {
+      setStatus('error');
+    }
+  };
+
   return (
     <div className="max-w-2xl mx-auto space-y-8">
       <header className="text-center">
@@ -9,7 +37,13 @@ export default function Contact() {
       </header>
 
       <div className="bg-white p-8 rounded-lg shadow-md">
-        <form className="space-y-6">
+        {status === 'success' && (
+          <div className="mb-4 text-green-700 font-semibold text-center">Thank you! Your message has been sent.</div>
+        )}
+        {status === 'error' && (
+          <div className="mb-4 text-red-700 font-semibold text-center">Oops! Something went wrong. Please try again.</div>
+        )}
+        <form className="space-y-6" onSubmit={handleSubmit}>
           <div>
             <label htmlFor="name" className="block text-[#4A3419] font-medium mb-2">
               Name
@@ -65,8 +99,9 @@ export default function Contact() {
           <button
             type="submit"
             className="w-full px-6 py-3 bg-[#4A3419] text-[#FFF5E6] rounded hover:bg-[#6B4B26]"
+            disabled={status === 'success'}
           >
-            Send Message
+            {status === 'success' ? 'Message Sent!' : 'Send Message'}
           </button>
         </form>
       </div>

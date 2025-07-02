@@ -1,20 +1,14 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FaTimes, FaShoppingCart, FaTrash, FaStar } from 'react-icons/fa'
 import { useCart } from '../context/CartContext'
 import Link from 'next/link'
 
 function CartContent() {
-  const { cartItems, removeFromCart, updateQuantity, getCartTotal, clearCart } = useCart()
-  const [isClient, setIsClient] = useState(false)
+  const { cartItems, removeFromCart, updateQuantity, getCartTotal, clearCart, isLoaded } = useCart()
   const [loading, setLoading] = useState(false)
-
-  // Fix for hydration errors by only rendering on client
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
 
   const handleCheckout = async () => {
     setLoading(true)
@@ -37,7 +31,7 @@ function CartContent() {
     }
   }
 
-  if (!isClient) {
+  if (!isLoaded) {
     return <div className="p-8 text-center">Loading cart...</div>
   }
 

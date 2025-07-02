@@ -2,6 +2,11 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
+  images: {
+    domains: [
+      'caydiscreations.s3.us-east-2.amazonaws.com',
+    ],
+  },
 }
 
 module.exports = nextConfig 

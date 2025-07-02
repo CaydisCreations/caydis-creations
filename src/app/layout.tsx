@@ -4,7 +4,7 @@ import { Inter } from 'next/font/google'
 import Image from 'next/image'
 import './globals.css'
 import { FaEnvelope, FaInstagram, FaFacebook, FaTwitter } from 'react-icons/fa'
-import CartWrapper from './components/CartWrapper'
+import CartProviderWrapper from './components/CartProviderWrapper'
 import CartIcon from './components/CartIcon'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -25,7 +25,7 @@ export default function RootLayout({
         <link rel="icon" type="image/png" href="/logoCaydisCreation.PNG" />
       </head>
       <body className={`${inter.className} bg-[#FFF5E6]`}>
-        <CartWrapper>
+        <CartProviderWrapper>
         <nav className="bg-[#4A3419] text-[#FFF5E6] sticky top-0 z-50 shadow-lg transition-all duration-300">
           <div className="container mx-auto flex justify-between items-center py-3 px-4">
             <a href="/" className="flex items-center gap-2 text-2xl font-bold transition-transform duration-300 transform hover:scale-105">
@@ -139,6 +139,7 @@ export default function RootLayout({
               <p className="flex items-center">
                 <FaEnvelope className="mr-2" /> caydicreations@gmail.com
               </p>
+              {/*
               <form className="mt-2">
                 <input 
                   type="email" 
@@ -149,13 +150,14 @@ export default function RootLayout({
                   Subscribe
                 </button>
               </form>
+              */}
             </div>
           </div>
           <div className="text-center mt-8 pt-4 border-t border-[#E8C39E]">
             <p>© 2024 Caydi's Creations. All rights reserved.</p>
           </div>
         </footer>
-        </CartWrapper>
+        </CartProviderWrapper>
       </body>
     </html>
   )
