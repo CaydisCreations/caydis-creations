@@ -84,10 +84,8 @@ function CartContent() {
               >
                 <div className="col-span-3 flex items-center space-x-4">
                   <div className="bg-[#E8C39E] h-16 w-16 rounded-md overflow-hidden relative">
-                    {/* Placeholder for product image */}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <FaStar className="text-[#4A3419] text-xl opacity-20" />
-                    </div>
+                    {/* Product image */}
+                    <img src={item.image} alt={item.name} className="object-contain w-full h-full" />
                   </div>
                   <div>
                     <h3 className="font-bold text-[#4A3419]">{item.name}</h3>

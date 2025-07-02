@@ -17,7 +17,11 @@ export async function POST(req: NextRequest) {
           product_data: {
             name: item.name,
             description: item.description,
-            images: [item.image || 'https://caydiscreation.com/logoCaydisCreation.PNG'],
+            images: [
+              item.image && item.image.startsWith('http')
+                ? item.image
+                : `https://caydiscreation.com${item.image || '/logoCaydisCreation.PNG'}`
+            ],
           },
           unit_amount: Math.round(item.price * 100),
         },

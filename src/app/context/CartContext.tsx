@@ -11,6 +11,7 @@ export interface CartItem {
   category: string
   rating: number
   quantity: number
+  image?: string // Optional image property for product images
 }
 
 // Cart context interface
