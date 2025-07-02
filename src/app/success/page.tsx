@@ -1,14 +1,20 @@
-'use client'
+"use client";
 
-import { useEffect } from 'react'
-import { useCart } from '../context/CartContext'
+import { useEffect, useContext } from "react";
+import { useCart } from "../context/CartContext";
 
 export default function SuccessPage() {
-  const { clearCart } = useCart()
+  const { clearCart } = useCart();
 
   useEffect(() => {
-    clearCart()
-  }, [clearCart])
+    // Clear the cart context
+    clearCart();
+    
+    // Also clear localStorage directly to ensure it's completely cleared
+    localStorage.removeItem("cart");
+    
+    console.log("Cart cleared after successful purchase");
+  }, [clearCart]);
 
   return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center text-center">
