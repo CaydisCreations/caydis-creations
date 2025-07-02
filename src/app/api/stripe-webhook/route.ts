@@ -29,9 +29,9 @@ export async function POST(req: NextRequest) {
     // Send email
     try {
       await resend.emails.send({
-        from: 'Caydi\'s Creations <no-reply@caydiscreations.com>',
+        from: "Caydi's Creations <no-reply@confirmation.caydiscreation.com>",
         to: session.customer_details?.email || session.customer_email || 'admin@caydiscreations.com',
-        subject: 'Your Caydi\'s Creations Order Confirmation',
+        subject: "Your Caydi's Creations Order Confirmation",
         html: `
           <h2>Thank you for your purchase!</h2>
           <p>Hi ${session.customer_details?.name || 'there'},</p>
