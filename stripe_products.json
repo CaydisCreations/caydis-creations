@@ -1,0 +1,8 @@
+{
+  "error": {
+    "message": "This property cannot be expanded (data.metadata).",
+    "request_log_url": "https://dashboard.stripe.com/logs/req_Kz488gsRHgyAEU?t=1751745261",
+    "type": "invalid_request_error"
+  }
+}
+

@@ -188,21 +188,30 @@ const mediaItems: MediaItem[] = [
   },
 ]
 
+// Add 'Accessories' to beanie media items
+const updatedMediaItems = mediaItems.map(item => {
+  if (item.categories.includes('Beanies') && !item.categories.includes('Accessories')) {
+    return { ...item, categories: [...item.categories, 'Accessories'] };
+  }
+  return item;
+});
+
 function GalleryContent() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
-  const [filteredItems, setFilteredItems] = useState<MediaItem[]>(mediaItems)
+  const [filteredItems, setFilteredItems] = useState<MediaItem[]>(updatedMediaItems)
   const [selectedMedia, setSelectedMedia] = useState<MediaItem | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   // Get unique categories from media items
-  const categories = ['All', ...new Set(mediaItems.flatMap(item => item.categories))]
+  const categories = ['All', ...Array.from(new Set(mediaItems.flatMap(item => item.categories)))
+    .filter(cat => !['Tops', 'Clothing', 'Patterns'].includes(cat))];
 
   // Filter media items based on search term and category
   useEffect(() => {
     setIsLoading(true)
     const timer = setTimeout(() => {
-      let results = mediaItems
+      let results = updatedMediaItems
 
       // Filter by category
       if (selectedCategory !== 'All') {

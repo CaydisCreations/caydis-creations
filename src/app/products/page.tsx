@@ -2,9 +2,8 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { FaSearch, FaShoppingCart, FaStar, FaTimes } from 'react-icons/fa'
+import { FaSearch, FaShoppingCart, FaStar, FaTimes, FaChevronDown } from 'react-icons/fa'
 import { useCart } from '../context/CartContext'
-import { products } from '../../data/products'
 
 function ProductImageCarousel({ images, alt }: { images: string[], alt: string }) {
   const [index, setIndex] = useState(0);
@@ -36,7 +35,8 @@ function ProductImageCarousel({ images, alt }: { images: string[], alt: string }
 
 function ProductsContent() {
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [filteredProducts, setFilteredProducts] = useState(products);
+  const [allProducts, setAllProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -44,33 +44,61 @@ function ProductsContent() {
   const [quantity, setQuantity] = useState(1);
   const { addToCart } = useCart();
   const [selectedTags, setSelectedTags] = useState([]);
+  const [tagsDropdownOpen, setTagsDropdownOpen] = useState(false);
+  const [fetchAttempts, setFetchAttempts] = useState(0);
+  const [noProductsTimeout, setNoProductsTimeout] = useState(false);
+
+  // Fetch products from Stripe API
+  useEffect(() => {
+    let isMounted = true;
+    let timeoutId;
+    setIsLoading(true);
+    setNoProductsTimeout(false);
+
+    fetch('/api/stripe-products')
+      .then(res => res.json())
+      .then(data => {
+        if (!isMounted) return;
+        setAllProducts(data.products || []);
+        setIsLoading(false);
+      });
+
+    timeoutId = setTimeout(() => {
+      setNoProductsTimeout(true);
+    }, 10000);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+    };
+  }, []);
 
   // Collect all unique tags from products that are actually used
-  const allTags = Array.from(new Set(products.flatMap(p => p.tags || [])));
+  const allTags = Array.from(new Set(allProducts.flatMap(p => p.metadata?.tags ? p.metadata.tags.split(',') : [])));
 
   // Update filtering logic
   useEffect(() => {
     setIsLoading(true);
     const timer = setTimeout(() => {
-      let results = products;
+      let results = allProducts;
       if (selectedCategory !== 'All') {
         if (selectedCategory === 'Wearables') {
           // Show all products that are clothes, accessories, or hats
           results = results.filter(product =>
-            ['Beanies', 'Scarves', 'Bags', 'Accessories', 'Hats', 'Scrunchies'].includes(product.category)
+            ['Beanies', 'Scarves', 'Bags', 'Accessories', 'Hats', 'Scrunchies'].includes(product.metadata?.category)
           );
         } else if (selectedCategory === 'Accessories') {
           // Accessories includes scarves as well
           results = results.filter(product =>
-            product.category === 'Accessories' || product.category === 'Scarves'
+            product.metadata?.category === 'Accessories' || product.metadata?.category === 'Scarves'
           );
         } else {
-          results = results.filter(product => product.category === selectedCategory);
+          results = results.filter(product => product.metadata?.category === selectedCategory);
         }
       }
       if (selectedTags.length > 0) {
         results = results.filter(product =>
-          (product.tags || []).some(tag => selectedTags.includes(tag))
+          (product.metadata?.tags ? product.metadata.tags.split(',') : []).some(tag => selectedTags.includes(tag))
         );
       }
       if (searchTerm) {
@@ -79,7 +107,7 @@ function ProductsContent() {
         const startsWith = results.filter(p => p.name.toLowerCase().startsWith(term));
         const includes = results.filter(p =>
           !p.name.toLowerCase().startsWith(term) &&
-          (p.name.toLowerCase().includes(term) || p.description.toLowerCase().includes(term))
+          (p.name.toLowerCase().includes(term) || (p.description || '').toLowerCase().includes(term))
         );
         results = [...startsWith, ...includes];
       }
@@ -87,7 +115,7 @@ function ProductsContent() {
       setIsLoading(false);
     }, 300);
     return () => clearTimeout(timer);
-  }, [selectedCategory, searchTerm, selectedTags]);
+  }, [selectedCategory, searchTerm, selectedTags, allProducts]);
 
   const handleProductClick = (product) => {
     setSelectedProduct(product);
@@ -126,7 +154,7 @@ function ProductsContent() {
 
   // Only show tags that are not categories
   const categorySet = new Set(['All', 'Wearables', 'Home Decor', 'Baby', 'Accessories', 'Scarves']);
-  const filteredTags = Array.from(new Set(products.flatMap(p => p.tags || []))).filter(tag => !categorySet.has(tag));
+  const filteredTags = Array.from(new Set(allProducts.flatMap(p => p.metadata?.tags ? p.metadata.tags.split(',') : []))).filter(tag => !categorySet.has(tag));
 
   const categories = ['All', 'Wearables', 'Home Decor', 'Baby', 'Accessories', 'Scarves'];
 
@@ -183,39 +211,39 @@ function ProductsContent() {
                 {category}
               </motion.button>
             ))}
-          </div>
-          <div className="flex flex-wrap gap-2 items-center mt-2 mb-2">
-            {filteredTags.map(tag => (
+            <div className="relative">
               <button
-                key={tag}
-                className={`px-4 py-1 rounded-full border font-semibold text-sm transition-colors duration-200 ${selectedTags.includes(tag) ? 'bg-[#4A3419] text-[#FFF5E6] border-[#4A3419]' : 'bg-[#FFF5E6] text-[#4A3419] border-[#4A3419]'}`}
-                onClick={() => toggleTag(tag)}
+                className="px-4 py-2 rounded-full bg-[#FFF5E6] text-[#4A3419] border border-[#4A3419] font-semibold flex items-center gap-2 hover:bg-[#E8C39E] transition-colors duration-300"
+                onClick={() => setTagsDropdownOpen((open) => !open)}
                 type="button"
               >
-                {tag}
+                More Filters <FaChevronDown className={`transition-transform duration-200 ${tagsDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
-            ))}
+              {tagsDropdownOpen && (
+                <div className="absolute left-0 mt-2 bg-white border border-[#E8C39E] rounded-lg shadow-lg p-4 z-20 flex flex-wrap gap-2 min-w-[200px]">
+                  {filteredTags.map(tag => (
+                    <button
+                      key={tag}
+                      className={`px-4 py-1 rounded-full border font-semibold text-sm transition-colors duration-200 ${selectedTags.includes(tag) ? 'bg-[#4A3419] text-[#FFF5E6] border-[#4A3419]' : 'bg-[#FFF5E6] text-[#4A3419] border-[#4A3419]'}`}
+                      onClick={() => toggleTag(tag)}
+                      type="button"
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </motion.div>
 
       {/* Products grid */}
       <div className="relative min-h-[400px]">
-        {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-[#FFF5E6] bg-opacity-60 z-10">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#4A3419]"></div>
-          </div>
-        )}
-        
-        {filteredProducts.length === 0 && !isLoading ? (
-          <motion.div 
-            className="text-center py-12"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-          >
-            <p className="text-xl text-[#4A3419]">No products found. Try a different search or category.</p>
-          </motion.div>
+        {isLoading || (!noProductsTimeout && filteredProducts.length === 0) ? (
+          <div className="text-center text-[#4A3419] text-xl py-12">Loading products...</div>
+        ) : filteredProducts.length === 0 && noProductsTimeout ? (
+          <div className="text-center text-[#4A3419] text-xl py-12">No products found. Try to refresh the page or try a different search or category.</div>
         ) : (
           <motion.div 
             layout
@@ -250,9 +278,16 @@ function ProductsContent() {
                   <div className="flex justify-between items-center mt-4">
                     <span className="text-lg font-bold text-[#4A3419]">${product.price}</span>
                     <span className="text-sm px-3 py-1 bg-[#E8C39E] rounded-full text-[#4A3419]">
-                      {product.category}
+                      {product.metadata?.category}
                     </span>
                   </div>
+                  {typeof product.metadata?.stock !== 'undefined' && (
+                    Number(product.metadata.stock) === 0 ? (
+                      <span className="block text-red-600 font-bold mt-2">Sold Out</span>
+                    ) : (
+                      <span className="block text-green-700 font-semibold mt-2">In Stock: {product.metadata.stock}</span>
+                    )
+                  )}
                   <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-white to-transparent"></div>
                   <div className="hidden group-hover:flex absolute right-0 bottom-0 p-2">
                     <motion.button
@@ -260,13 +295,14 @@ function ProductsContent() {
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
                       onClick={(e) => handleAddToCart(e, product)}
+                      disabled={Number(product.metadata?.stock) === 0}
                     >
                       <FaShoppingCart size={14} />
                       <span className="text-xs">Add</span>
                     </motion.button>
                   </div>
                   <div className="flex flex-wrap gap-1 mt-2">
-                    {(product.tags || []).map(tag => (
+                    {(product.metadata?.tags ? product.metadata.tags.split(',') : []).map(tag => (
                       <span key={tag} className="text-xs px-2 py-1 bg-[#E8C39E] text-[#4A3419] rounded-full">{tag}</span>
                     ))}
                   </div>
@@ -319,7 +355,7 @@ function ProductsContent() {
                 <div className="flex items-center justify-between mb-4">
                   <p className="text-2xl font-bold text-[#4A3419]">${selectedProduct.price}</p>
                   <span className="bg-[#E8C39E] text-[#4A3419] px-3 py-1 rounded-full text-sm">
-                    {selectedProduct.category}
+                    {selectedProduct.metadata?.category}
                   </span>
                 </div>
                 <p className="text-gray-700 mb-6">{selectedProduct.description}</p>
@@ -354,8 +390,9 @@ function ProductsContent() {
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
                     onClick={handleAddToCartFromModal}
+                    disabled={Number(selectedProduct?.metadata?.stock) === 0}
                   >
-                    <FaShoppingCart /> Add to Cart
+                    <FaShoppingCart /> {Number(selectedProduct?.metadata?.stock) === 0 ? 'Sold Out' : 'Add to Cart'}
                   </motion.button>
                 </div>
               </div>

@@ -103,7 +103,7 @@ export default function CustomizeOrdersPage() {
             <h2 className="text-3xl font-bold text-[#4A3419] text-center mb-12">
               What We Can Create Together
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <motion.div 
                 className="bg-white p-6 rounded-lg shadow-md text-center"
                 whileHover={{ scale: 1.05 }}
@@ -149,12 +149,15 @@ export default function CustomizeOrdersPage() {
                   Thoughtful gifts for special occasions and loved ones.
                 </p>
               </motion.div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 mt-8">
+              <div></div>
               <motion.div 
                 className="bg-white p-6 rounded-lg shadow-md text-center"
                 whileHover={{ scale: 1.05 }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.7 }}
+                transition={{ duration: 0.5, delay: 1.1 }}
               >
                 <div className="bg-[#E8C39E] p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                   <FaStar className="text-[#4A3419] text-2xl" />
@@ -164,6 +167,7 @@ export default function CustomizeOrdersPage() {
                   Special blankets and hats made with love for little ones.
                 </p>
               </motion.div>
+              <div></div>
             </div>
           </motion.section>
         )}
@@ -241,43 +245,50 @@ export default function CustomizeOrdersPage() {
               <div className="flex items-start space-x-4">
                 <div className="bg-[#4A3419] text-[#FFF5E6] rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0 mt-1">1</div>
                 <div>
-                  <h3 className="text-lg font-bold text-[#4A3419] mb-2">Fill out form</h3>
-                  <p className="text-[#4A3419]">Submit your custom order details using the online form.</p>
+                  <h3 className="text-lg font-bold text-[#4A3419] mb-2">Complete the Order Form</h3>
+                  <p className="text-[#4A3419]">Please fill out the provided form to initiate the process.</p>
                 </div>
               </div>
               <div className="flex items-start space-x-4">
                 <div className="bg-[#4A3419] text-[#FFF5E6] rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0 mt-1">2</div>
                 <div>
-                  <h3 className="text-lg font-bold text-[#4A3419] mb-2">Get a confirmation email</h3>
-                  <p className="text-[#4A3419]">You'll receive an email confirming your request was received.</p>
+                  <h3 className="text-lg font-bold text-[#4A3419] mb-2">Confirmation Email</h3>
+                  <p className="text-[#4A3419]">Once your form is submitted, you will receive a confirmation email acknowledging the receipt of your order.</p>
                 </div>
               </div>
               <div className="flex items-start space-x-4">
                 <div className="bg-[#4A3419] text-[#FFF5E6] rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0 mt-1">3</div>
                 <div>
-                  <h3 className="text-lg font-bold text-[#4A3419] mb-2">Go over details for order and give a quote</h3>
-                  <p className="text-[#4A3419]">We'll discuss your order details and provide a quote after gauging the cost of yarn and materials.</p>
+                  <h3 className="text-lg font-bold text-[#4A3419] mb-2">Order Details and Quote</h3>
+                  <p className="text-[#4A3419]">We will review your order details and provide an estimated quote.</p>
                 </div>
               </div>
               <div className="flex items-start space-x-4">
                 <div className="bg-[#4A3419] text-[#FFF5E6] rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0 mt-1">4</div>
                 <div>
-                  <h3 className="text-lg font-bold text-[#4A3419] mb-2">Accept quote & pay initial invoice</h3>
-                  <p className="text-[#4A3419]">If you accept the quote, you'll receive an initial invoice to cover material costs.</p>
+                  <h3 className="text-lg font-bold text-[#4A3419] mb-2">Acceptance of Quote</h3>
+                  <p className="text-[#4A3419]">Upon acceptance of the quote, we will issue an initial invoice to cover the cost of materials.</p>
                 </div>
               </div>
               <div className="flex items-start space-x-4">
                 <div className="bg-[#4A3419] text-[#FFF5E6] rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0 mt-1">5</div>
                 <div>
-                  <h3 className="text-lg font-bold text-[#4A3419] mb-2">Materials purchased & product creation begins</h3>
-                  <p className="text-[#4A3419]">After the initial invoice is paid, we will buy all the materials and start making your product.</p>
+                  <h3 className="text-lg font-bold text-[#4A3419] mb-2">Material Procurement and Production</h3>
+                  <p className="text-[#4A3419]">After the payment of the initial invoice, we will proceed to purchase the necessary materials and begin production of your order.</p>
                 </div>
               </div>
               <div className="flex items-start space-x-4">
                 <div className="bg-[#4A3419] text-[#FFF5E6] rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0 mt-1">6</div>
                 <div>
-                  <h3 className="text-lg font-bold text-[#4A3419] mb-2">Final invoice & delivery</h3>
-                  <p className="text-[#4A3419]">Once your product is finished, you'll receive a final invoice for the remaining balance. After payment, your custom piece will be shipped to you.</p>
+                  <h3 className="text-lg font-bold text-[#4A3419] mb-2">Final Payment and Invoice</h3>
+                  <p className="text-[#4A3419]">Once the product is completed, we will send a final invoice for the remaining balance of the order.</p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-4">
+                <div className="bg-[#4A3419] text-[#FFF5E6] rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0 mt-1">7</div>
+                <div>
+                  <h3 className="text-lg font-bold text-[#4A3419] mb-2">Shipment</h3>
+                  <p className="text-[#4A3419]">Upon receipt of payment for the final invoice, we will ship the completed product to the specified address.</p>
                 </div>
               </div>
             </div>

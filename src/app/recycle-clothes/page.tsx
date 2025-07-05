@@ -202,51 +202,58 @@ export default function RecycleClothesPage() {
                   <div className="flex items-start space-x-4">
                     <div className="bg-[#4A3419] text-[#FFF5E6] rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0 mt-1">1</div>
                     <div>
-                      <h4 className="text-lg font-bold text-[#4A3419] mb-2">Fill Out the Form</h4>
-                      <p className="text-[#4A3419]">Let us know how many clothing items you are sending and if you want something made out of the clothes.</p>
+                      <h4 className="text-lg font-bold text-[#4A3419] mb-2">Complete the Order Form</h4>
+                      <p className="text-[#4A3419]">Please fill out the provided form, indicating the number of clothing items you would like to send and specifying if you would like any of the clothing repurposed into a new item.</p>
                     </div>
                   </div>
                   <div className="flex items-start space-x-4">
                     <div className="bg-[#4A3419] text-[#FFF5E6] rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0 mt-1">2</div>
                     <div>
-                      <h4 className="text-lg font-bold text-[#4A3419] mb-2">Receive Email with Address & Details</h4>
-                      <p className="text-[#4A3419]">We will email you the address and details for your order.</p>
+                      <h4 className="text-lg font-bold text-[#4A3419] mb-2">Order Confirmation and Quote</h4>
+                      <p className="text-[#4A3419]">Upon submission, we will send an email with the details of your order, including an estimated quote. You will be required to confirm your acceptance of the quote and state where you are shipping the clothes from and where you want the finished product shipped to. You will do this by replying to the email.</p>
                     </div>
                   </div>
                   <div className="flex items-start space-x-4">
                     <div className="bg-[#4A3419] text-[#FFF5E6] rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0 mt-1">3</div>
                     <div>
-                      <h4 className="text-lg font-bold text-[#4A3419] mb-2">Send Your Clothes</h4>
-                      <p className="text-[#4A3419]">Send your clothes to the provided address. Once received, we will email you an invoice for the order.</p>
+                      <h4 className="text-lg font-bold text-[#4A3419] mb-2">Shipping Details</h4>
+                      <p className="text-[#4A3419]">After your acceptance, we will send you an email containing the shipping address and a prepaid shipping label for your convenience.</p>
                     </div>
                   </div>
                   <div className="flex items-start space-x-4">
                     <div className="bg-[#4A3419] text-[#FFF5E6] rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0 mt-1">4</div>
                     <div>
-                      <h4 className="text-lg font-bold text-[#4A3419] mb-2">Invoice & Yarn Creation</h4>
-                      <p className="text-[#4A3419]">Once the invoice is paid, we will begin making the yarn from your clothes.</p>
+                      <h4 className="text-lg font-bold text-[#4A3419] mb-2">Shipment of Clothing</h4>
+                      <p className="text-[#4A3419]">Please send the clothing items to the provided address. Once received, our team will review the items, and an invoice for your order will be sent to you.</p>
                     </div>
                   </div>
                   <div className="flex items-start space-x-4">
                     <div className="bg-[#4A3419] text-[#FFF5E6] rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0 mt-1">5</div>
                     <div>
-                      <h4 className="text-lg font-bold text-[#4A3419] mb-2">Optional: Item Creation</h4>
-                      <p className="text-[#4A3419]">If you want your yarn made into something (like a duffle bag, basket, or coaster), let us know in the form. Additional costs apply (see below).</p>
+                      <h4 className="text-lg font-bold text-[#4A3419] mb-2">Invoice Payment</h4>
+                      <p className="text-[#4A3419]">Upon payment of the invoice, the production of yarn from your clothing will commence.</p>
                     </div>
                   </div>
                   <div className="flex items-start space-x-4">
                     <div className="bg-[#4A3419] text-[#FFF5E6] rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0 mt-1">6</div>
                     <div>
-                      <h4 className="text-lg font-bold text-[#4A3419] mb-2">Delivery</h4>
-                      <p className="text-[#4A3419]">Your finished yarn (and/or item) will be shipped back to you, ready to be enjoyed and cherished.</p>
+                      <h4 className="text-lg font-bold text-[#4A3419] mb-2">Repurposing (if requested)</h4>
+                      <p className="text-[#4A3419]">If you have requested that the yarn be transformed into another item, we will proceed with that process after the yarn is ready.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-4">
+                    <div className="bg-[#4A3419] text-[#FFF5E6] rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0 mt-1">7</div>
+                    <div>
+                      <h4 className="text-lg font-bold text-[#4A3419] mb-2">Return of Final Product</h4>
+                      <p className="text-[#4A3419]">Once the requested items are completed, we will ship them back to you.</p>
                     </div>
                   </div>
                 </div>
                 <div className="mt-8 p-6 bg-[#FFF5E6] border border-[#E8C39E] rounded-lg text-[#4A3419]">
                   <h4 className="text-xl font-bold mb-2">Pricing & Example</h4>
                   <ul className="list-disc ml-6 mb-2">
-                    <li>Every item being turned into yarn: <b>$5 per item</b></li>
-                    <li>If you want an item made and we need to provide more balls of yarn: <b>$10 per extra ball</b></li>
+                    <li>Every piece of clothing being turned into yarn: <b>$5 per item</b></li>
+                    <li>If you want an item made and we need to provide more balls of yarn made from clothes: <b>$10 per extra ball</b></li>
                     <li><b>Example (Duffle Bag):</b> 13 shirts/balls of yarn used → 13 x $5 = $65. Made into a duffle bag: +$15. <b>Total: $80</b></li>
                   </ul>
                   <div className="mt-2">

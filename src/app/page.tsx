@@ -1,18 +1,37 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { FaRecycle, FaTools, FaArrowRight, FaGift, FaStar, FaShoppingCart, FaHeart } from 'react-icons/fa'
 import { useCart } from './context/CartContext'
 import Link from 'next/link'
-import { products as allProducts } from '../data/products'
 
 function HomeContent() {
   const [modalOpen, setModalOpen] = useState(false);
   const [activeProduct, setActiveProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const { addToCart } = useCart();
+  const [allProducts, setAllProducts] = useState([]);
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/stripe-products')
+      .then(res => res.json())
+      .then(data => {
+        setAllProducts(data.products || []);
+        setIsLoading(false);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (!allProducts.length) return;
+    const bag = allProducts.find(p => p.metadata?.category === 'Bags' && p.name !== 'Shoulder Bag - Brown');
+    const scarf = allProducts.find(p => p.metadata?.category === 'Scarves');
+    const beanie = allProducts.find(p => p.metadata?.category === 'Beanies');
+    setFeaturedProducts([bag, scarf, beanie].filter(Boolean));
+  }, [allProducts]);
 
   const handleProductClick = (product) => {
     setActiveProduct(product);
@@ -32,13 +51,6 @@ function HomeContent() {
   const decrementQuantity = () => {
     setQuantity(prev => (prev > 1 ? prev - 1 : 1));
   };
-
-  // Select one bag, one scarf, and one beanie for featured products
-  const featuredProducts = [
-    allProducts.find(p => p.category === 'Bags'),
-    allProducts.find(p => p.category === 'Scarves'),
-    allProducts.find(p => p.category === 'Beanies'),
-  ].filter(Boolean)
 
   return (
     <div className="space-y-16">
@@ -83,11 +95,11 @@ function HomeContent() {
       <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <Link href="/about" className="group">
           <motion.div 
-            className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border-b-4 border-transparent hover:border-[#4A3419] cursor-pointer h-full flex flex-col"
+            className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-all duration-200 transform hover:-translate-y-2 border-b-4 border-transparent hover:border-[#4A3419] cursor-pointer h-full flex flex-col"
             whileHover={{ scale: 1.02 }}
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.2 }}
           >
             <div className="flex items-center mb-4">
               <div className="bg-[#4A3419] p-3 rounded-full mr-4">
@@ -104,11 +116,11 @@ function HomeContent() {
 
         <Link href="/customize-orders" className="group">
           <motion.div 
-            className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border-b-4 border-transparent hover:border-[#4A3419] cursor-pointer h-full flex flex-col"
+            className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-all duration-200 transform hover:-translate-y-2 border-b-4 border-transparent hover:border-[#4A3419] cursor-pointer h-full flex flex-col"
             whileHover={{ scale: 1.02 }}
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            transition={{ duration: 0.2, delay: 0.1 }}
           >
             <div className="flex items-center mb-4">
               <div className="bg-[#4A3419] p-3 rounded-full mr-4">
@@ -125,11 +137,11 @@ function HomeContent() {
 
         <Link href="/recycle-clothes" className="group">
           <motion.div 
-            className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border-b-4 border-transparent hover:border-[#4A3419] cursor-pointer h-full flex flex-col"
+            className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-all duration-200 transform hover:-translate-y-2 border-b-4 border-transparent hover:border-[#4A3419] cursor-pointer h-full flex flex-col"
             whileHover={{ scale: 1.02 }}
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
+            transition={{ duration: 0.2, delay: 0.2 }}
           >
             <div className="flex items-center mb-4">
               <div className="bg-[#4A3419] p-3 rounded-full mr-4">
@@ -171,7 +183,11 @@ function HomeContent() {
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {featuredProducts.map((product, index) => (
+          {isLoading ? (
+            <div className="col-span-3 text-center text-[#4A3419] text-xl py-12">Loading featured products...</div>
+          ) : featuredProducts.length === 0 ? (
+            <div className="col-span-3 text-center text-[#4A3419] text-xl py-12">No featured products found.</div>
+          ) : featuredProducts.map((product, index) => (
             <motion.div 
               key={product.id}
               className="bg-white p-6 rounded-lg shadow-md overflow-hidden group cursor-pointer relative"

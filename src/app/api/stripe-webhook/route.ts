@@ -22,10 +22,44 @@ export async function POST(req: NextRequest) {
     const session = event.data.object as Stripe.Checkout.Session
     // Retrieve line items
     const lineItems = await stripe.checkout.sessions.listLineItems(session.id, { limit: 100 })
+    console.log('Stripe webhook: checkout.session.completed', { sessionId: session.id, lineItems: lineItems.data });
+    // Decrease stock for each product
+    for (const item of lineItems.data) {
+      let productId = null;
+      if (item.price && item.price.product) {
+        if (typeof item.price.product === 'string') {
+          productId = item.price.product;
+        } else if (typeof item.price.product === 'object' && item.price.product.id) {
+          productId = item.price.product.id;
+        }
+      }
+      if (productId) {
+        try {
+          const product = await stripe.products.retrieve(productId);
+          console.log('[DEBUG] Fetched product:', product);
+          const currentStock = product.metadata && product.metadata.stock ? Number(product.metadata.stock) : null;
+          console.log(`[DEBUG] Current stock for ${productId}:`, currentStock);
+          if (currentStock !== null && !isNaN(currentStock)) {
+            const newStock = Math.max(0, currentStock - (item.quantity || 1));
+            const updatedProduct = await stripe.products.update(productId, {
+              metadata: { ...product.metadata, stock: String(newStock) }
+            });
+            console.log(`[DEBUG] Updated stock for product ${productId}: ${currentStock} -> ${newStock}`);
+            console.log('[DEBUG] Updated product metadata:', updatedProduct.metadata);
+          } else {
+            console.log(`[DEBUG] No stock metadata for product ${productId}`);
+          }
+        } catch (err) {
+          console.error(`[DEBUG] Error updating stock for product ${productId}:`, err);
+        }
+      } else {
+        console.log('[DEBUG] Could not determine productId for line item', item);
+      }
+    }
     // Compose order details
     const itemsHtml = lineItems.data.map(item => {
       // Use the product image from metadata if available, otherwise fallback to logo
-      let imageUrl = 'https://caydiscreation.com/logoCaydisCreation.PNG';
+      let imageUrl = 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/logoCaydisCreation.PNG';
       if (
         item.price &&
         item.price.product &&
@@ -42,12 +76,12 @@ export async function POST(req: NextRequest) {
     // Send email
     try {
       await resend.emails.send({
-        from: "Caydi's Creations <no-reply@confirmation.caydiscreation.com>",
+        from: "Caydi's Creations <no-reply@confirmations.caydiscreations.com>",
         to: session.customer_details?.email || session.customer_email || 'admin@caydiscreations.com',
         subject: "🧶 Thank You for Your Order! Confirmation Inside",
         html: `
           <div style="display:flex; align-items:center; justify-content:flex-end; min-height:120px; margin-bottom:24px;">
-            <img src="https://caydiscreation.com/logoCaydisCreation.PNG" alt="Caydi's Creations Logo" style="max-width:120px; width:120px; height:auto; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08); background:#fff; margin-top:32px;" />
+            <img src="https://caydiscreations.s3.us-east-2.amazonaws.com/Public/logoCaydisCreation.PNG" alt="Caydi's Creations Logo" style="max-width:120px; width:120px; height:auto; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08); background:#fff; margin-top:32px;" />
           </div>
           <div style="font-size:18px; color:#4A3419; font-family:sans-serif;">
             <p>Hi ${session.customer_details?.name?.split(' ')[0] || 'there'},</p>
