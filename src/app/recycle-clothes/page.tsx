@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { FaRecycle, FaTshirt, FaYarn, FaHeart, FaArrowRight } from 'react-icons/fa'
 import Link from 'next/link'
 
@@ -19,6 +19,12 @@ export default function RecycleClothesPage() {
   const [carouselIndex, setCarouselIndex] = useState(0);
   const prevImage = () => setCarouselIndex(i => (i === 0 ? duffleBagImages.length - 1 : i - 1));
   const nextImage = () => setCarouselIndex(i => (i === duffleBagImages.length - 1 ? 0 : i + 1));
+  const [activeTab, setActiveTab] = useState('Recycled Product Info');
+  const tabs = [
+    'Recycled Product Info',
+    'Example',
+    'Order and Payment Terms',
+  ];
 
   return (
     <div className="min-h-screen bg-[#FFF5E6] py-12">
@@ -119,201 +125,275 @@ export default function RecycleClothesPage() {
           </div>
         </motion.section>
 
-        {/* Types of Items We Can Make Section */}
-        <motion.section 
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.15 }}
-          className="mb-16"
-        >
-          <h2 className="text-3xl font-bold text-[#4A3419] text-center mb-8">
-            Types of Items We Can Make
-          </h2>
-          <div className="bg-white p-8 rounded-lg shadow-md text-[#4A3419] text-lg space-y-2">
-            <ul className="list-disc ml-6">
-              <li>Bags (see duffle bag example below)</li>
-              <li>Small baskets</li>
-              <li>Coasters</li>
-              <li>Thin blankets</li>
-            </ul>
-          </div>
-        </motion.section>
-
-        {/* Duffle Bag Example Section with Carousel */}
-        <motion.section 
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="mb-16"
-        >
-          <h2 className="text-3xl font-bold text-[#4A3419] text-center mb-8">
-            Duffle Bag Example
-          </h2>
-          <div className="bg-white p-8 rounded-lg shadow-md flex flex-col md:flex-row items-center gap-8">
-            <div className="relative w-full max-w-xs flex-shrink-0">
-              <img src={duffleBagImages[carouselIndex]} alt={`Duffle Bag Example ${carouselIndex + 1}`} className="w-full rounded-lg shadow-md object-contain" />
-              {duffleBagImages.length > 1 && (
-                <>
-                  <button onClick={prevImage} className="absolute left-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-70 rounded-full p-2 text-[#4A3419] hover:bg-opacity-100">&#8592;</button>
-                  <button onClick={nextImage} className="absolute right-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-70 rounded-full p-2 text-[#4A3419] hover:bg-opacity-100">&#8594;</button>
-                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
-                    {duffleBagImages.map((_, i) => (
-                      <span key={i} className={`inline-block w-2 h-2 rounded-full ${i === carouselIndex ? 'bg-[#4A3419]' : 'bg-[#E8C39E]'}`}></span>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-            <div className="text-[#4A3419] text-lg">
-              <p className="mb-2"><b>This duffle bag was made out of t-shirts (mainly cotton, some polyester).</b></p>
-              <p className="mb-2">It was made out of about 13 shirts/balls of yarn.</p>
-              <p className="mb-2">Plain shirts and shirts without side seams work best for this type of project.</p>
-            </div>
-          </div>
-        </motion.section>
-
-        {/* What We Accept Section */}
-        <motion.section 
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.25 }}
-          className="mb-16"
-        >
-          <h2 className="text-3xl font-bold text-[#4A3419] text-center mb-8">
-            What We Accept
-          </h2>
-          <div className="bg-white p-8 rounded-lg shadow-md">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h3 className="text-xl font-bold text-[#4A3419] mb-4">✅ Perfect for Recycling:</h3>
-                <ul className="space-y-2 text-[#4A3419]">
-                  <li>• Wool shirts</li>
-                  <li>• Cotton t-shirts and shirts</li>
-                  <li>• Polyester, acrylic, velvet</li>
-                  <li>• Cotton dresses and skirts</li>
-                  <li>• Natural fiber clothing</li>
-                  <li>• Thin blankets</li>
-                </ul>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-[#4A3419] mb-4">❌ Not Suitable:</h3>
-                <ul className="space-y-2 text-[#4A3419]">
-                  <li>• Fur</li>
-                  <li>• Denim</li>
-                  <li>• Leather</li>
-                  <li>• Lace</li>
-                  <li>• Suede</li>
-                  <li>• Items with strong odors or metal components</li>
-                </ul>
-              </div>
-            </div>
-            <div className="mt-6 text-[#4A3419]">
-              <p className="mb-2"><b>Tips for Best Results:</b></p>
-              <ul className="list-disc ml-6">
-                <li>Try not to send shirts with seams on the sides (see duffle bag example above).</li>
-                <li>Try to send plain shirts with no or little design (see duffle bag example above).</li>
-              </ul>
-            </div>
-          </div>
-        </motion.section>
-
-        {/* Process Details */}
-        <motion.section 
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="mb-16"
-        >
-          <h2 className="text-3xl font-bold text-[#4A3419] text-center mb-8">
-            The Process
-          </h2>
-          <div className="bg-white p-8 rounded-lg shadow-md">
-            <div className="space-y-6">
-              <div className="flex items-start space-x-4">
-                <div className="bg-[#4A3419] text-[#FFF5E6] rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0 mt-1">
-                  1
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-[#4A3419] mb-2">Fill Out the Form</h3>
-                  <p className="text-[#4A3419]">
-                    Let us know how many clothing items you are sending and if you want something made out of the clothes.
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-4">
-                <div className="bg-[#4A3419] text-[#FFF5E6] rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0 mt-1">
-                  2
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-[#4A3419] mb-2">Receive Email with Address & Details</h3>
-                  <p className="text-[#4A3419]">
-                    We will email you the address and details for your order.
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-4">
-                <div className="bg-[#4A3419] text-[#FFF5E6] rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0 mt-1">
-                  3
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-[#4A3419] mb-2">Send Your Clothes</h3>
-                  <p className="text-[#4A3419]">
-                    Send your clothes to the provided address. Once received, we will email you an invoice for the order.
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-4">
-                <div className="bg-[#4A3419] text-[#FFF5E6] rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0 mt-1">
-                  4
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-[#4A3419] mb-2">Invoice & Yarn Creation</h3>
-                  <p className="text-[#4A3419]">
-                    Once the invoice is paid, we will begin making the yarn from your clothes.
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-4">
-                <div className="bg-[#4A3419] text-[#FFF5E6] rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0 mt-1">
-                  5
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-[#4A3419] mb-2">Optional: Item Creation</h3>
-                  <p className="text-[#4A3419]">
-                    If you want your yarn made into something (like a duffle bag, basket, or coaster), let us know in the form. Additional costs apply (see below).
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-4">
-                <div className="bg-[#4A3419] text-[#FFF5E6] rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0 mt-1">
-                  6
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-[#4A3419] mb-2">Delivery</h3>
-                  <p className="text-[#4A3419]">
-                    Your finished yarn (and/or item) will be shipped back to you, ready to be enjoyed and cherished.
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="mt-8 p-6 bg-[#FFF5E6] border border-[#E8C39E] rounded-lg text-[#4A3419]">
-              <h4 className="text-xl font-bold mb-2">Pricing & Example</h4>
-              <ul className="list-disc ml-6 mb-2">
-                <li>Every item being turned into yarn: <b>$5 per item</b></li>
-                <li>If you want an item made and we need to provide more balls of yarn: <b>$10 per extra ball</b></li>
-                <li><b>Example (Duffle Bag):</b> 13 shirts/balls of yarn used → 13 x $5 = $65. Made into a duffle bag: +$15. <b>Total: $80</b></li>
-              </ul>
-              <div className="mt-2">
-                <b>Additional Item Costs:</b>
+        {/* Tabbed Section for Types, Accept, Process */}
+        <div className="flex justify-center mb-8 gap-4">
+          {tabs.map(tab => (
+            <button
+              key={tab}
+              className={`px-6 py-2 rounded-full font-bold transition-colors duration-300 ${activeTab === tab ? 'bg-[#4A3419] text-[#FFF5E6]' : 'bg-[#E8C39E] text-[#4A3419]'}`}
+              onClick={() => setActiveTab(tab)}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+        <AnimatePresence mode="wait">
+          {activeTab === 'Recycled Product Info' && (
+            <motion.section
+              key="info"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 30 }}
+              transition={{ duration: 0.5 }}
+              className="mb-16"
+            >
+              <h2 className="text-3xl font-bold text-[#4A3419] text-center mb-8">
+                Recycled Product Info
+              </h2>
+              {/* Types of Items We Can Make */}
+              <div className="bg-white p-8 rounded-lg shadow-md text-[#4A3419] text-lg space-y-2 mb-8">
+                <h3 className="text-2xl font-bold mb-4">Types of Items We Can Make</h3>
                 <ul className="list-disc ml-6">
-                  <li>Coaster: +$5</li>
-                  <li>Duffle Bag: +$15</li>
-                  <li>Small Basket: +$10</li>
+                  <li>Bags (see example in next tab)</li>
+                  <li>Small baskets</li>
+                  <li>Coasters</li>
+
                 </ul>
               </div>
-            </div>
-          </div>
-        </motion.section>
+              {/* What We Accept */}
+              <div className="bg-white p-8 rounded-lg shadow-md mb-8">
+                <h3 className="text-2xl font-bold mb-4 text-[#4A3419]">What We Accept</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="text-xl font-bold text-[#4A3419] mb-4">✅ Perfect for Recycling:</h4>
+                    <ul className="space-y-2 text-[#4A3419]">
+                      <li>• Wool shirts</li>
+                      <li>• Cotton t-shirts and shirts</li>
+                      <li>• Polyester, acrylic, velvet</li>
+                      <li>• Cotton dresses and skirts</li>
+                      <li>• Natural fiber clothing</li>
+                      <li>• Thin blankets</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="text-xl font-bold text-[#4A3419] mb-4">❌ Not Suitable:</h4>
+                    <ul className="space-y-2 text-[#4A3419]">
+                      <li>• Jeans/denim</li>
+                      <li>• Thick sweaters</li>
+                      <li>• Items with lots of seams or heavy embellishments</li>
+                      <li>• Very thick or stiff fabrics</li>
+                      <li>• Items with large prints/logos</li>
+                    </ul>
+                  </div>
+                </div>
+                {/* Tips for Best Results */}
+                <div className="mt-8">
+                  <p className="font-bold text-lg text-[#4A3419] mb-2">Tips for Best Results:</p>
+                  <ul className="list-disc ml-6 text-[#4A3419]">
+                    <li>Try not to send shirts with seams on the sides (Go to example tab above).</li>
+                    <li>Try to send plain shirts with no or little design (Go to example tab above).</li>
+                  </ul>
+                </div>
+              </div>
+              {/* The Process */}
+              <div className="bg-white p-8 rounded-lg shadow-md text-[#4A3419] text-lg">
+                <h3 className="text-2xl font-bold mb-4 text-center">The Process</h3>
+                <div className="space-y-6">
+                  <div className="flex items-start space-x-4">
+                    <div className="bg-[#4A3419] text-[#FFF5E6] rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0 mt-1">1</div>
+                    <div>
+                      <h4 className="text-lg font-bold text-[#4A3419] mb-2">Fill Out the Form</h4>
+                      <p className="text-[#4A3419]">Let us know how many clothing items you are sending and if you want something made out of the clothes.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-4">
+                    <div className="bg-[#4A3419] text-[#FFF5E6] rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0 mt-1">2</div>
+                    <div>
+                      <h4 className="text-lg font-bold text-[#4A3419] mb-2">Receive Email with Address & Details</h4>
+                      <p className="text-[#4A3419]">We will email you the address and details for your order.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-4">
+                    <div className="bg-[#4A3419] text-[#FFF5E6] rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0 mt-1">3</div>
+                    <div>
+                      <h4 className="text-lg font-bold text-[#4A3419] mb-2">Send Your Clothes</h4>
+                      <p className="text-[#4A3419]">Send your clothes to the provided address. Once received, we will email you an invoice for the order.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-4">
+                    <div className="bg-[#4A3419] text-[#FFF5E6] rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0 mt-1">4</div>
+                    <div>
+                      <h4 className="text-lg font-bold text-[#4A3419] mb-2">Invoice & Yarn Creation</h4>
+                      <p className="text-[#4A3419]">Once the invoice is paid, we will begin making the yarn from your clothes.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-4">
+                    <div className="bg-[#4A3419] text-[#FFF5E6] rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0 mt-1">5</div>
+                    <div>
+                      <h4 className="text-lg font-bold text-[#4A3419] mb-2">Optional: Item Creation</h4>
+                      <p className="text-[#4A3419]">If you want your yarn made into something (like a duffle bag, basket, or coaster), let us know in the form. Additional costs apply (see below).</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-4">
+                    <div className="bg-[#4A3419] text-[#FFF5E6] rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0 mt-1">6</div>
+                    <div>
+                      <h4 className="text-lg font-bold text-[#4A3419] mb-2">Delivery</h4>
+                      <p className="text-[#4A3419]">Your finished yarn (and/or item) will be shipped back to you, ready to be enjoyed and cherished.</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-8 p-6 bg-[#FFF5E6] border border-[#E8C39E] rounded-lg text-[#4A3419]">
+                  <h4 className="text-xl font-bold mb-2">Pricing & Example</h4>
+                  <ul className="list-disc ml-6 mb-2">
+                    <li>Every item being turned into yarn: <b>$5 per item</b></li>
+                    <li>If you want an item made and we need to provide more balls of yarn: <b>$10 per extra ball</b></li>
+                    <li><b>Example (Duffle Bag):</b> 13 shirts/balls of yarn used → 13 x $5 = $65. Made into a duffle bag: +$15. <b>Total: $80</b></li>
+                  </ul>
+                  <div className="mt-2">
+                    <b>Additional Item Costs:</b>
+                    <ul className="list-disc ml-6">
+                      <li>Coaster: +$5</li>
+                      <li>Duffle Bag: +$15</li>
+                      <li>Small Basket: +$10</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </motion.section>
+          )}
+          {activeTab === 'Example' && (
+            <motion.section
+              key="example"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 30 }}
+              transition={{ duration: 0.5 }}
+              className="mb-16"
+            >
+              <h2 className="text-3xl font-bold text-[#4A3419] text-center mb-8">
+                Duffle Bag Example
+              </h2>
+              {/* Duffle Bag Example Section with Carousel */}
+              <div className="bg-white p-8 rounded-lg shadow-md flex flex-col md:flex-row items-center gap-8">
+                <div className="relative w-full max-w-xs flex-shrink-0">
+                  <img src={duffleBagImages[carouselIndex]} alt={`Duffle Bag Example ${carouselIndex + 1}`} className="w-full rounded-lg shadow-md object-contain" />
+                  {duffleBagImages.length > 1 && (
+                    <>
+                      <button onClick={prevImage} className="absolute left-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-70 rounded-full p-2 text-[#4A3419] hover:bg-opacity-100">&#8592;</button>
+                      <button onClick={nextImage} className="absolute right-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-70 rounded-full p-2 text-[#4A3419] hover:bg-opacity-100">&#8594;</button>
+                      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                        {duffleBagImages.map((_, i) => (
+                          <span key={i} className={`inline-block w-2 h-2 rounded-full ${i === carouselIndex ? 'bg-[#4A3419]' : 'bg-[#E8C39E]'}`}></span>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+                <div className="text-[#4A3419] text-lg">
+                  <p className="mb-2"><b>This duffle bag was made out of t-shirts (mainly cotton, some polyester).</b></p>
+                  <p className="mb-2">It was made out of about 13 shirts/balls of yarn.</p>
+                  <p className="mb-2">Plain shirts and shirts without side seams work best for this type of project.</p>
+                  <div className="mt-6 p-6 bg-[#FFF5E6] border border-[#E8C39E] rounded-lg text-[#4A3419] max-w-2xl">
+                    <span className="font-bold">Example (Duffle Bag):</span> 13 shirts/balls of yarn used → 13 x $5 = $65. Made into a duffle bag: +$15. <span className="font-bold">Total: $80</span>
+                  </div>
+                </div>
+              </div>
+            </motion.section>
+          )}
+          {activeTab === 'Order and Payment Terms' && (
+            <motion.section
+              key="terms"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 30 }}
+              transition={{ duration: 0.5 }}
+              className="mb-16"
+            >
+              <h2 className="text-3xl font-bold text-[#4A3419] text-center mb-8">
+                Order and Payment Terms
+              </h2>
+              <div className="bg-white p-8 rounded-lg shadow-md text-[#4A3419] text-lg space-y-6">
+                <div>
+                  <h3 className="text-2xl font-bold mb-2">General Process and Terms (Applies to all)</h3>
+                  <ul className="list-disc ml-6 space-y-2">
+                    <li>A prepaid shipping label will be provided by the company. Customers are responsible for shipping their clothing to the address listed on the label.</li>
+                    <li>Once received, all clothing will be reviewed to assess usability.</li>
+                    <li>A final invoice will be sent after review. Customers have five (5) business days to complete payment.</li>
+                    <li>If payment is not received within 5 business days and no communication is made, all clothing becomes the property of the company and will not be returned or processed.</li>
+                    <li>If the customer requests an extension, an additional 5 business days will be granted. This extension can only be used once per order. If the invoice remains unpaid after the extension, all clothing is forfeited.</li>
+                    <li>Upon invoice payment, the processing or creation phase begins.</li>
+                    <li>If any changes are requested after invoice payment, a re-evaluation will occur to determine whether a refund is due or an additional invoice is needed.</li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold mb-2">For Yarn Creation Only (No Product Request)</h3>
+                  <ul className="list-disc ml-6 space-y-2">
+                    <li>Clothing that is approved will be converted into yarn.</li>
+                    <li>If clothing is sent that was previously stated as unacceptable, it will not be processed and will be returned with the final package.</li>
+                    <li>Customers may opt to pay $10 per unusable item to receive the yarn that would have been made from that item.</li>
+                    <li>If the company determines a clothing item is unusable but not previously listed as unacceptable, yarn will still be provided at no additional cost, and the clothing will be returned.</li>
+                  </ul>
+                  <h4 className="text-xl font-bold mt-4 mb-2">Final Invoice & Payment</h4>
+                  <ul className="list-disc ml-6 space-y-2">
+                    <li>Once the review is complete, the final invoice will be sent.</li>
+                    <li>Failure to pay within the specified period results in forfeiture of all submitted materials.</li>
+                    <li>Review General Process and Terms for more information on invoice payments.</li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold mb-2">For Yarn and Product Request</h3>
+                  <ul className="list-disc ml-6 space-y-2">
+                    <li>Once the clothing is received, it will be reviewed for compatibility with the requested item.</li>
+                  </ul>
+                  <h4 className="text-xl font-bold mt-4 mb-2">Scenario 1: Unusable clothing not previously listed</h4>
+                  <ul className="list-disc ml-6 space-y-2">
+                    <li>Yarn will be provided from that clothing at no fee.</li>
+                    <li>If more yarn is needed to complete the item:
+                      <ul className="list-disc ml-6">
+                        <li>The customer may opt to proceed with the item by paying $10 per additional clothing piece provided by the company.</li>
+                        <li>The customer may opt to change to a different item that uses less yarn.</li>
+                        <li>The customer may opt to receive only the yarn (no item made).</li>
+                      </ul>
+                    </li>
+                  </ul>
+                  <h4 className="text-xl font-bold mt-4 mb-2">Scenario 2: Unusable clothing was listed as not accepted</h4>
+                  <ul className="list-disc ml-6 space-y-2">
+                    <li>The customer will be contacted to choose:
+                      <ul className="list-disc ml-6">
+                        <li>Receive yarn only, no item made.</li>
+                        <li>Receive yarn only + request yarn substitution for the unusable items ($10 per clothing item).</li>
+                        <li>Proceed with the item, without substitute yarn provided by the company.</li>
+                        <li>Choose a different item without substitute yarn provided by the company.</li>
+                        <li>Choose a different item + request yarn from unusable clothing ($10 per item).</li>
+                      </ul>
+                    </li>
+                  </ul>
+                  <h4 className="text-xl font-bold mt-4 mb-2">Scenario 3: More yarn needed during production</h4>
+                  <ul className="list-disc ml-6 space-y-2">
+                    <li>The customer will be notified and may:
+                      <ul className="list-disc ml-6">
+                        <li>Proceed and pay $10 per clothing item for additional yarn provided.</li>
+                        <li>Cancel item request and receive only the yarn.</li>
+                        <li>Switch to a smaller item requiring less yarn.</li>
+                      </ul>
+                    </li>
+                  </ul>
+                  <h4 className="text-xl font-bold mt-4 mb-2">Final Product & Extras</h4>
+                  <ul className="list-disc ml-6 space-y-2">
+                    <li>All extra yarn will be returned with the final product.</li>
+                    <li>Any unusable clothing will also be returned with the final package.</li>
+                  </ul>
+                  <h4 className="text-xl font-bold mt-4 mb-2">Final Invoice & Payment</h4>
+                  <ul className="list-disc ml-6 space-y-2">
+                    <li>The final invoice will be sent after the reviewing of the product.</li>
+                    <li>As with all orders, failure to pay within the designated time frame results in complete forfeiture of the submitted clothing.</li>
+                    <li>Review General Process and Terms for more information on invoice payments.</li>
+                  </ul>
+                </div>
+              </div>
+            </motion.section>
+          )}
+        </AnimatePresence>
 
         {/* CTA Section */}
         <motion.section 

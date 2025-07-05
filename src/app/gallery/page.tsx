@@ -147,7 +147,6 @@ const mediaItems: MediaItem[] = [
     url: 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Scrunchies/5956c54e-731a-4c33-8490-130c94bb2ed2.jpeg', // Use the first image as the cover
     images: [
       'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Scrunchies/5956c54e-731a-4c33-8490-130c94bb2ed2.jpeg',
-      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Scrunchies/32384b1b-d9d7-4134-9161-4a8397c020d9.jpeg',
     ],
     title: 'Recycled Yarn Collection',
     description: 'photos, recycled yarn using clothes like shirts, sweatpants, hoodie',
@@ -164,7 +163,6 @@ const mediaItems: MediaItem[] = [
       'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Scrunchies/3a3374b8-0cd6-420c-b55a-153b576bb7f9.jpeg',
       'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Scrunchies/60aecdee-8a22-4b8a-92c2-6a53df9f8ac9.jpeg',
       'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Scrunchies/c4696fba-0026-4f00-ba40-8eb9bc1d24a0.jpeg',
-      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Scrunchies/5956c54e-731a-4c33-8490-130c94bb2ed2.jpeg',
     ],
     title: 'Scrunchie Collection',
     description: 'A collection of handmade acrylic scrunchies in a variety of colors and styles.',
@@ -175,17 +173,14 @@ const mediaItems: MediaItem[] = [
   {
     id: 'duffle-bag',
     type: 'image-group',
-    url: '/duffleBag/IMG_6982.jpg',
+    url: '/duffleBag/IMG_6990.jpg',
     images: [
-      '/duffleBag/IMG_6982.jpg',
-      '/duffleBag/IMG_6985.jpg',
-      '/duffleBag/IMG_6986.jpg',
-      '/duffleBag/IMG_6987.jpg',
+      '/duffleBag/IMG_6990.jpg',      
       '/duffleBag/IMG_6988.jpg',
       '/duffleBag/IMG_6989.jpg',
-      '/duffleBag/IMG_6990.jpg',
+      '/duffleBag/IMG_6986.jpg',
     ],
-    title: 'Duffle Bag Example',
+    title: 'Duffle Bag',
     description: 'A duffle bag made from recycled t-shirts. See the Recycled Products page for more details.',
     categories: ['Bags', 'Recycled'],
     tags: ['duffle bag', 'recycled', 'upcycled', 'bag'],
