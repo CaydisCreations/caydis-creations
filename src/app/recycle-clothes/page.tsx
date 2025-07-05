@@ -55,7 +55,7 @@ export default function RecycleClothesPage() {
         {/* Google Form Button at Top */}
         <div className="flex justify-center mb-8">
           <a
-            href="https://docs.google.com/forms/d/e/1FAIpQLSdfpc5gVq_5kexzuQATl-mTg4b8eRRPUjTi2A9K89NrhMmH9A/viewform"
+            href="https://forms.gle/vjnsN5vUJhSFtsbX6"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block bg-[#E8C39E] text-[#4A3419] px-8 py-4 rounded-lg font-bold text-lg hover:bg-[#d6b28e] transition-colors duration-300"
@@ -409,7 +409,7 @@ export default function RecycleClothesPage() {
             Let's create something beautiful together from your cherished garments.
           </p>
           <motion.a 
-            href="https://docs.google.com/forms/d/e/1FAIpQLSdfpc5gVq_5kexzuQATl-mTg4b8eRRPUjTi2A9K89NrhMmH9A/viewform"
+            href="https://forms.gle/vjnsN5vUJhSFtsbX6"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block bg-[#E8C39E] text-[#4A3419] px-8 py-4 rounded-lg font-bold text-lg hover:bg-[#d6b28e] transition-colors duration-300"

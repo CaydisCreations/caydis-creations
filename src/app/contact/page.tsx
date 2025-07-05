@@ -9,7 +9,7 @@ export default function Contact() {
       <p className="text-lg text-[#4A3419] mb-8">We'd love to hear from you! Please use the forms below to get in touch or leave feedback. You can also email us at <a href="mailto:caydicreations@gmail.com" className="underline hover:text-[#6B4B26]">caydicreations@gmail.com</a>.</p>
       <div className="flex flex-col md:flex-row gap-6 justify-center">
         <a
-          href="https://forms.gle/2kRHpSdE6KnGr5zF7"
+          href="https://forms.gle/f1UuzVKmN3V85b9N9"
           target="_blank"
           rel="noopener noreferrer"
           className="bg-[#E8C39E] text-[#4A3419] px-8 py-4 rounded-lg font-bold text-lg hover:bg-[#d6b28e] transition-colors duration-300"
@@ -17,7 +17,7 @@ export default function Contact() {
           Contact Form
         </a>
         <a
-          href="https://forms.gle/i6F8uiLPzfHMeu1V8"
+          href="https://forms.gle/icTi5R3iQh8rti5SA"
           target="_blank"
           rel="noopener noreferrer"
           className="bg-[#4A3419] text-[#FFF5E6] px-8 py-4 rounded-lg font-bold text-lg hover:bg-[#6B4B26] transition-colors duration-300"

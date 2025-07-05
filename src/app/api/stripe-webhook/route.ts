@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
             <p style="margin-top:32px;">Warmly,<br/>
             <b>Caydance Hill</b><br/>
             Owner & Maker, Caydi's Creations<br/>
-            <a href="https://caydiscreation.com" style="color:#4A3419; text-decoration:underline;">caydiscreation.com</a> | <a href="mailto:caydicreations@gmail.com" style="color:#4A3419; text-decoration:underline;">caydicreations@gmail.com</a> | Insta: @caydiscreations
+            <a href="https://caydiscreations.com" style="color:#4A3419; text-decoration:underline;">caydiscreations.com</a> | <a href="mailto:caydiscreations@gmail.com" style="color:#4A3419; text-decoration:underline;">caydiscreations@gmail.com</a> | Insta: @caydiscreations
             </p>
           </div>
         `

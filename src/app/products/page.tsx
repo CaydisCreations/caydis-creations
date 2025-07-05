@@ -43,27 +43,51 @@ function ProductsContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const { addToCart } = useCart();
+  const [selectedTags, setSelectedTags] = useState([]);
 
-  // Filter products based on selected category and search term
+  // Collect all unique tags from products that are actually used
+  const allTags = Array.from(new Set(products.flatMap(p => p.tags || [])));
+
+  // Update filtering logic
   useEffect(() => {
     setIsLoading(true);
     const timer = setTimeout(() => {
       let results = products;
       if (selectedCategory !== 'All') {
-        results = results.filter(product => product.category === selectedCategory);
+        if (selectedCategory === 'Wearables') {
+          // Show all products that are clothes, accessories, or hats
+          results = results.filter(product =>
+            ['Beanies', 'Scarves', 'Bags', 'Accessories', 'Hats', 'Scrunchies'].includes(product.category)
+          );
+        } else if (selectedCategory === 'Accessories') {
+          // Accessories includes scarves as well
+          results = results.filter(product =>
+            product.category === 'Accessories' || product.category === 'Scarves'
+          );
+        } else {
+          results = results.filter(product => product.category === selectedCategory);
+        }
+      }
+      if (selectedTags.length > 0) {
+        results = results.filter(product =>
+          (product.tags || []).some(tag => selectedTags.includes(tag))
+        );
       }
       if (searchTerm) {
-        results = results.filter(product => 
-          product.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-          product.description.toLowerCase().includes(searchTerm.toLowerCase())
+        const term = searchTerm.toLowerCase();
+        // Prioritize: startsWith > includes
+        const startsWith = results.filter(p => p.name.toLowerCase().startsWith(term));
+        const includes = results.filter(p =>
+          !p.name.toLowerCase().startsWith(term) &&
+          (p.name.toLowerCase().includes(term) || p.description.toLowerCase().includes(term))
         );
+        results = [...startsWith, ...includes];
       }
       setFilteredProducts(results);
       setIsLoading(false);
-    }, 300); // Add slight delay to simulate filtering
-
+    }, 300);
     return () => clearTimeout(timer);
-  }, [selectedCategory, searchTerm]);
+  }, [selectedCategory, searchTerm, selectedTags]);
 
   const handleProductClick = (product) => {
     setSelectedProduct(product);
@@ -93,7 +117,18 @@ function ProductsContent() {
     setQuantity(prev => (prev > 1 ? prev - 1 : 1));
   };
 
-  const categories = ['All', 'Home Decor', 'Baby', 'Accessories'];
+  // Tag selection handler
+  const toggleTag = (tag) => {
+    setSelectedTags(prev =>
+      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+    );
+  };
+
+  // Only show tags that are not categories
+  const categorySet = new Set(['All', 'Wearables', 'Home Decor', 'Baby', 'Accessories', 'Scarves']);
+  const filteredTags = Array.from(new Set(products.flatMap(p => p.tags || []))).filter(tag => !categorySet.has(tag));
+
+  const categories = ['All', 'Wearables', 'Home Decor', 'Baby', 'Accessories', 'Scarves'];
 
   return (
     <div className="space-y-8">
@@ -147,6 +182,18 @@ function ProductsContent() {
               >
                 {category}
               </motion.button>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-2 items-center mt-2 mb-2">
+            {filteredTags.map(tag => (
+              <button
+                key={tag}
+                className={`px-4 py-1 rounded-full border font-semibold text-sm transition-colors duration-200 ${selectedTags.includes(tag) ? 'bg-[#4A3419] text-[#FFF5E6] border-[#4A3419]' : 'bg-[#FFF5E6] text-[#4A3419] border-[#4A3419]'}`}
+                onClick={() => toggleTag(tag)}
+                type="button"
+              >
+                {tag}
+              </button>
             ))}
           </div>
         </div>
@@ -217,6 +264,11 @@ function ProductsContent() {
                       <FaShoppingCart size={14} />
                       <span className="text-xs">Add</span>
                     </motion.button>
+                  </div>
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {(product.tags || []).map(tag => (
+                      <span key={tag} className="text-xs px-2 py-1 bg-[#E8C39E] text-[#4A3419] rounded-full">{tag}</span>
+                    ))}
                   </div>
                 </motion.div>
               ))}

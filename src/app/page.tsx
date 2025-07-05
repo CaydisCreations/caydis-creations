@@ -6,33 +6,7 @@ import { motion } from 'framer-motion'
 import { FaRecycle, FaTools, FaArrowRight, FaGift, FaStar, FaShoppingCart, FaHeart } from 'react-icons/fa'
 import { useCart } from './context/CartContext'
 import Link from 'next/link'
-
-  const products = [
-    {
-      id: 1,
-      name: 'Cozy Blanket',
-      price: 89.99,
-    description: 'A warm and comfortable blanket perfect for cold nights, made from recycled cotton yarn.',
-    category: 'Home Decor',
-    rating: 4.8
-    },
-    {
-      id: 2,
-      name: 'Baby Set',
-      price: 49.99,
-    description: 'Adorable set including hat, booties, and mittens. Perfect for welcoming a new arrival!',
-    category: 'Baby',
-    rating: 5.0
-    },
-    {
-      id: 3,
-      name: 'Winter Scarf',
-      price: 34.99,
-    description: 'Soft and stylish scarf to keep you warm. Makes an excellent gift!',
-    category: 'Accessories',
-    rating: 4.9
-    }
-  ];
+import { products as allProducts } from '../data/products'
 
 function HomeContent() {
   const [modalOpen, setModalOpen] = useState(false);
@@ -58,6 +32,13 @@ function HomeContent() {
   const decrementQuantity = () => {
     setQuantity(prev => (prev > 1 ? prev - 1 : 1));
   };
+
+  // Select one bag, one scarf, and one beanie for featured products
+  const featuredProducts = [
+    allProducts.find(p => p.category === 'Bags'),
+    allProducts.find(p => p.category === 'Scarves'),
+    allProducts.find(p => p.category === 'Beanies'),
+  ].filter(Boolean)
 
   return (
     <div className="space-y-16">
@@ -171,17 +152,26 @@ function HomeContent() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8, delay: 0.6 }}
       >
-        <h2 className="text-3xl font-bold text-[#4A3419] mb-6 relative inline-block">
-          Featured Products
-          <motion.span 
-            className="absolute bottom-0 left-0 w-full h-1 bg-[#E8C39E]"
-            initial={{ width: 0 }}
-            animate={{ width: "100%" }}
-            transition={{ duration: 1, delay: 1 }}
-          ></motion.span>
-        </h2>
+        <div className="relative flex items-center justify-center mb-6" style={{ minHeight: '48px' }}>
+          <h2 className="text-3xl font-bold text-[#4A3419] relative inline-block mb-0 mx-auto">
+            Featured Products
+            <motion.span 
+              className="absolute bottom-0 left-0 w-full h-1 bg-[#E8C39E]"
+              initial={{ width: 0 }}
+              animate={{ width: '100%' }}
+              transition={{ duration: 1, delay: 1 }}
+            ></motion.span>
+          </h2>
+          <div className="absolute right-0 flex items-center">
+            <Link href="/products">
+              <button className="ml-2 px-4 py-2 bg-[#E8C39E] text-[#4A3419] rounded-lg font-bold text-base hover:bg-[#d6b28e] transition-colors duration-300 flex items-center gap-2">
+                See Products <FaArrowRight />
+              </button>
+            </Link>
+          </div>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {products.map((product, index) => (
+          {featuredProducts.map((product, index) => (
             <motion.div 
               key={product.id}
               className="bg-white p-6 rounded-lg shadow-md overflow-hidden group cursor-pointer relative"
@@ -195,10 +185,9 @@ function HomeContent() {
               onClick={() => handleProductClick(product)}
             >
               <div className="bg-[#E8C39E] h-48 rounded-md mb-4 overflow-hidden relative transform group-hover:scale-105 transition-transform duration-500">
-                {/* Placeholder for product image */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <FaStar className="text-[#4A3419] text-4xl opacity-20" />
-                </div>
+                {product.image && (
+                  <Image src={product.image} alt={product.name} fill className="object-contain" />
+                )}
               </div>
               <h3 className="text-xl font-bold text-[#4A3419] group-hover:text-[#E8C39E] transition-colors duration-300">{product.name}</h3>
               <p className="text-[#4A3419] font-bold">${product.price}</p>
@@ -221,12 +210,12 @@ function HomeContent() {
         <h2 className="text-2xl font-bold mb-4">Ready to transform your old clothes into beautiful crochet items?</h2>
         <p className="mb-6">Let us create something special that tells your story!</p>
         <motion.a 
-          href="/contact"
+          href="/recycle-clothes"
           className="inline-block bg-[#E8C39E] text-[#4A3419] px-6 py-3 rounded-lg font-bold hover:bg-[#d6b28e] transition-colors duration-300"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          Get in Touch Today
+          Let's Get Started
         </motion.a>
       </motion.section>
 

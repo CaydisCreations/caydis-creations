@@ -42,7 +42,7 @@ export default function CustomizeOrdersPage() {
         {/* Google Form Button at Top */}
         <div className="flex justify-center mb-8">
           <a
-            href="https://forms.gle/pMRpV5CstQ6mKhHN8"
+            href="https://forms.gle/ky8cAJ8cpVJpTAKLA"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block bg-[#E8C39E] text-[#4A3419] px-8 py-4 rounded-lg font-bold text-lg hover:bg-[#d6b28e] transition-colors duration-300"
@@ -336,7 +336,7 @@ export default function CustomizeOrdersPage() {
             Let's bring your vision to life with a custom crochet piece made just for you.
           </p>
           <motion.a 
-            href="https://forms.gle/pMRpV5CstQ6mKhHN8"
+            href="https://forms.gle/ky8cAJ8cpVJpTAKLA"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block bg-[#E8C39E] text-[#4A3419] px-8 py-4 rounded-lg font-bold text-lg hover:bg-[#d6b28e] transition-colors duration-300"
