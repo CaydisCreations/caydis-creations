@@ -141,21 +141,6 @@ export default function CustomizeOrdersPage() {
                 whileHover={{ scale: 1.05 }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.7 }}
-              >
-                <div className="bg-[#E8C39E] p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                  <FaStar className="text-[#4A3419] text-2xl" />
-                </div>
-                <h3 className="text-xl font-bold text-[#4A3419] mb-3">Baby Items</h3>
-                <p className="text-[#4A3419]">
-                  Special blankets and hats made with love for little ones.
-                </p>
-              </motion.div>
-              <motion.div 
-                className="bg-white p-6 rounded-lg shadow-md text-center"
-                whileHover={{ scale: 1.05 }}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.9 }}
               >
                 <div className="bg-[#E8C39E] p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
@@ -164,6 +149,21 @@ export default function CustomizeOrdersPage() {
                 <h3 className="text-xl font-bold text-[#4A3419] mb-3">Gift Items</h3>
                 <p className="text-[#4A3419]">
                   Thoughtful gifts for special occasions and loved ones.
+                </p>
+              </motion.div>
+              <motion.div 
+                className="bg-white p-6 rounded-lg shadow-md text-center"
+                whileHover={{ scale: 1.05 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.7 }}
+              >
+                <div className="bg-[#E8C39E] p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                  <FaStar className="text-[#4A3419] text-2xl" />
+                </div>
+                <h3 className="text-xl font-bold text-[#4A3419] mb-3">Baby Items</h3>
+                <p className="text-[#4A3419]">
+                  Special blankets and hats made with love for little ones.
                 </p>
               </motion.div>
             </div>

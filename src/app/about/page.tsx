@@ -1,11 +1,15 @@
-import React from 'react'
+'use client'
+
+import React, { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 export default function About() {
+  const [showFull, setShowFull] = useState(false);
   return (
     <div className="max-w-4xl mx-auto space-y-12">
       <header className="text-center">
         <h1 className="text-4xl font-bold text-[#4A3419]">About Caydi's Creations</h1>
-        <p className="mt-2 text-[#4A3419]">Crafting beautiful crochet pieces with love and dedication</p>
+        <p className="mt-2 text-[#4A3419]">Hi, I'm Caydance — but everyone knows me as Caydi — the hands and heart behind Caydi's Creations!</p>
       </header>
 
       <div className="grid md:grid-cols-2 gap-8 items-center">
@@ -17,17 +21,48 @@ export default function About() {
           />
         </div>
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold text-[#4A3419]">Our Story</h2>
+          <h2 className="text-2xl font-bold text-[#4A3419]">My Story</h2>
           <p className="text-[#4A3419]">
-            Welcome to Caydi's Creations, where every stitch tells a story of passion and creativity. 
-            What started as a love for crochet has blossomed into a dedicated craft business, 
-            bringing warmth and comfort to homes through handmade pieces.
+            I'm a crochet artist based in West Haven, Connecticut, creating cozy, handmade pieces that are as unique as the people who wear or use them. Every item I make is crafted with love, care, and a little bit of my personality stitched in.
           </p>
           <p className="text-[#4A3419]">
-            Each item in our collection is carefully crafted using premium materials, 
-            ensuring both beauty and durability. We take pride in creating pieces that 
-            become cherished parts of your home and daily life.
+            By day, I'm an undergraduate at the University of New Haven, studying Criminal Justice and Accounting. And when I'm not buried in textbooks or yarn, you'll probably find me on the rugby field repping my school — Go Chargers!
           </p>
+          {!showFull && (
+            <button
+              className="mt-2 px-4 py-2 bg-[#E8C39E] text-[#4A3419] rounded hover:bg-[#d6b28e] font-bold transition-colors"
+              onClick={() => setShowFull(true)}
+            >
+              Continue Reading
+            </button>
+          )}
+          <AnimatePresence>
+            {showFull && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.5 }}
+                className="space-y-4"
+              >
+                <p className="text-[#4A3419]">
+                  I first picked up a crochet hook in the summer of 2023, hoping to make my own stuffed animals. That simple curiosity quickly turned into a passion. While I still adore making plushies, I've fallen in love with creating all kinds of handmade items. Whether it's a cozy hat, a custom order, or a thoughtful gift, I find so much joy in making things that bring comfort, smiles, and a little magic to others.
+                </p>
+                <p className="text-[#4A3419]">
+                  What started as a relaxing hobby has now grown into a heartfelt business rooted in creativity, connection, and the joy of handmade art.
+                </p>
+                <p className="text-[#4A3419]">
+                  Thank you so much for being here and supporting what I do — it truly means the world to me. If you ever want to collaborate on something custom or just say hi, I'd love to hear from you!
+                </p>
+                <button
+                  className="mt-2 px-4 py-2 bg-[#E8C39E] text-[#4A3419] rounded hover:bg-[#d6b28e] font-bold transition-colors"
+                  onClick={() => setShowFull(false)}
+                >
+                  Show Less
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 

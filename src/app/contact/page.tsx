@@ -1,34 +1,8 @@
 'use client'
 
-import React, { useState } from 'react'
+import React from 'react'
 
 export default function Contact() {
-  const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const form = e.currentTarget;
-    const data = new FormData(form);
-    setStatus('idle');
-    try {
-      const res = await fetch('https://formspree.io/f/mpwrbkgw', {
-        method: 'POST',
-        body: data,
-        headers: {
-          Accept: 'application/json',
-        },
-      });
-      if (res.ok) {
-        setStatus('success');
-        form.reset();
-      } else {
-        setStatus('error');
-      }
-    } catch {
-      setStatus('error');
-    }
-  };
-
   return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center text-center">
       <h1 className="text-4xl font-bold text-[#4A3419] mb-4">Contact Us</h1>

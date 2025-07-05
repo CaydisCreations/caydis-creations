@@ -4,72 +4,35 @@ import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FaSearch, FaShoppingCart, FaStar, FaTimes } from 'react-icons/fa'
 import { useCart } from '../context/CartContext'
+import { products } from '../../data/products'
 
-const products = [
-  {
-    id: 1,
-    name: 'Cozy Blanket',
-    price: 89.99,
-    description: 'A warm and comfortable blanket perfect for cold nights, made from recycled cotton yarn.',
-    category: 'Home Decor',
-    rating: 4.8,
-    image: '/logoCaydisCreation.PNG',
-  },
-  {
-    id: 100,
-    name: 'Test Product',
-    price: 0.50,
-    description: 'A special $0.50 product for testing checkout and payments.',
-    category: 'Accessories',
-    rating: 5.0,
-    image: 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/BrownHats/IMG_5920.jpeg',
-  },
-  {
-    id: 2,
-    name: 'Baby Set',
-    price: 49.99,
-    description: 'Adorable set including hat, booties, and mittens. Perfect for welcoming a new arrival!',
-    category: 'Baby',
-    rating: 5.0,
-    image: '/logoCaydisCreation.PNG',
-  },
-  {
-    id: 3,
-    name: 'Winter Scarf',
-    price: 34.99,
-    description: 'Soft and stylish scarf to keep you warm. Makes an excellent gift for friends and family.',
-    category: 'Accessories',
-    rating: 4.7,
-    image: '/logoCaydisCreation.PNG',
-  },
-  {
-    id: 4,
-    name: 'Throw Pillows',
-    price: 29.99,
-    description: 'Decorative throw pillows with intricate patterns. These add a cozy touch to any home!',
-    category: 'Home Decor',
-    rating: 4.5,
-    image: '/logoCaydisCreation.PNG',
-  },
-  {
-    id: 5,
-    name: 'Baby Blanket',
-    price: 45.99,
-    description: 'Soft and gentle blanket for your little one. Made with love, care, and quality materials.',
-    category: 'Baby',
-    rating: 4.9,
-    image: '/logoCaydisCreation.PNG',
-  },
-  {
-    id: 6,
-    name: 'Beanie Hat',
-    price: 24.99,
-    description: 'Stylish and warm beanie hat for winter. One-size-fits-most design for ultimate comfort.',
-    category: 'Accessories',
-    rating: 4.6,
-    image: '/logoCaydisCreation.PNG',
-  }
-];
+function ProductImageCarousel({ images, alt }: { images: string[], alt: string }) {
+  const [index, setIndex] = useState(0);
+  const prev = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIndex(i => (i === 0 ? images.length - 1 : i - 1));
+  };
+  const next = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIndex(i => (i === images.length - 1 ? 0 : i + 1));
+  };
+  return (
+    <div className="relative h-48 rounded-md mb-4 overflow-hidden bg-[#E8C39E] flex items-center justify-center">
+      <img src={images[index]} alt={alt} className="object-contain w-full h-full" />
+      {images.length > 1 && (
+        <>
+          <button onClick={prev} className="absolute left-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-70 rounded-full p-2 text-[#4A3419] hover:bg-opacity-100">&#8592;</button>
+          <button onClick={next} className="absolute right-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-70 rounded-full p-2 text-[#4A3419] hover:bg-opacity-100">&#8594;</button>
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+            {images.map((_, i) => (
+              <span key={i} className={`inline-block w-2 h-2 rounded-full ${i === index ? 'bg-[#4A3419]' : 'bg-[#E8C39E]'}`}></span>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 
 function ProductsContent() {
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -225,12 +188,16 @@ function ProductsContent() {
                   onClick={() => handleProductClick(product)}
                 >
                   {/* Product image */}
-                  <div className="bg-[#E8C39E] h-48 rounded-md mb-4 overflow-hidden relative">
-                    <img src={product.image} alt={product.name} className="object-contain w-full h-full" />
-                    <div className="absolute top-0 right-0 bg-[#4A3419] text-white px-2 py-1 m-2 rounded-full text-sm">
-                      {product.rating} ★
+                  {product.images ? (
+                    <ProductImageCarousel images={product.images} alt={product.name} />
+                  ) : (
+                    <div className="bg-[#E8C39E] h-48 rounded-md mb-4 overflow-hidden relative">
+                      <img src={product.image} alt={product.name} className="object-contain w-full h-full" />
+                      <div className="absolute top-0 right-0 bg-[#4A3419] text-white px-2 py-1 m-2 rounded-full text-sm">
+                        {product.rating} ★
+                      </div>
                     </div>
-                  </div>
+                  )}
                   <h2 className="text-xl font-bold text-[#4A3419] group-hover:text-[#6B4B26] transition-colors">{product.name}</h2>
                   <p className="text-[#4A3419] mb-2 line-clamp-2">{product.description}</p>
                   <div className="flex justify-between items-center mt-4">
@@ -275,9 +242,13 @@ function ProductsContent() {
               transition={{ type: "spring", bounce: 0.3 }}
             >
               <div className="relative">
-                <div className="bg-[#E8C39E] h-64 relative">
-                  <img src={selectedProduct.image} alt={selectedProduct.name} className="object-contain w-full h-full" />
-                </div>
+                {selectedProduct.images ? (
+                  <ProductImageCarousel images={selectedProduct.images} alt={selectedProduct.name} />
+                ) : (
+                  <div className="bg-[#E8C39E] h-64 relative">
+                    <img src={selectedProduct.image} alt={selectedProduct.name} className="object-contain w-full h-full" />
+                  </div>
+                )}
                 <button 
                   className="absolute top-4 right-4 bg-white p-2 rounded-full shadow-lg hover:bg-[#E8C39E] transition-colors duration-300"
                   onClick={closeModal}

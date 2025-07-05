@@ -44,24 +44,32 @@ export async function POST(req: NextRequest) {
       await resend.emails.send({
         from: "Caydi's Creations <no-reply@confirmation.caydiscreation.com>",
         to: session.customer_details?.email || session.customer_email || 'admin@caydiscreations.com',
-        subject: "Your Caydi's Creations Order Confirmation",
+        subject: "🧶 Thank You for Your Order! Confirmation Inside",
         html: `
           <div style="display:flex; align-items:center; justify-content:flex-end; min-height:120px; margin-bottom:24px;">
             <img src="https://caydiscreation.com/logoCaydisCreation.PNG" alt="Caydi's Creations Logo" style="max-width:120px; width:120px; height:auto; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08); background:#fff; margin-top:32px;" />
           </div>
-          <h2>Thank you for your purchase!</h2>
-          <p>Hi ${session.customer_details?.name || 'there'},</p>
-          <p>Your order was successful. Here are your order details:</p>
-          <ul>${itemsHtml}</ul>
-          <p><b>Total Paid:</b> $${((session.amount_total || 0) / 100).toFixed(2)}</p>
-          <p><b>Shipping to:</b><br/>
-            ${session.customer_details?.address?.line1 || ''}<br/>
-            ${session.customer_details?.address?.line2 || ''}<br/>
-            ${session.customer_details?.address?.city || ''}, ${session.customer_details?.address?.state || ''} ${session.customer_details?.address?.postal_code || ''}<br/>
-            ${session.customer_details?.address?.country || ''}
-          </p>
-          <p>If you have any questions, contact us at caydicreations@gmail.com.</p>
-          <p>Thank you for supporting Caydi's Creations handmade products!</p>
+          <div style="font-size:18px; color:#4A3419; font-family:sans-serif;">
+            <p>Hi ${session.customer_details?.name?.split(' ')[0] || 'there'},</p>
+            <p>Thank you so much for your order — we're thrilled you chose Caydi's Creations for your handmade crochet item!</p>
+            <p>We've received your order and are getting it ready just for you. Each piece is carefully handmade with love, and we can't wait for you to receive yours.</p>
+            <div style="margin: 24px 0; padding: 16px; background: #FFF5E6; border-radius: 8px;">
+              <b>Here are the details of your order:</b>
+              <ul style="margin: 12px 0 0 0; padding: 0; list-style: none;">
+                <li><b>Order Number:</b> #${session.id}</li>
+                <li><b>Item(s):</b><ul style="margin: 0; padding-left: 16px;">${lineItems.data.map(item => `<li>${item.description} — Qty: ${item.quantity} — $${((item.amount_total || 0) / 100).toFixed(2)}</li>`).join('')}</ul></li>
+                <li><b>Total:</b> $${((session.amount_total || 0) / 100).toFixed(2)}</li>
+                <li><b>Shipping To:</b> ${session.customer_details?.address?.line1 || ''} ${session.customer_details?.address?.line2 || ''}, ${session.customer_details?.address?.city || ''}, ${session.customer_details?.address?.state || ''} ${session.customer_details?.address?.postal_code || ''}, ${session.customer_details?.address?.country || ''}</li>
+              </ul>
+            </div>
+            <p>You'll receive another email with tracking info once your package is on its way.</p>
+            <p>If you have any questions or just want to say hi, feel free to reply to this email — I'd love to hear from you!</p>
+            <p style="margin-top:32px;">Warmly,<br/>
+            <b>Caydance Hill</b><br/>
+            Owner & Maker, Caydi's Creations<br/>
+            <a href="https://caydiscreation.com" style="color:#4A3419; text-decoration:underline;">caydiscreation.com</a> | <a href="mailto:caydicreations@gmail.com" style="color:#4A3419; text-decoration:underline;">caydicreations@gmail.com</a> | Insta: @caydiscreations
+            </p>
+          </div>
         `
       })
     } catch (err: any) {
