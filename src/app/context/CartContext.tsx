@@ -12,6 +12,7 @@ export interface CartItem {
   rating: number
   quantity: number
   image?: string // Optional image property for product images
+  priceId: string // Stripe price ID
 }
 
 // Cart context interface
@@ -78,8 +79,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
             : item
         )
       } else {
-        // Add new item to cart
-        return [...currentItems, { ...product, quantity }]
+        // Add new item to cart, ensure priceId is included
+        return [...currentItems, { ...product, quantity, priceId: product.priceId }]
       }
     })
   }, [])

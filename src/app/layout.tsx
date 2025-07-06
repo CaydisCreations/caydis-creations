@@ -91,7 +91,7 @@ export default function RootLayout({
             </div>
           </div>
           <div className="text-center mt-8 pt-4 border-t border-[#E8C39E]">
-            <p>© 2024 Caydi's Creations. All rights reserved.</p>
+            <p>© 2025 Caydi's Creations. All rights reserved.</p>
           </div>
         </footer>
         </CartProviderWrapper>

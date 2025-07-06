@@ -47,6 +47,7 @@ function ProductsContent() {
   const [tagsDropdownOpen, setTagsDropdownOpen] = useState(false);
   const [fetchAttempts, setFetchAttempts] = useState(0);
   const [noProductsTimeout, setNoProductsTimeout] = useState(false);
+  const [tagDropdownOpen, setTagDropdownOpen] = useState(false);
 
   // Fetch products from Stripe API
   useEffect(() => {
@@ -73,37 +74,35 @@ function ProductsContent() {
     };
   }, []);
 
-  // Collect all unique tags from products that are actually used
-  const allTags = Array.from(new Set(allProducts.flatMap(p => p.metadata?.tags ? p.metadata.tags.split(',') : [])));
+  // Define the allowed categories
+  const allowedCategories = ["All", "Wearables", "Bags", "Accessories", "Baby Clothes"];
+  // Collect all unique categories from product metadata (not tags)
+  const allCategories = [
+    ...new Set([
+      "All",
+      ...allProducts.map(p => p.metadata?.category).filter(Boolean)
+    ])
+  ].filter(cat => allowedCategories.includes(cat));
+  // Collect all unique tags from product metadata.tags
+  const allTags = Array.from(new Set(
+    allProducts.flatMap(p => p.metadata?.tags ? p.metadata.tags.split(',').map(t => t.trim()) : [])
+  ));
 
-  // Update filtering logic
+  // Filtering logic
   useEffect(() => {
     setIsLoading(true);
     const timer = setTimeout(() => {
       let results = allProducts;
       if (selectedCategory !== 'All') {
-        if (selectedCategory === 'Wearables') {
-          // Show all products that are clothes, accessories, or hats
-          results = results.filter(product =>
-            ['Beanies', 'Scarves', 'Bags', 'Accessories', 'Hats', 'Scrunchies'].includes(product.metadata?.category)
-          );
-        } else if (selectedCategory === 'Accessories') {
-          // Accessories includes scarves as well
-          results = results.filter(product =>
-            product.metadata?.category === 'Accessories' || product.metadata?.category === 'Scarves'
-          );
-        } else {
-          results = results.filter(product => product.metadata?.category === selectedCategory);
-        }
+        results = results.filter(product => product.metadata?.category === selectedCategory);
       }
       if (selectedTags.length > 0) {
         results = results.filter(product =>
-          (product.metadata?.tags ? product.metadata.tags.split(',') : []).some(tag => selectedTags.includes(tag))
+          (product.metadata?.tags ? product.metadata.tags.split(',').map(t => t.trim()) : []).some(tag => selectedTags.includes(tag))
         );
       }
       if (searchTerm) {
         const term = searchTerm.toLowerCase();
-        // Prioritize: startsWith > includes
         const startsWith = results.filter(p => p.name.toLowerCase().startsWith(term));
         const includes = results.filter(p =>
           !p.name.toLowerCase().startsWith(term) &&
@@ -129,11 +128,11 @@ function ProductsContent() {
 
   const handleAddToCart = (e, product) => {
     e.stopPropagation(); // Prevents triggering handleProductClick when clicking the button
-    addToCart(product, 1);
+    addToCart({ ...product, priceId: product.priceId }, 1);
   };
 
   const handleAddToCartFromModal = () => {
-    addToCart(selectedProduct, quantity);
+    addToCart({ ...selectedProduct, priceId: selectedProduct.priceId }, quantity);
     setModalOpen(false);
   };
 
@@ -151,12 +150,6 @@ function ProductsContent() {
       prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
     );
   };
-
-  // Only show tags that are not categories
-  const categorySet = new Set(['All', 'Wearables', 'Home Decor', 'Baby', 'Accessories', 'Scarves']);
-  const filteredTags = Array.from(new Set(allProducts.flatMap(p => p.metadata?.tags ? p.metadata.tags.split(',') : []))).filter(tag => !categorySet.has(tag));
-
-  const categories = ['All', 'Wearables', 'Home Decor', 'Baby', 'Accessories', 'Scarves'];
 
   return (
     <div className="space-y-8">
@@ -176,8 +169,8 @@ function ProductsContent() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
       >
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-          <div className="relative flex-1 max-w-md">
+        <div className="flex flex-col md:flex-row md:items-center gap-4 md:justify-between">
+          <div className="relative md:w-[340px] w-full">
             <input
               type="text"
               placeholder="Search products..."
@@ -195,44 +188,45 @@ function ProductsContent() {
               </button>
             )}
           </div>
-          <div className="flex flex-wrap gap-2 justify-center">
-            {categories.map((category) => (
-              <motion.button
-                key={category}
-                className={`px-4 py-2 rounded-full ${
-                  selectedCategory === category 
-                    ? 'bg-[#4A3419] text-[#FFF5E6]' 
-                    : 'bg-[#FFF5E6] text-[#4A3419] border border-[#4A3419]'
-                } hover:bg-[#6B4B26] hover:text-[#FFF5E6] transition-colors duration-300`}
-                onClick={() => setSelectedCategory(category)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                {category}
-              </motion.button>
-            ))}
-            <div className="relative">
-              <button
-                className="px-4 py-2 rounded-full bg-[#FFF5E6] text-[#4A3419] border border-[#4A3419] font-semibold flex items-center gap-2 hover:bg-[#E8C39E] transition-colors duration-300"
-                onClick={() => setTagsDropdownOpen((open) => !open)}
-                type="button"
-              >
-                More Filters <FaChevronDown className={`transition-transform duration-200 ${tagsDropdownOpen ? 'rotate-180' : ''}`} />
-              </button>
-              {tagsDropdownOpen && (
-                <div className="absolute left-0 mt-2 bg-white border border-[#E8C39E] rounded-lg shadow-lg p-4 z-20 flex flex-wrap gap-2 min-w-[200px]">
-                  {filteredTags.map(tag => (
-                    <button
-                      key={tag}
-                      className={`px-4 py-1 rounded-full border font-semibold text-sm transition-colors duration-200 ${selectedTags.includes(tag) ? 'bg-[#4A3419] text-[#FFF5E6] border-[#4A3419]' : 'bg-[#FFF5E6] text-[#4A3419] border-[#4A3419]'}`}
-                      onClick={() => toggleTag(tag)}
-                      type="button"
-                    >
-                      {tag}
-                    </button>
-                  ))}
-                </div>
-              )}
+          <div className="flex flex-row items-center min-w-0 justify-end w-full md:w-auto">
+            <div className="flex flex-wrap gap-2">
+              {allCategories.map((category) => (
+                <motion.button
+                  key={category}
+                  className={`px-4 py-2 rounded-full border-2 transition-colors duration-200 font-semibold text-[#4A3419] ${selectedCategory === category ? 'bg-[#4A3419] text-white border-[#4A3419]' : 'bg-[#FFF5E6] border-[#E8C39E]'}`}
+                  onClick={() => setSelectedCategory(category)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  {category}
+                </motion.button>
+              ))}
+            </div>
+            <div className="ml-2 md:ml-4 flex-shrink-0">
+              <div className="relative">
+                <button
+                  className="px-4 py-2 rounded-full bg-[#FFF5E6] text-[#4A3419] border border-[#4A3419] font-semibold flex items-center gap-2 hover:bg-[#E8C39E] transition-colors duration-300"
+                  onClick={() => setTagDropdownOpen(open => !open)}
+                  type="button"
+                >
+                  Filter
+                  <FaChevronDown className={`transition-transform duration-200 ${tagDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {tagDropdownOpen && (
+                  <div className="absolute right-0 mt-2 bg-white border border-[#E8C39E] rounded-lg shadow-lg p-4 z-20 flex flex-wrap gap-2 min-w-[200px]">
+                    {allTags.map(tag => (
+                      <button
+                        key={tag}
+                        className={`px-4 py-1 rounded-full border font-semibold text-sm transition-colors duration-200 ${selectedTags.includes(tag) ? 'bg-[#4A3419] text-white border-[#4A3419]' : 'bg-[#FFF5E6] text-[#4A3419] border-[#4A3419]'}`}
+                        onClick={() => toggleTag(tag)}
+                        type="button"
+                      >
+                        {tag}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -277,9 +271,6 @@ function ProductsContent() {
                   <p className="text-[#4A3419] mb-2 line-clamp-2">{product.description}</p>
                   <div className="flex justify-between items-center mt-4">
                     <span className="text-lg font-bold text-[#4A3419]">${product.price}</span>
-                    <span className="text-sm px-3 py-1 bg-[#E8C39E] rounded-full text-[#4A3419]">
-                      {product.metadata?.category}
-                    </span>
                   </div>
                   {typeof product.metadata?.stock !== 'undefined' && (
                     Number(product.metadata.stock) === 0 ? (
@@ -354,9 +345,6 @@ function ProductsContent() {
                 </div>
                 <div className="flex items-center justify-between mb-4">
                   <p className="text-2xl font-bold text-[#4A3419]">${selectedProduct.price}</p>
-                  <span className="bg-[#E8C39E] text-[#4A3419] px-3 py-1 rounded-full text-sm">
-                    {selectedProduct.metadata?.category}
-                  </span>
                 </div>
                 <p className="text-gray-700 mb-6">{selectedProduct.description}</p>
                 <div className="grid grid-cols-2 gap-4 mb-6">

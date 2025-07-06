@@ -12,24 +12,7 @@ export async function POST(req: NextRequest) {
       payment_method_types: ['card'],
       mode: 'payment',
       line_items: items.map((item: any) => ({
-        price_data: {
-          currency: 'usd',
-          product_data: {
-            name: item.name,
-            description: item.description,
-            images: [
-              item.image && item.image.startsWith('http')
-                ? item.image
-                : `https://caydiscreation.com${item.image || '/logoCaydisCreation.PNG'}`
-            ],
-            metadata: {
-              image: item.image && item.image.startsWith('http')
-                ? item.image
-                : `https://caydiscreation.com${item.image || '/logoCaydisCreation.PNG'}`
-            }
-          },
-          unit_amount: Math.round(item.price * 100),
-        },
+        price: item.priceId,
         quantity: item.quantity,
       })),
       shipping_address_collection: { allowed_countries: ['US', 'CA'] },
