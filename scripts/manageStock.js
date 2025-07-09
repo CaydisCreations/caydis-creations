@@ -15,6 +15,8 @@ async function listAllProducts() {
     console.log(`   Total Sold: ${totalSold}`);
     console.log(`   Last Purchase: ${lastPurchase}`);
     console.log(`   Active: ${product.active ? '✅' : '❌'}`);
+    // Show parcel metadata
+    console.log(`   Parcel: ${product.metadata?.parcel_length || '-'} x ${product.metadata?.parcel_width || '-'} x ${product.metadata?.parcel_height || '-'} in, ${product.metadata?.parcel_weight_oz || '-'} oz`);
     console.log('');
   }
 }
@@ -130,6 +132,51 @@ async function clearTagsForAllProducts() {
   console.log('All product tags cleared!');
 }
 
+// Parcel size/weight mapping by product type
+const parcelInfoByType = {
+  bag: { length: 13, width: 8, height: 2, weight_oz: 12.8 }, // 0.8 lbs
+  scarf: { length: 8, width: 8, height: 3, weight_oz: 12.8 }, // 0.8 lbs
+  scrunchie: { length: 4, width: 4, height: 3, weight_oz: 2 }, // 2 oz
+  cardigan: { length: 15, width: 16, height: 4, weight_oz: 28.8 }, // 1.8 lbs
+  sweater: { length: 15, width: 16, height: 4, weight_oz: 28.8 }, // 1.8 lbs
+  beanie: { length: 10, width: 11, height: 2, weight_oz: 12.8 }, // 0.8 lbs
+};
+
+function getParcelInfo(product) {
+  // Try to determine type from tags, name, or category
+  const tags = (product.metadata?.tags || '').toLowerCase();
+  const name = (product.name || '').toLowerCase();
+  const category = (product.metadata?.category || '').toLowerCase();
+  if (tags.includes('bag') || name.includes('bag') || category === 'bags') return parcelInfoByType.bag;
+  if (tags.includes('scarf') || name.includes('scarf')) return parcelInfoByType.scarf;
+  if (tags.includes('scrunchie') || name.includes('scrunchie')) return parcelInfoByType.scrunchie;
+  if (tags.includes('cardigan') || name.includes('cardigan')) return parcelInfoByType.cardigan;
+  if (tags.includes('sweater') || name.includes('sweater')) return parcelInfoByType.sweater;
+  if (tags.includes('beanie') || name.includes('beanie')) return parcelInfoByType.beanie;
+  return null;
+}
+
+async function updateAllProductParcelMetadata(stripe) {
+  const products = await stripe.products.list({ limit: 100 });
+  for (const product of products.data) {
+    const parcel = getParcelInfo(product);
+    if (parcel) {
+      await stripe.products.update(product.id, {
+        metadata: {
+          ...product.metadata,
+          parcel_length: parcel.length.toString(),
+          parcel_width: parcel.width.toString(),
+          parcel_height: parcel.height.toString(),
+          parcel_weight_oz: parcel.weight_oz.toString(),
+        },
+      });
+      console.log(`Updated ${product.name} (${product.id}) with parcel info.`);
+    } else {
+      console.log(`Skipped ${product.name} (${product.id}) - no parcel info.`);
+    }
+  }
+}
+
 // Command line interface
 async function main() {
   const command = process.argv[2];
@@ -201,8 +248,13 @@ async function main() {
       await clearTagsForAllProducts();
       break;
       
+    case 'update-parcel-metadata':
+      await updateAllProductParcelMetadata(stripe);
+      console.log('All product parcel metadata updated!');
+      break;
+      
     default:
-      console.log(`\n📦 Stripe Stock Management Tool\n\nUsage:\n  node manageStock.js list                    - List all products and their stock levels\n  node manageStock.js set-all <number>        - Set stock level for all products\n  node manageStock.js set <id> <number>       - Set stock level for specific product\n  node manageStock.js reset-sold              - Reset total_sold for all products\n  node manageStock.js low-stock [threshold]   - Show products with low stock (default: 2)\n  node manageStock.js out-of-stock            - Show out of stock products\n  node manageStock.js set-categories-tags     - Set categories and tags for products (edit script to customize)\n  node manageStock.js clear-tags               - Clear tags for all products\n\nExamples:\n  node manageStock.js list\n  node manageStock.js set-all 10\n  node manageStock.js set prod_123 5\n  node manageStock.js low-stock 3\n  node manageStock.js set-categories-tags\n  node manageStock.js clear-tags\n      `);
+      console.log(`\n📦 Stripe Stock Management Tool\n\nUsage:\n  node manageStock.js list                    - List all products and their stock levels\n  node manageStock.js set-all <number>        - Set stock level for all products\n  node manageStock.js set <id> <number>       - Set stock level for specific product\n  node manageStock.js reset-sold              - Reset total_sold for all products\n  node manageStock.js low-stock [threshold]   - Show products with low stock (default: 2)\n  node manageStock.js out-of-stock            - Show out of stock products\n  node manageStock.js set-categories-tags     - Set categories and tags for products (edit script to customize)\n  node manageStock.js clear-tags               - Clear tags for all products\n  node manageStock.js update-parcel-metadata  - Update all product parcel metadata\n\nExamples:\n  node manageStock.js list\n  node manageStock.js set-all 10\n  node manageStock.js set prod_123 5\n  node manageStock.js low-stock 3\n  node manageStock.js set-categories-tags\n  node manageStock.js clear-tags\n  node manageStock.js update-parcel-metadata\n      `);
   }
 }
 

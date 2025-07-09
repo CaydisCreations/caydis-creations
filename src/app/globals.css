@@ -35,4 +35,12 @@ body {
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
+}
+
+@keyframes fadeSlideUp {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-slide-up {
+  animation: fadeSlideUp 1s cubic-bezier(0.4,0,0.2,1);
 } 
