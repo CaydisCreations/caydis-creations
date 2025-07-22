@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
         // Wait for rate limiting
         await waitForRateLimit();
         
-        // Try custom domain first (it's now working)
+        // Try custom domain first (confirmation.caydiscreations.com)
         try {
           console.log(`📤 Sending ${emailType} email to: ${to}`);
           console.log(`📧 ${emailType} email details:`, {
@@ -195,7 +195,7 @@ export async function POST(req: NextRequest) {
                       <ul style="margin: 8px 0; padding-left: 20px;">
                         <li>Manually send order confirmation to: ${to}</li>
                         <li>Include order details and tracking information</li>
-                        <li>Email system issue detected</li>
+                        <li>Domain verification issue detected</li>
                       </ul>
                     </div>
                   </div>
