@@ -85,6 +85,10 @@ export default function NavBar() {
               Contact
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#E8C39E] group-hover:w-full transition-all duration-300"></span>
             </Link>
+            <Link href="/shipping-services" className="hover:text-[#E8C39E] relative group py-2 cursor-pointer">
+              Shipping
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#E8C39E] group-hover:w-full transition-all duration-300"></span>
+            </Link>
             <Link href="/cart" className="relative ml-4 group flex items-center cursor-pointer">
               <span className="inline-block">
                 <CartIcon className="w-7 h-7 text-[#FFF5E6] group-hover:text-[#E8C39E] transition-transform duration-200 group-hover:scale-110" />
@@ -115,37 +119,38 @@ export default function NavBar() {
               </div>
             )}
           </div>
-          <button 
+              <button 
             className="md:hidden ml-4 p-2 rounded focus:outline-none focus:ring-2 focus:ring-[#E8C39E] cursor-pointer"
-            onClick={() => setMobileMenuOpen(open => !open)}
-            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-          >
-            {mobileMenuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
-          </button>
-        </div>
-        {mobileMenuOpen && (
-          <div className="fixed inset-0 z-50 bg-black bg-opacity-40 md:hidden" onClick={() => setMobileMenuOpen(false)}></div>
-        )}
-        <div className={`fixed top-0 right-0 h-full w-64 bg-[#FFF5E6] text-[#4A3419] shadow-lg z-50 transform transition-transform duration-300 md:hidden ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`} style={{minHeight: '100vh'}}>
-          <button 
+                onClick={() => setMobileMenuOpen(open => !open)}
+                aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+              >
+                {mobileMenuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+              </button>
+          </div>
+          {mobileMenuOpen && (
+            <div className="fixed inset-0 z-50 bg-black bg-opacity-40 md:hidden" onClick={() => setMobileMenuOpen(false)}></div>
+          )}
+          <div className={`fixed top-0 right-0 h-full w-64 bg-[#FFF5E6] text-[#4A3419] shadow-lg z-50 transform transition-transform duration-300 md:hidden ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`} style={{minHeight: '100vh'}}>
+            <button 
             className="absolute top-4 right-4 p-2 rounded focus:outline-none focus:ring-2 focus:ring-[#E8C39E] cursor-pointer"
-            onClick={() => setMobileMenuOpen(false)}
-            aria-label="Close menu"
-          >
-            <FaTimes size={24} />
-          </button>
-          <nav className="flex flex-col mt-20 space-y-4 px-8">
+              onClick={() => setMobileMenuOpen(false)}
+              aria-label="Close menu"
+            >
+              <FaTimes size={24} />
+            </button>
+            <nav className="flex flex-col mt-20 space-y-4 px-8">
             <Link href="/" className="py-2 text-lg font-bold hover:text-[#E8C39E] cursor-pointer" onClick={() => setMobileMenuOpen(false)}>Home</Link>
             <Link href="/products" className="py-2 text-lg font-bold hover:text-[#E8C39E] cursor-pointer" onClick={() => setMobileMenuOpen(false)}>Products</Link>
-            <div className="border-t border-[#E8C39E] my-2"></div>
-            <span className="text-base font-semibold mt-2 mb-1">Create & Explore</span>
+              <div className="border-t border-[#E8C39E] my-2"></div>
+              <span className="text-base font-semibold mt-2 mb-1">Create & Explore</span>
             <Link href="/customize-orders" className="py-2 pl-2 text-base hover:text-[#E8C39E] cursor-pointer" onClick={() => setMobileMenuOpen(false)}>Customize Orders</Link>
             <Link href="/recycle-clothes" className="py-2 pl-2 text-base hover:text-[#E8C39E] cursor-pointer" onClick={() => setMobileMenuOpen(false)}>Recycled Producted</Link>
             <Link href="/gallery" className="py-2 pl-2 text-base hover:text-[#E8C39E] cursor-pointer" onClick={() => setMobileMenuOpen(false)}>Gallery</Link>
-            <div className="border-t border-[#E8C39E] my-2"></div>
+              <div className="border-t border-[#E8C39E] my-2"></div>
             <Link href="/about" className="py-2 text-lg font-bold hover:text-[#E8C39E] cursor-pointer" onClick={() => setMobileMenuOpen(false)}>About</Link>
             <Link href="/contact" className="py-2 text-lg font-bold hover:text-[#E8C39E] cursor-pointer" onClick={() => setMobileMenuOpen(false)}>Contact</Link>
-          </nav>
+            <Link href="/shipping-services" className="py-2 text-lg font-bold hover:text-[#E8C39E] cursor-pointer" onClick={() => setMobileMenuOpen(false)}>Shipping</Link>
+            </nav>
         </div>
       </div>
     </nav>

@@ -72,14 +72,33 @@ export default function LoginPage() {
     setResetMsg('');
     setError('');
     try {
+      console.log('🔧 Sending password reset email...');
       const { getAuth, sendPasswordResetEmail } = await import('firebase/auth');
       const auth = getAuth();
-      await sendPasswordResetEmail(auth, resetEmail);
-      setResetMsg('Password reset email sent! Please check your inbox.');
+      
+      console.log('📧 Sending reset email to:', resetEmail);
+      
+      // Configure action code settings for custom domain
+      const actionCodeSettings = {
+        url: `${window.location.origin}/login`,
+        handleCodeInApp: false,
+        // Note: The custom domain is configured in Firebase Console
+        // The sender email should be set to: noreply@confirmation.caydiscreations.com
+      };
+      
+      await sendPasswordResetEmail(auth, resetEmail, actionCodeSettings);
+      console.log('✅ Password reset email sent successfully');
+      console.log('📧 Email should be sent from: noreply@confirmation.caydiscreations.com');
+      setResetMsg('Password reset email sent! Please check your inbox (and spam folder).');
       setError('');
     } catch (err: any) {
+      console.error('❌ Password reset error:', err);
+      console.error('Error code:', err.code);
+      console.error('Error message:', err.message);
+      
       const code = err.code || err.message || '';
-      setError(getFriendlyError(code));
+      const friendlyError = getFriendlyError(code);
+      setError(friendlyError);
       setResetMsg('');
     }
   };

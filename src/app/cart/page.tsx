@@ -84,6 +84,16 @@ function ShippingModal({ open, onClose, onConfirm, initialAddress = undefined, c
   const [addressError, setAddressError] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
+  // Update address when initialAddress changes
+  useEffect(() => {
+    console.log('ShippingModal: initialAddress changed:', initialAddress); // Debug log
+    if (initialAddress) {
+      const validAddress = getValidAddress(initialAddress as Partial<Address> | undefined);
+      console.log('ShippingModal: setting address to:', validAddress); // Debug log
+      setAddress(validAddress);
+    }
+  }, [initialAddress]);
+
   // Helper to get a unique key for each rate
   const getRateKey = (rate: any) => rate.object_id || `${rate.provider}-${rate.servicelevel?.name}-${rate.amount}`;
 
@@ -250,7 +260,7 @@ function ShippingModal({ open, onClose, onConfirm, initialAddress = undefined, c
         {rates.length > 0 && (
           <div className="mt-6">
             <h3 className="text-lg font-bold mb-2 text-[#4A3419]">Select Shipping Rate</h3>
-            <div className="flex flex-col gap-2 max-h-80 overflow-y-auto rounded border border-gray-200 bg-gray-50 p-2">
+            <div className="flex flex-col gap-3 max-h-80 overflow-y-auto rounded border border-gray-200 bg-gray-50 p-3">
               {/* Organize and deduplicate rates */}
               {(() => {
                 const seen = new Set();
@@ -270,20 +280,77 @@ function ShippingModal({ open, onClose, onConfirm, initialAddress = undefined, c
                 return (
                   <>
                     {onlyUSPS && (
-                      <div className="text-xs text-gray-500 mb-2">Only USPS shipping is currently available.</div>
+                      <div className="text-xs text-gray-500 mb-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
+                        💡 Only USPS shipping is currently available for this address.
+                      </div>
                     )}
-                    {uniqueRates.map(rate => (
-                      <label key={getRateKey(rate)}
-                        className={`flex items-center border p-2 rounded cursor-pointer transition-colors duration-150 ${selectedRateKey === getRateKey(rate) ? 'border-[#4A3419] bg-[#FFF5E6]' : 'border-gray-200 hover:border-[#E8C39E]'}`}
-                        tabIndex={0}
-                        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { setSelectedRateKey(getRateKey(rate)); } }}
-                      >
-                        <input type="radio" name="shippingRate" checked={selectedRateKey === getRateKey(rate)} onChange={() => setSelectedRateKey(getRateKey(rate))} className="mr-3" />
-                        <span className="font-semibold">{rate.provider} {rate.servicelevel?.name}</span>
-                        <span className="ml-2">${parseFloat(rate.amount).toFixed(2)}</span>
-                        <span className="ml-2 text-xs text-gray-500">Est. {rate.estimated_days} days</span>
-                      </label>
-                    ))}
+                    {uniqueRates.map(rate => {
+                      const isSelected = selectedRateKey === getRateKey(rate);
+                      const getProviderIcon = (provider: string) => {
+                        switch (provider) {
+                          case 'USPS': return '📦';
+                          case 'UPS': return '🚚';
+                          case 'FedEx': return '✈️';
+                          default: return '📦';
+                        }
+                      };
+                      const getDeliveryTimeColor = (days: string) => {
+                        const numDays = parseInt(days);
+                        if (numDays <= 3) return 'text-green-600';
+                        if (numDays <= 7) return 'text-blue-600';
+                        return 'text-gray-600';
+                      };
+                      
+                      return (
+                        <label key={getRateKey(rate)}
+                          className={`flex items-center border p-3 rounded-lg cursor-pointer transition-all duration-200 ${
+                            isSelected 
+                              ? 'border-[#4A3419] bg-[#FFF5E6] shadow-md' 
+                              : 'border-gray-200 hover:border-[#E8C39E] hover:bg-white'
+                          }`}
+                          tabIndex={0}
+                          onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { setSelectedRateKey(getRateKey(rate)); } }}
+                        >
+                          <input 
+                            type="radio" 
+                            name="shippingRate" 
+                            checked={isSelected} 
+                            onChange={() => setSelectedRateKey(getRateKey(rate))} 
+                            className="mr-3" 
+                          />
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-1">
+                              <div className="flex items-center space-x-2">
+                                <span className="text-lg">{getProviderIcon(rate.provider)}</span>
+                                <div>
+                                  <span className="font-semibold text-[#4A3419]">
+                                    {rate.provider} {rate.servicelevel?.name}
+                                  </span>
+                                  <div className="text-xs text-gray-500">
+                                    {rate.provider === 'USPS' && rate.servicelevel?.name?.includes('Priority') && '📦 Reliable & Insured'}
+                                    {rate.provider === 'UPS' && rate.servicelevel?.name?.includes('Ground') && '🚚 Cost-effective'}
+                                    {rate.provider === 'FedEx' && rate.servicelevel?.name?.includes('Express') && '✈️ Fast & Guaranteed'}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <span className="font-bold text-lg text-[#4A3419]">
+                                  ${parseFloat(rate.amount).toFixed(2)}
+                                </span>
+                                <div className={`text-xs font-medium ${getDeliveryTimeColor(rate.estimated_days)}`}>
+                                  Est. {rate.estimated_days} days
+                                </div>
+                              </div>
+                            </div>
+                            {rate.servicelevel?.description && (
+                              <div className="text-xs text-gray-600 mt-1">
+                                {rate.servicelevel.description}
+                              </div>
+                            )}
+                          </div>
+                        </label>
+                      );
+                    })}
                   </>
                 );
               })()}
@@ -296,7 +363,7 @@ function ShippingModal({ open, onClose, onConfirm, initialAddress = undefined, c
   );
 }
 
-function CartContent({ onCheckout, cartItems, setLoading, loading }) {
+function CartContent({ onCheckout, cartItems, setLoading, loading, couponCode, setCouponCode, couponValid, couponDetails, validatingCoupon, couponError, validateCoupon, removeCoupon }) {
   const { removeFromCart, updateQuantity, getCartTotal, clearCart, isLoaded } = useCart()
   const [address, setAddress] = useState({
     name: '',
@@ -313,6 +380,56 @@ function CartContent({ onCheckout, cartItems, setLoading, loading }) {
   const [selectedRate, setSelectedRate] = useState(null)
   const [fetchingRates, setFetchingRates] = useState(false)
   const [addressError, setAddressError] = useState('')
+  
+  // Coupon state
+  // const [couponCode, setCouponCode] = useState('') // Moved to CartPage
+  // const [couponValid, setCouponValid] = useState(false) // Moved to CartPage
+  // const [couponDetails, setCouponDetails] = useState(null) // Moved to CartPage
+  // const [validatingCoupon, setValidatingCoupon] = useState(false) // Moved to CartPage
+  // const [couponError, setCouponError] = useState('') // Moved to CartPage
+
+  // const validateCoupon = async () => { // Moved to CartPage
+  //   if (!couponCode.trim()) {
+  //     setCouponError('Please enter a coupon code');
+  //     return;
+  //   }
+
+  //   setValidatingCoupon(true);
+  //   setCouponError('');
+    
+  //   try {
+  //     const response = await fetch('/api/validate-coupon', {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify({ couponCode: couponCode.trim() })
+  //     });
+      
+  //     const data = await response.json();
+      
+  //     if (data.valid) {
+  //       setCouponValid(true);
+  //       setCouponDetails(data.coupon);
+  //       setCouponError('');
+  //     } else {
+  //       setCouponValid(false);
+  //       setCouponDetails(null);
+  //       setCouponError(data.error || 'Invalid coupon code');
+  //     }
+  //   } catch (err) {
+  //     setCouponValid(false);
+  //     setCouponDetails(null);
+  //     setCouponError('Failed to validate coupon. Please try again.');
+  //   }
+    
+  //   setValidatingCoupon(false);
+  // };
+
+  // const removeCoupon = () => { // Moved to CartPage
+  //   setCouponCode('');
+  //   setCouponValid(false);
+  //   setCouponDetails(null);
+  //   setCouponError('');
+  // };
 
   const handleAddressChange = (e) => {
     setAddress({ ...address, [e.target.name]: e.target.value })
@@ -474,6 +591,57 @@ function CartContent({ onCheckout, cartItems, setLoading, loading }) {
           </AnimatePresence>
         </div>
 
+        {/* Coupon Section */}
+        <div className="p-4 bg-gray-50 border-t border-gray-200">
+          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-[#4A3419] mb-1">Have a coupon code?</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value)}
+                  placeholder="Enter coupon code"
+                  className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#4A3419] focus:border-[#4A3419]"
+                  disabled={couponValid}
+                />
+                {!couponValid ? (
+                  <button
+                    onClick={validateCoupon}
+                    disabled={validatingCoupon || !couponCode.trim()}
+                    className="px-4 py-2 bg-[#4A3419] text-white rounded-lg hover:bg-[#6B4B26] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {validatingCoupon ? 'Validating...' : 'Apply'}
+                  </button>
+                ) : (
+                  <button
+                    onClick={removeCoupon}
+                    className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+              {couponError && (
+                <p className="text-red-600 text-sm mt-1">{couponError}</p>
+              )}
+              {couponValid && couponDetails && (
+                <div className="mt-2 p-2 bg-green-100 border border-green-200 rounded-lg">
+                  <p className="text-green-700 text-sm font-medium">
+                    ✓ {couponDetails.name} applied
+                  </p>
+                  <p className="text-green-600 text-xs">
+                    {couponDetails.percent_off ? 
+                      `${couponDetails.percent_off}% off` : 
+                      `$${(couponDetails.amount_off / 100).toFixed(2)} off`
+                    }
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
         <div className="p-6 bg-[#FFF5E6] border-t border-gray-200">
           <div className="flex justify-between items-center">
             <div>
@@ -520,24 +688,116 @@ export default function CartPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [prefillAddress, setPrefillAddress] = useState(null);
   const [loading, setLoading] = useState(false);
+  
+  // Coupon state
+  const [couponCode, setCouponCode] = useState('');
+  const [couponValid, setCouponValid] = useState(false);
+  const [couponDetails, setCouponDetails] = useState(null);
+  const [validatingCoupon, setValidatingCoupon] = useState(false);
+  const [couponError, setCouponError] = useState('');
 
   const memoizedAddress = useMemo(() => prefillAddress, [JSON.stringify(prefillAddress)]);
 
+  const validateCoupon = async (code) => {
+    if (!code.trim()) {
+      setCouponError('Please enter a coupon code');
+      return;
+    }
+
+    setValidatingCoupon(true);
+    setCouponError('');
+    
+    try {
+      const response = await fetch('/api/validate-coupon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ couponCode: code.trim() })
+      });
+      
+      const data = await response.json();
+      
+      if (data.valid) {
+        setCouponValid(true);
+        setCouponDetails(data.coupon);
+        setCouponError('');
+      } else {
+        setCouponValid(false);
+        setCouponDetails(null);
+        setCouponError(data.error || 'Invalid coupon code');
+      }
+    } catch (err) {
+      setCouponValid(false);
+      setCouponDetails(null);
+      setCouponError('Failed to validate coupon. Please try again.');
+    }
+    
+    setValidatingCoupon(false);
+  };
+
+  const removeCoupon = () => {
+    setCouponCode('');
+    setCouponValid(false);
+    setCouponDetails(null);
+    setCouponError('');
+  };
+
   const handleOpenModal = async () => {
     if (user && user.email) {
-      // Try to fetch Stripe customer info
-      const res = await fetch('/api/stripe-customer', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: user.email }) });
-      const data = await res.json();
-      let stripeAddress = null;
-      if (data.customer && data.customer.shipping && data.customer.shipping.address) {
-        stripeAddress = {
-          ...data.customer.shipping.address,
-          name: data.customer.shipping.name,
-          email: user.email,
-          phone: data.customer.phone || '',
-        };
+      try {
+        // Try to fetch Stripe customer info
+        const res = await fetch('/api/stripe-customer', { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' }, 
+          body: JSON.stringify({ email: user.email }) 
+        });
+        const data = await res.json();
+        console.log('Stripe customer data:', data); // Debug log
+        
+        let stripeAddress = null;
+        if (data.customer && data.customer.shipping && data.customer.shipping.address) {
+          stripeAddress = {
+            name: data.customer.shipping.name || data.customer.name || user.displayName || '',
+            email: user.email,
+            phone: data.customer.phone || '',
+            line1: data.customer.shipping.address.line1 || '',
+            line2: data.customer.shipping.address.line2 || '',
+            city: data.customer.shipping.address.city || '',
+            state: data.customer.shipping.address.state || '',
+            postal_code: data.customer.shipping.address.postal_code || '',
+            country: data.customer.shipping.address.country || 'US',
+          };
+          console.log('Using Stripe address:', stripeAddress); // Debug log
+        } else {
+          // No Stripe customer or no shipping address, use basic user info
+          stripeAddress = { 
+            name: user.displayName || '', 
+            email: user.email, 
+            phone: '', 
+            line1: '', 
+            line2: '', 
+            city: '', 
+            state: '', 
+            postal_code: '', 
+            country: 'US' 
+          };
+          console.log('Using basic user info:', stripeAddress); // Debug log
+        }
+        setPrefillAddress(stripeAddress);
+      } catch (error) {
+        console.error('Error fetching customer data:', error);
+        // Fallback to basic user info
+        setPrefillAddress({ 
+          name: user.displayName || '', 
+          email: user.email, 
+          phone: '', 
+          line1: '', 
+          line2: '', 
+          city: '', 
+          state: '', 
+          postal_code: '', 
+          country: 'US' 
+        });
       }
-      setPrefillAddress(stripeAddress || { name: user.displayName || '', email: user.email, phone: '', line1: '', line2: '', city: '', state: '', postal_code: '', country: 'US' });
     } else {
       setPrefillAddress({ name: '', email: '', phone: '', line1: '', line2: '', city: '', state: '', postal_code: '', country: 'US' });
     }
@@ -550,7 +810,12 @@ export default function CartPage() {
       const response = await fetch('/api/checkout_sessions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: cartItems, address, selectedRate })
+        body: JSON.stringify({ 
+          items: cartItems, 
+          address, 
+          selectedRate,
+          couponId: couponValid ? couponDetails.id : undefined
+        })
       });
       const data = await response.json();
       if (data.url) {
@@ -567,7 +832,20 @@ export default function CartPage() {
 
   return (
     <>
-      <CartContent onCheckout={handleOpenModal} cartItems={cartItems} setLoading={setLoading} loading={loading} />
+      <CartContent 
+        onCheckout={handleOpenModal} 
+        cartItems={cartItems} 
+        setLoading={setLoading} 
+        loading={loading} 
+        couponCode={couponCode} 
+        setCouponCode={setCouponCode}
+        couponValid={couponValid} 
+        couponDetails={couponDetails} 
+        validatingCoupon={validatingCoupon} 
+        couponError={couponError} 
+        validateCoupon={() => validateCoupon(couponCode)} 
+        removeCoupon={removeCoupon} 
+      />
       <ShippingModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}

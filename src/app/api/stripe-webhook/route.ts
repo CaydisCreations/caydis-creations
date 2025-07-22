@@ -1,83 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { Resend } from 'resend'
-// Shippo CommonJS import/initialization
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { Shippo } = require('shippo');
-const shippo = new Shippo({ apiKeyHeader: process.env.SHIPPO_API_KEY });
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {})
 const resend = new Resend(process.env.RESEND_API_KEY)
-
-// Define from addresses for each carrier
-const FROM_ADDRESSES = {
-  fedex: {
-    name: 'Caydi\'s Creations',
-    street1: '400 Boston Post Rd',
-    city: 'Orange',
-    state: 'CT',
-    zip: '06477',
-    country: 'US',
-    phone: '800-463-3339',
-    email: 'admin@caydiscreations.com',
-  },
-  ups: {
-    name: 'Caydi\'s Creations',
-    street1: '355 Campbell Ave',
-    city: 'West Haven',
-    state: 'CT',
-    zip: '06516',
-    country: 'US',
-    phone: '800-742-5877',
-    email: 'admin@caydiscreations.com',
-  },
-  usps: {
-    name: 'Caydi\'s Creations',
-    street1: '400 Boston Post Rd',
-    city: 'Orange',
-    state: 'CT',
-    zip: '06477',
-    country: 'US',
-    phone: '800-463-3339',
-    email: 'admin@caydiscreations.com',
-  },
-};
-
-async function createShippoLabel({ toAddress, parcel, orderId }) {
-  // Get rates from all three carriers
-  const shipments = await Promise.all([
-    shippo.shipments.create({
-      addressFrom: FROM_ADDRESSES.fedex,
-      addressTo: toAddress,
-      parcels: [parcel],
-      async: false,
-      carrierAccounts: [], // Use default test accounts
-    }),
-    shippo.shipments.create({
-      addressFrom: FROM_ADDRESSES.ups,
-      addressTo: toAddress,
-      parcels: [parcel],
-      async: false,
-      carrierAccounts: [],
-    }),
-    shippo.shipments.create({
-      addressFrom: FROM_ADDRESSES.usps,
-      addressTo: toAddress,
-      parcels: [parcel],
-      async: false,
-      carrierAccounts: [],
-    }),
-  ]);
-  // Collect all rates
-  const allRates = shipments.flatMap(s => s.rates || []);
-  if (!allRates.length) throw new Error('No shipping rates found');
-  // Find the cheapest
-  const cheapest = allRates.reduce((min, r) => (parseFloat(r.amount) < parseFloat(min.amount) ? r : min), allRates[0]);
-  // Buy the label
-  const transaction = await shippo.transactions.create({ rate: cheapest.object_id, label_file_type: 'PDF', async: false });
-  if (transaction.status !== 'SUCCESS') throw new Error('Failed to purchase shipping label');
-  return { labelUrl: transaction.label_url, trackingNumber: transaction.tracking_number, carrier: cheapest.provider, amount: cheapest.amount };
-}
 
 export async function POST(req: NextRequest) {
   const sig = req.headers.get('stripe-signature')
@@ -93,7 +19,16 @@ export async function POST(req: NextRequest) {
   }
 
   if (event.type === 'checkout.session.completed') {
+    console.log('🎉 Webhook received: checkout.session.completed');
     const session = event.data.object as Stripe.Checkout.Session
+    console.log('📦 Session details:', {
+      id: session.id,
+      customer_email: session.customer_email,
+      customer_details: session.customer_details,
+      amount_total: session.amount_total
+    });
+
+    // Update inventory
     const lineItems = await stripe.checkout.sessions.listLineItems(session.id, { limit: 100 })
     for (const item of lineItems.data) {
       let productId = null;
@@ -128,48 +63,12 @@ export async function POST(req: NextRequest) {
         }
       }
     }
-    let labelInfo = null;
+
+    // Send emails (no Shippo integration)
     try {
-      const shipping = session.customer_details?.address;
-      if (shipping) {
-        // Use the first product for parcel info (or loop for multi-item orders)
-        const firstItem = lineItems.data[0];
-        let productId = null;
-        if (firstItem.price && firstItem.price.product) {
-          productId = typeof firstItem.price.product === 'string' ? firstItem.price.product : firstItem.price.product.id;
-        }
-        if (productId) {
-          const product = await stripe.products.retrieve(productId);
-          const parcel = {
-            length: product.metadata?.parcel_length?.toString(),
-            width: product.metadata?.parcel_width?.toString(),
-            height: product.metadata?.parcel_height?.toString(),
-            distanceUnit: 'in',
-            weight: product.metadata?.parcel_weight_oz?.toString(),
-            massUnit: 'oz',
-          };
-          // Build toAddress from shipping
-          const toAddress = {
-            name: session.customer_details?.name || '',
-            street1: shipping.line1,
-            street2: shipping.line2,
-            city: shipping.city,
-            state: shipping.state,
-            zip: shipping.postal_code,
-            country: shipping.country,
-            phone: session.customer_details?.phone || '',
-            email: session.customer_details?.email || session.customer_email || '',
-          };
-          // Create label
-          labelInfo = await createShippoLabel({ toAddress, parcel, orderId: session.id });
-          console.log('Shippo label created:', labelInfo);
-        }
-      }
-    } catch (err) {
-      console.error('Shippo error:', err);
-    }
-    try {
-      // Compose order details with correct product images
+      console.log('📧 Starting email composition...');
+      
+      // Compose order details
       const itemsHtml = await Promise.all(lineItems.data.map(async item => {
         let imageUrl = 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/logoCaydisCreation.PNG';
         let productName = item.description;
@@ -185,20 +84,115 @@ export async function POST(req: NextRequest) {
             productName = product.name;
           } catch {}
         }
-        return `<li style=\"margin-bottom:16px;display:flex;align-items:center;\">\n<img src=\"${imageUrl}\" alt=\"${productName}\" style=\"max-width:60px;max-height:60px;margin-right:12px;border-radius:8px;object-fit:contain;\" />\n<b>${item.description}</b> — Qty: ${item.quantity} — $${((item.amount_total || 0) / 100).toFixed(2)}</li>`;
+        return `<li style="margin-bottom:16px;display:flex;align-items:center;"><img src="${imageUrl}" alt="${productName}" style="max-width:60px;max-height:60px;margin-right:12px;border-radius:8px;object-fit:contain;" /><b>${item.description}</b> — Qty: ${item.quantity} — $${((item.amount_total || 0) / 100).toFixed(2)}</li>`;
       }));
-      await resend.emails.send({
-        from: "Caydi's Creations <no-reply@confirmations.caydiscreations.com>",
-        to: session.customer_details?.email || session.customer_email || 'admin@caydiscreations.com',
-        subject: "🧶 Thank You for Your Order! Confirmation Inside",
-        html: `
-          <div style=\"display:flex; align-items:center; justify-content:flex-end; min-height:120px; margin-bottom:24px;\">\n            <img src=\"https://caydiscreations.s3.us-east-2.amazonaws.com/Public/logoCaydisCreation.PNG\" alt=\"Caydi's Creations Logo\" style=\"max-width:120px; width:120px; height:auto; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08); background:#fff; margin-top:32px;\" />\n          </div>\n          <div style=\"font-size:18px; color:#4A3419; font-family:sans-serif;\">\n            <p>Hi ${session.customer_details?.name?.split(' ')[0] || 'there'},</p>\n            <p>Thank you so much for your order — we're thrilled you chose Caydi's Creations for your handmade crochet item!</p>\n            <p>We've received your order and are getting it ready just for you. Each piece is carefully handmade with love, and we can't wait for you to receive yours.</p>\n            <div style=\"margin: 24px 0; padding: 16px; background: #FFF5E6; border-radius: 8px;\">\n              <b>Here are the details of your order:</b>\n              <ul style=\"margin: 12px 0 0 0; padding: 0; list-style: none;\">\n                <li><b>Order Number:</b> #${session.id}</li>\n                <li><b>Item(s):</b><ul style=\"margin: 0; padding-left: 16px;\">${itemsHtml.join('')}</ul></li>\n                <li><b>Total:</b> $${((session.amount_total || 0) / 100).toFixed(2)}</li>\n                <li><b>Shipping To:</b> ${session.customer_details?.address?.line1 || ''} ${session.customer_details?.address?.line2 || ''}, ${session.customer_details?.address?.city || ''}, ${session.customer_details?.address?.state || ''} ${session.customer_details?.address?.postal_code || ''}</li>
-                ${labelInfo ? `<li><b>Tracking Number:</b> ${labelInfo.trackingNumber}</li>` : ''}
-              </ul>\n            </div>\n            <p>You'll receive another email with tracking info once your package is on its way.</p>\n            <p>If you have any questions or just want to say hi, feel free to reply to this email — I'd love to hear from you!</p>\n            <p style=\"margin-top:32px;\">Warmly,<br/>\n            <b>Caydance Hill</b><br/>\n            Owner & Maker, Caydi's Creations<br/>\n            <a href=\"https://caydiscreations.com\" style=\"color:#4A3419; text-decoration:underline;\">caydiscreations.com</a> | <a href=\"mailto:caydiscreations@gmail.com\" style=\"color:#4A3419; text-decoration:underline;\">caydiscreations@gmail.com</a> | Insta: @caydiscreations\n            </p>\n          </div>\n        `
-      })
+
+      // Send customer email
+      const customerEmail = session.customer_details?.email || session.customer_email;
+      if (customerEmail) {
+        console.log('📤 Sending customer email to:', customerEmail);
+        try {
+          const customerEmailResult = await resend.emails.send({
+            from: "Caydi's Creations <no-reply@confirmation.caydiscreations.com>",
+            to: customerEmail,
+            subject: "🧶 Thank You for Your Order! Confirmation Inside",
+            html: `
+              <div style="font-size:18px; color:#4A3419; font-family:sans-serif; max-width:600px; margin:0 auto;">
+                <div style="text-align:center; margin-bottom:24px;">
+                  <img src="https://caydiscreations.s3.us-east-2.amazonaws.com/Public/logoCaydisCreation.PNG" alt="Caydi's Creations Logo" style="max-width:120px; width:120px; height:auto; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08); background:#fff;" />
+                </div>
+                <p>Hi ${session.customer_details?.name?.split(' ')[0] || 'there'},</p>
+                <p>Thank you so much for your order — we're thrilled you chose Caydi's Creations for your handmade crochet item!</p>
+                <p>We've received your order and are getting it ready just for you. Each piece is carefully handmade with love, and we can't wait for you to receive yours.</p>
+                <div style="margin: 24px 0; padding: 16px; background: #FFF5E6; border-radius: 8px;">
+                  <b>Here are the details of your order:</b>
+                  <ul style="margin: 12px 0 0 0; padding: 0; list-style: none;">
+                    <li><b>Order Number:</b> #${session.id}</li>
+                    <li><b>Item(s):</b><ul style="margin: 0; padding-left: 16px;">${itemsHtml.join('')}</ul></li>
+                    <li><b>Total:</b> $${((session.amount_total || 0) / 100).toFixed(2)}</li>
+                    <li><b>Shipping To:</b> ${session.customer_details?.address?.line1 || ''} ${session.customer_details?.address?.line2 || ''}, ${session.customer_details?.address?.city || ''}, ${session.customer_details?.address?.state || ''} ${session.customer_details?.address?.postal_code || ''}</li>
+                  </ul>
+                </div>
+                <p>You'll receive another email with tracking info once your package is on its way.</p>
+                <p>If you have any questions or just want to say hi, feel free to reply to this email — I'd love to hear from you!</p>
+                <p style="margin-top:32px;">
+                  Warmly,<br/>
+                  <b>Caydance Hill</b><br/>
+                  Owner & Maker, Caydi's Creations<br/>
+                  <a href="https://caydiscreations.com" style="color:#4A3419; text-decoration:underline;">caydiscreations.com</a> | <a href="mailto:caydiscreations@gmail.com" style="color:#4A3419; text-decoration:underline;">caydiscreations@gmail.com</a> | Insta: @caydiscreations
+                </p>
+              </div>
+            `
+          });
+          console.log('✅ Customer email sent successfully! Email ID:', customerEmailResult?.data?.id);
+        } catch (customerEmailError) {
+          console.error('❌ Customer email failed:', customerEmailError.message);
+        }
+      } else {
+        console.error('❌ No customer email found in session');
+      }
+
+      // Send admin notification email
+      try {
+        console.log('📤 Sending admin email to: caydiscreations@gmail.com');
+        const adminEmailResult = await resend.emails.send({
+          from: "Caydi's Creations <no-reply@confirmation.caydiscreations.com>",
+          to: "caydiscreations@gmail.com",
+          subject: `🛍️ New Order Received! #${session.id}`,
+          html: `
+            <div style="font-size:16px; color:#4A3419; font-family:sans-serif;">
+              <h2 style="color:#4A3419;">🎉 New Order Alert!</h2>
+              <p><strong>Order Number:</strong> #${session.id}</p>
+              <p><strong>Customer:</strong> ${session.customer_details?.name || 'N/A'}</p>
+              <p><strong>Email:</strong> ${session.customer_details?.email || session.customer_email || 'N/A'}</p>
+              <p><strong>Phone:</strong> ${session.customer_details?.phone || 'N/A'}</p>
+              <p><strong>Total Amount:</strong> $${((session.amount_total || 0) / 100).toFixed(2)}</p>
+              
+              <h3 style="color:#4A3419; margin-top:24px;">📦 Order Items:</h3>
+              <ul style="margin: 12px 0; padding-left: 20px;">
+                ${lineItems.data.map(item => 
+                  `<li><strong>${item.description}</strong> — Qty: ${item.quantity} — $${((item.amount_total || 0) / 100).toFixed(2)}</li>`
+                ).join('')}
+              </ul>
+              
+              <h3 style="color:#4A3419; margin-top:24px;">📍 Shipping Address:</h3>
+              <div style="background: #FFF5E6; padding: 12px; border-radius: 8px; margin: 12px 0;">
+                <p style="margin: 4px 0;">${session.customer_details?.name || 'N/A'}</p>
+                <p style="margin: 4px 0;">${session.customer_details?.address?.line1 || 'N/A'}</p>
+                ${session.customer_details?.address?.line2 ? `<p style="margin: 4px 0;">${session.customer_details.address.line2}</p>` : ''}
+                <p style="margin: 4px 0;">${session.customer_details?.address?.city || 'N/A'}, ${session.customer_details?.address?.state || 'N/A'} ${session.customer_details?.address?.postal_code || 'N/A'}</p>
+                <p style="margin: 4px 0;">${session.customer_details?.address?.country || 'N/A'}</p>
+              </div>
+              
+              <p style="color: #d32f2f;"><strong>⚠️ Note:</strong> Shipping labels are currently disabled. Please create shipping labels manually.</p>
+              
+              <div style="margin-top: 24px; padding: 12px; background: #e8f5e8; border-radius: 8px;">
+                <p style="margin: 4px 0;"><strong>Action Required:</strong></p>
+                <ul style="margin: 8px 0; padding-left: 20px;">
+                  <li>Prepare the order items</li>
+                  <li>Create shipping label manually</li>
+                  <li>Package and ship the order</li>
+                  <li>Update inventory if needed</li>
+                </ul>
+              </div>
+              
+              <p style="margin-top:24px; font-size:14px; color:#666;">
+                This email was automatically generated when a new order was placed on your website.
+              </p>
+            </div>
+          `
+        });
+        console.log('✅ Admin email sent successfully! Email ID:', adminEmailResult?.data?.id);
+      } catch (adminEmailError) {
+        console.error('❌ Admin email failed:', adminEmailError.message);
+      }
+
     } catch (err: any) {
-      return NextResponse.json({ error: `Email Error: ${err.message}` }, { status: 500 })
+      console.error('❌ Email sending failed:', err.message);
+      console.error('🔍 Full email error:', err);
     }
   }
+
+  console.log('✅ Webhook processing completed successfully');
   return NextResponse.json({ received: true })
 } 

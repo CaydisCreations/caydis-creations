@@ -15,6 +15,7 @@ export default function AccountPage() {
   const [editFields, setEditFields] = useState({ name: '', email: '', phone: '', address: { line1: '', line2: '', city: '', state: '', postal_code: '', country: '' } });
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
+  const [saveMsgType, setSaveMsgType] = useState<'success' | 'error' | ''>('');
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
   const [passwordMsg, setPasswordMsg] = useState('');
@@ -22,6 +23,17 @@ export default function AccountPage() {
   const [verifyMsgType, setVerifyMsgType] = useState<'success' | 'error' | ''>('');
   const router = useRouter();
   const [fieldErrors, setFieldErrors] = useState({ phone: '', address: '' });
+
+  // Auto-hide success messages after 3 seconds
+  useEffect(() => {
+    if (saveMsgType === 'success') {
+      const timer = setTimeout(() => {
+        setSaveMsg('');
+        setSaveMsgType('');
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [saveMsgType]);
 
   useEffect(() => {
     if (!user) {
@@ -60,7 +72,7 @@ export default function AccountPage() {
             name: user.displayName || '',
             email: user.email || '',
             phone: '',
-            address: { line1: '', line2: '', city: '', state: '', postal_code: '', country: '' },
+            address: { line1: '', line2: '', city: '', state: '', postal_code: '', country: 'US' },
           });
         }
       } catch (err) {
@@ -85,21 +97,40 @@ export default function AccountPage() {
     setSaving(true);
     setSaveMsg('');
     let errors = { phone: '', address: '' };
+    
+    // Debug validation
+    console.log('Validating fields:', { 
+      phone: editFields.phone, 
+      address: editFields.address,
+      phoneValid: validatePhone(editFields.phone),
+      addressValid: validateAddress(editFields.address)
+    });
+    
     if (!validatePhone(editFields.phone)) {
       errors.phone = 'Invalid phone number.';
     }
     if (!validateAddress(editFields.address)) {
-      errors.address = 'Please fill all address fields.';
+      errors.address = 'Please fill all required address fields (Address Line 1, City, State, Postal Code).';
     }
     setFieldErrors(errors);
     if (errors.phone || errors.address) {
       setSaving(false);
+      // Add shake animation for validation errors
+      const form = document.querySelector('[data-section="account-form"]');
+      if (form) {
+        form.classList.add('animate-shake');
+        setTimeout(() => {
+          form.classList.remove('animate-shake');
+        }, 500);
+      }
       return;
     }
     try {
+      console.log('Saving account info:', { customer: !!customer, editFields }); // Debug log
       let data;
       if (!customer) {
         // No customer: create new Stripe customer
+        console.log('Creating new Stripe customer...'); // Debug log
         const res = await fetch('/api/stripe-customer', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -112,8 +143,10 @@ export default function AccountPage() {
           })
         });
         data = await res.json();
+        console.log('Create customer response:', data); // Debug log
       } else {
         // Update existing customer
+        console.log('Updating existing Stripe customer:', customer.id); // Debug log
         const res = await fetch('/api/stripe-customer-update', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -126,16 +159,33 @@ export default function AccountPage() {
           })
         });
         data = await res.json();
+        console.log('Update customer response:', data); // Debug log
       }
       if (data.customer) {
         setCustomer(data.customer);
         setEditMode(false);
-        setSaveMsg('Saved!');
+        setSaveMsg('Saved successfully!');
+        setSaveMsgType('success');
+        console.log('Account saved successfully:', data.customer); // Debug log
+        
+        // Add a subtle success animation by briefly highlighting the sections
+        const sections = document.querySelectorAll('[data-section="account-form"]');
+        sections.forEach(section => {
+          section.classList.add('animate-pulse');
+          setTimeout(() => {
+            section.classList.remove('animate-pulse');
+          }, 1000);
+        });
       } else {
-        setSaveMsg(data.error || 'Failed to save.');
+        const errorMsg = data.error || 'Failed to save.';
+        setSaveMsg(errorMsg);
+        setSaveMsgType('error');
+        console.error('Save failed:', errorMsg); // Debug log
       }
     } catch (err) {
-      setSaveMsg('Failed to save.');
+      console.error('Error saving account:', err); // Debug log
+      setSaveMsg('Failed to save. Please try again.');
+      setSaveMsgType('error');
     }
     setSaving(false);
   };
@@ -145,23 +195,55 @@ export default function AccountPage() {
     setVerifyMsgType('');
     if (user && user.email && !user.emailVerified) {
       try {
+        console.log('🔧 Sending email verification...');
         const auth = getAuth();
         const currentUser = auth.currentUser;
+        
         if (currentUser && !currentUser.emailVerified) {
-          await sendEmailVerification(currentUser);
-          setVerifyMsg('Verification email sent!');
+          console.log('📧 Current user found, sending verification email to:', currentUser.email);
+          
+          // Configure action code settings for custom domain
+          const actionCodeSettings = {
+            url: `${window.location.origin}/account`,
+            handleCodeInApp: false,
+            // Note: The custom domain is configured in Firebase Console
+            // The sender email should be set to: noreply@confirmation.caydiscreations.com
+          };
+          
+          await sendEmailVerification(currentUser, actionCodeSettings);
+          console.log('✅ Email verification sent successfully');
+          console.log('📧 Email should be sent from: noreply@confirmation.caydiscreations.com');
+          setVerifyMsg('Verification email sent! Please check your inbox (and spam folder).');
           setVerifyMsgType('success');
         } else {
+          console.log('ℹ️ User already verified or no current user');
           setVerifyMsg('Your email is already verified.');
           setVerifyMsgType('success');
         }
       } catch (err: any) {
-        setVerifyMsg('Failed to send verification email.');
+        console.error('❌ Email verification error:', err);
+        console.error('Error code:', err.code);
+        console.error('Error message:', err.message);
+        
+        // Provide user-friendly error messages
+        let errorMessage = 'Failed to send verification email.';
+        if (err.code === 'auth/too-many-requests') {
+          errorMessage = 'Too many requests. Please wait a few minutes before trying again.';
+        } else if (err.code === 'auth/invalid-email') {
+          errorMessage = 'Invalid email address. Please check your email format.';
+        } else if (err.code === 'auth/user-not-found') {
+          errorMessage = 'User not found. Please try logging in again.';
+        }
+        
+        setVerifyMsg(errorMessage);
         setVerifyMsgType('error');
       }
     } else if (user && user.emailVerified) {
       setVerifyMsg('Your email is already verified.');
       setVerifyMsgType('success');
+    } else {
+      setVerifyMsg('Please log in to verify your email.');
+      setVerifyMsgType('error');
     }
   };
   const handleChangePassword = async () => {
@@ -190,55 +272,93 @@ export default function AccountPage() {
           <div className="text-red-600">{error}</div>
         ) : (
           <div className="w-full space-y-6">
-            <div className="bg-[#FFF5E6] rounded-lg p-4 border border-[#E8C39E]">
+            <div className="bg-[#FFF5E6] rounded-lg p-4 border border-[#E8C39E]" data-section="account-form">
               <div className="flex justify-between items-center mb-2">
                 <h2 className="text-xl font-bold text-[#4A3419]">Personal Info</h2>
                 {!editMode && <button onClick={handleEdit} className="text-[#4A3419] underline hover:text-[#6B4B26] font-semibold">Edit</button>}
               </div>
               {editMode ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <input name="name" value={editFields.name} onChange={handleChange} placeholder="Name" className="border p-2 rounded" />
-                  <input name="email" value={editFields.email} onChange={handleChange} placeholder="Email" className="border p-2 rounded" />
-                  <input name="phone" value={editFields.phone} onChange={handleChange} placeholder="Phone" className="border p-2 rounded" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 transition-all duration-300 ease-in-out">
+                  <input name="name" value={editFields.name} onChange={handleChange} placeholder="Name" className="border p-2 rounded transition-all duration-200 focus:ring-2 focus:ring-[#4A3419] focus:border-[#4A3419]" />
+                  <input name="email" value={editFields.email} onChange={handleChange} placeholder="Email" className="border p-2 rounded transition-all duration-200 focus:ring-2 focus:ring-[#4A3419] focus:border-[#4A3419]" />
+                  <input name="phone" value={editFields.phone} onChange={handleChange} placeholder="Phone" className="border p-2 rounded transition-all duration-200 focus:ring-2 focus:ring-[#4A3419] focus:border-[#4A3419]" />
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div><span className="font-semibold">Name:</span> {customer?.name || customer?.shipping?.name || '-'}</div>
-                  <div><span className="font-semibold">Email:</span> {customer?.email || editFields.email}</div>
-                  <div><span className="font-semibold">Phone:</span> {customer?.phone || '-'}</div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 transition-all duration-300 ease-in-out">
+                  <div className="p-2"><span className="font-semibold">Name:</span> {customer?.name || customer?.shipping?.name || '-'}</div>
+                  <div className="p-2"><span className="font-semibold">Email:</span> {customer?.email || editFields.email}</div>
+                  <div className="p-2"><span className="font-semibold">Phone:</span> {customer?.phone || '-'}</div>
                 </div>
               )}
             </div>
-            <div className="bg-[#FFF5E6] rounded-lg p-4 border border-[#E8C39E]">
+            <div className="bg-[#FFF5E6] rounded-lg p-4 border border-[#E8C39E]" data-section="account-form">
               <div className="flex justify-between items-center mb-2">
                 <h2 className="text-xl font-bold text-[#4A3419]">Shipping Address</h2>
                 {!editMode && <button onClick={handleEdit} className="text-[#4A3419] underline hover:text-[#6B4B26] font-semibold">Edit</button>}
               </div>
               {editMode ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <input name="address.line1" value={editFields.address.line1} onChange={handleChange} placeholder="Address Line 1" className="border p-2 rounded" />
-                  <input name="address.line2" value={editFields.address.line2} onChange={handleChange} placeholder="Address Line 2" className="border p-2 rounded" />
-                  <input name="address.city" value={editFields.address.city} onChange={handleChange} placeholder="City" className="border p-2 rounded" />
-                  <input name="address.state" value={editFields.address.state} onChange={handleChange} placeholder="State" className="border p-2 rounded" />
-                  <input name="address.postal_code" value={editFields.address.postal_code} onChange={handleChange} placeholder="Postal Code" className="border p-2 rounded" />
-                  <input name="address.country" value={editFields.address.country} onChange={handleChange} placeholder="Country" className="border p-2 rounded" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 transition-all duration-300 ease-in-out">
+                  <input name="address.line1" value={editFields.address.line1} onChange={handleChange} placeholder="Address Line 1 *" className="border p-2 rounded transition-all duration-200 focus:ring-2 focus:ring-[#4A3419] focus:border-[#4A3419]" />
+                  <input name="address.line2" value={editFields.address.line2} onChange={handleChange} placeholder="Address Line 2" className="border p-2 rounded transition-all duration-200 focus:ring-2 focus:ring-[#4A3419] focus:border-[#4A3419]" />
+                  <input name="address.city" value={editFields.address.city} onChange={handleChange} placeholder="City *" className="border p-2 rounded transition-all duration-200 focus:ring-2 focus:ring-[#4A3419] focus:border-[#4A3419]" />
+                  <input name="address.state" value={editFields.address.state} onChange={handleChange} placeholder="State *" className="border p-2 rounded transition-all duration-200 focus:ring-2 focus:ring-[#4A3419] focus:border-[#4A3419]" />
+                  <input name="address.postal_code" value={editFields.address.postal_code} onChange={handleChange} placeholder="Postal Code *" className="border p-2 rounded transition-all duration-200 focus:ring-2 focus:ring-[#4A3419] focus:border-[#4A3419]" />
+                  <input name="address.country" value={editFields.address.country || 'US'} onChange={handleChange} placeholder="Country" className="border p-2 rounded transition-all duration-200 focus:ring-2 focus:ring-[#4A3419] focus:border-[#4A3419]" />
                 </div>
               ) : customer && customer.shipping && customer.shipping.address ? (
-                <div>
-                  <div>{customer.shipping.name}</div>
-                  <div>{customer.shipping.address.line1} {customer.shipping.address.line2}</div>
-                  <div>{customer.shipping.address.city}, {customer.shipping.address.state} {customer.shipping.address.postal_code}</div>
-                  <div>{customer.shipping.address.country}</div>
+                <div className="transition-all duration-300 ease-in-out">
+                  <div className="p-2">{customer.shipping.name}</div>
+                  <div className="p-2">{customer.shipping.address.line1} {customer.shipping.address.line2}</div>
+                  <div className="p-2">{customer.shipping.address.city}, {customer.shipping.address.state} {customer.shipping.address.postal_code}</div>
+                  <div className="p-2">{customer.shipping.address.country}</div>
                 </div>
               ) : (
-                <div className="text-[#4A3419]">No shipping address on file.</div>
+                <div className="text-[#4A3419] p-2 transition-all duration-300 ease-in-out">No shipping address on file.</div>
               )}
             </div>
             {editMode && (
               <div className="flex gap-4 mt-2">
-                <button onClick={handleSave} className="bg-[#4A3419] text-[#FFF5E6] px-6 py-2 rounded-lg font-bold hover:bg-[#6B4B26] transition-colors" disabled={saving}>{saving ? 'Saving...' : 'Save'}</button>
-                <button onClick={handleCancel} className="bg-[#E8C39E] text-[#4A3419] px-6 py-2 rounded-lg font-bold hover:bg-[#FFF5E6] transition-colors">Cancel</button>
-                {saveMsg && <span className="ml-4 text-[#4A3419]">{saveMsg}</span>}
+                <button 
+                  onClick={handleSave} 
+                  className={`px-6 py-2 rounded-lg font-bold transition-all duration-200 flex items-center gap-2 ${
+                    saving 
+                      ? 'bg-gray-400 text-white cursor-not-allowed' 
+                      : saveMsgType === 'success'
+                      ? 'bg-green-600 text-white hover:bg-green-700'
+                      : 'bg-[#4A3419] text-[#FFF5E6] hover:bg-[#6B4B26]'
+                  }`} 
+                  disabled={saving}
+                >
+                  {saving && (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  )}
+                  {saving ? 'Saving...' : 'Save'}
+                </button>
+                <button 
+                  onClick={handleCancel} 
+                  className="bg-[#E8C39E] text-[#4A3419] px-6 py-2 rounded-lg font-bold hover:bg-[#FFF5E6] transition-colors"
+                  disabled={saving}
+                >
+                  Cancel
+                </button>
+                {saveMsg && (
+                  <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${
+                    saveMsgType === 'success' 
+                      ? 'bg-green-100 text-green-700 border border-green-200' 
+                      : 'bg-red-100 text-red-700 border border-red-200'
+                  }`}>
+                    {saveMsgType === 'success' ? (
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                    {saveMsg}
+                  </div>
+                )}
               </div>
             )}
             {/* Email Security Section */}
@@ -336,11 +456,15 @@ function validatePhone(phone) {
   return /^\+?[0-9\s\-()]{7,20}$/.test(phone);
 }
 function validateAddress(address) {
+  // Make country optional, default to 'US' if empty
+  if (!address.country?.trim()) {
+    address.country = 'US';
+  }
+  
   return (
     address.line1?.trim() &&
     address.city?.trim() &&
     address.state?.trim() &&
-    address.postal_code?.trim() &&
-    address.country?.trim()
+    address.postal_code?.trim()
   );
 } 

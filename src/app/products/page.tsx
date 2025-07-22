@@ -94,7 +94,7 @@ function ProductsContent() {
     const timer = setTimeout(() => {
       let results = allProducts;
       if (selectedCategory !== 'All') {
-        results = results.filter(product => product.metadata?.category === selectedCategory);
+          results = results.filter(product => product.metadata?.category === selectedCategory);
       }
       if (selectedTags.length > 0) {
         results = results.filter(product =>
@@ -191,41 +191,41 @@ function ProductsContent() {
           <div className="flex flex-row items-center min-w-0 justify-end w-full md:w-auto">
             <div className="flex flex-wrap gap-2">
               {allCategories.map((category) => (
-                <motion.button
-                  key={category}
+              <motion.button
+                key={category}
                   className={`px-4 py-2 rounded-full border-2 transition-colors duration-200 font-semibold text-[#4A3419] ${selectedCategory === category ? 'bg-[#4A3419] text-white border-[#4A3419]' : 'bg-[#FFF5E6] border-[#E8C39E]'}`}
-                  onClick={() => setSelectedCategory(category)}
-                  whileHover={{ scale: 1.05 }}
+                onClick={() => setSelectedCategory(category)}
+                whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.97 }}
-                >
-                  {category}
-                </motion.button>
-              ))}
+              >
+                {category}
+              </motion.button>
+            ))}
             </div>
             <div className="ml-2 md:ml-4 flex-shrink-0">
-              <div className="relative">
-                <button
-                  className="px-4 py-2 rounded-full bg-[#FFF5E6] text-[#4A3419] border border-[#4A3419] font-semibold flex items-center gap-2 hover:bg-[#E8C39E] transition-colors duration-300"
+            <div className="relative">
+              <button
+                className="px-4 py-2 rounded-full bg-[#FFF5E6] text-[#4A3419] border border-[#4A3419] font-semibold flex items-center gap-2 hover:bg-[#E8C39E] transition-colors duration-300"
                   onClick={() => setTagDropdownOpen(open => !open)}
-                  type="button"
-                >
+                type="button"
+              >
                   Filter
                   <FaChevronDown className={`transition-transform duration-200 ${tagDropdownOpen ? 'rotate-180' : ''}`} />
-                </button>
+              </button>
                 {tagDropdownOpen && (
                   <div className="absolute right-0 mt-2 bg-white border border-[#E8C39E] rounded-lg shadow-lg p-4 z-20 flex flex-wrap gap-2 min-w-[200px]">
                     {allTags.map(tag => (
-                      <button
-                        key={tag}
+                    <button
+                      key={tag}
                         className={`px-4 py-1 rounded-full border font-semibold text-sm transition-colors duration-200 ${selectedTags.includes(tag) ? 'bg-[#4A3419] text-white border-[#4A3419]' : 'bg-[#FFF5E6] text-[#4A3419] border-[#4A3419]'}`}
-                        onClick={() => toggleTag(tag)}
-                        type="button"
-                      >
-                        {tag}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                      onClick={() => toggleTag(tag)}
+                      type="button"
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+              )}
               </div>
             </div>
           </div>

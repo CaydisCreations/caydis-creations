@@ -6,7 +6,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 })
 
 export async function POST(req: NextRequest) {
-  const { items, address, selectedRate } = await req.json()
+  const { items, address, selectedRate, couponId } = await req.json()
   try {
     // Try to find an existing customer by email
     let customer = null;
@@ -91,6 +91,7 @@ export async function POST(req: NextRequest) {
       mode: 'payment',
       line_items: lineItems,
       customer: customer.id,
+      ...(couponId && { discounts: [{ coupon: couponId }] }),
       shipping_address_collection: { allowed_countries: [
         'US', 'CA', 'GB', 'AU', 'DE', 'FR', 'IT', 'ES', 'JP', 'CN', 'IN', 'MX', 'BR', 'NL', 'SE', 'CH', 'IE', 'NZ', 'SG', 'KR', 'ZA', 'BE', 'DK', 'NO', 'FI', 'AT', 'PL', 'PT', 'RU', 'TR', 'IL', 'AE', 'AR', 'CL', 'CO', 'TH', 'MY', 'PH', 'ID', 'SA', 'EG', 'GR', 'CZ', 'HU', 'RO', 'SK', 'SI', 'HR', 'BG', 'EE', 'LV', 'LT', 'LU', 'MT', 'CY'
       ] },
