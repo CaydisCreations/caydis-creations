@@ -107,17 +107,17 @@ export async function POST(req: NextRequest) {
         // Wait for rate limiting
         await waitForRateLimit();
         
-        // Try custom domain first (it's verified)
+        // Use verified domain directly (onboarding@resend.dev)
         try {
           console.log(`📤 Sending ${emailType} email to: ${to}`);
           console.log(`📧 ${emailType} email details:`, {
-            from: "Caydi's Creations <no-reply@confirmation.caydiscreations.com>",
+            from: "Caydi's Creations <onboarding@resend.dev>",
             to: to,
             subject: subject
           });
           
           const result = await resend.emails.send({
-            from: "Caydi's Creations <no-reply@confirmation.caydiscreations.com>",
+            from: "Caydi's Creations <onboarding@resend.dev>",
             to: to,
             subject: subject,
             html: html
@@ -134,71 +134,46 @@ export async function POST(req: NextRequest) {
             throw new Error('No email ID returned');
           }
         } catch (error: any) {
-          console.error(`❌ ${emailType} email failed with custom domain:`, error.message);
+          console.error(`❌ ${emailType} email failed:`, error.message);
           
-          // Fallback to verified domain (onboarding@resend.dev)
-          try {
-            console.log(`🔄 Trying fallback for ${emailType} email...`);
-            await waitForRateLimit(); // Rate limit for fallback email
-            
-            const fallbackResult = await resend.emails.send({
-              from: "Caydi's Creations <onboarding@resend.dev>",
-              to: to,
-              subject: subject,
-              html: html
-            });
-            
-            console.log(`📋 ${emailType} fallback result:`, JSON.stringify(fallbackResult, null, 2));
-            
-            if (fallbackResult?.data?.id) {
-              console.log(`✅ ${emailType} email sent successfully with fallback! Email ID:`, fallbackResult.data.id);
-              return true;
-            } else {
-              console.error(`❌ ${emailType} fallback also failed`);
-              return false;
-            }
-          } catch (fallbackError: any) {
-            console.error(`❌ ${emailType} fallback failed:`, fallbackError.message);
-            
-            // For customer emails, send notification to admin instead
-            if (emailType === 'customer') {
-              console.log(`📤 Sending customer notification to admin instead...`);
-              try {
-                await waitForRateLimit(); // Rate limit for notification email
-                const notificationResult = await resend.emails.send({
-                  from: "Caydi's Creations <onboarding@resend.dev>",
-                  to: "caydiscreations@gmail.com",
-                  subject: `📧 Customer Email Failed - Manual Contact Needed`,
-                  html: `
-                    <div style="font-size:16px; color:#4A3419; font-family:sans-serif;">
-                      <h2 style="color:#d32f2f;">⚠️ Customer Email Failed</h2>
-                      <p><strong>Customer Email:</strong> ${to}</p>
-                      <p><strong>Customer Name:</strong> ${session.customer_details?.name || 'N/A'}</p>
-                      <p><strong>Order Number:</strong> #${session.id}</p>
-                      <p><strong>Error:</strong> ${error.message}</p>
-                      
-                      <div style="margin-top: 24px; padding: 12px; background: #fff3cd; border-radius: 8px;">
-                        <p style="margin: 4px 0;"><strong>Action Required:</strong></p>
-                        <ul style="margin: 8px 0; padding-left: 20px;">
-                          <li>Manually send order confirmation to: ${to}</li>
-                          <li>Include order details and tracking information</li>
-                          <li>Email system issue detected</li>
-                        </ul>
-                      </div>
+          // For customer emails, send notification to admin instead
+          if (emailType === 'customer') {
+            console.log(`📤 Sending customer notification to admin instead...`);
+            try {
+              await waitForRateLimit(); // Rate limit for notification email
+              const notificationResult = await resend.emails.send({
+                from: "Caydi's Creations <onboarding@resend.dev>",
+                to: "caydiscreations@gmail.com",
+                subject: `📧 Customer Email Failed - Manual Contact Needed`,
+                html: `
+                  <div style="font-size:16px; color:#4A3419; font-family:sans-serif;">
+                    <h2 style="color:#d32f2f;">⚠️ Customer Email Failed</h2>
+                    <p><strong>Customer Email:</strong> ${to}</p>
+                    <p><strong>Customer Name:</strong> ${session.customer_details?.name || 'N/A'}</p>
+                    <p><strong>Order Number:</strong> #${session.id}</p>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    
+                    <div style="margin-top: 24px; padding: 12px; background: #fff3cd; border-radius: 8px;">
+                      <p style="margin: 4px 0;"><strong>Action Required:</strong></p>
+                      <ul style="margin: 8px 0; padding-left: 20px;">
+                        <li>Manually send order confirmation to: ${to}</li>
+                        <li>Include order details and tracking information</li>
+                        <li>Email system issue detected</li>
+                      </ul>
                     </div>
-                  `
-                });
-                console.log('✅ Customer notification sent to admin! Email ID:', notificationResult?.data?.id);
-                return true;
-              } catch (notificationError: any) {
-                console.error('❌ Customer notification failed:', notificationError.message);
-                return false;
-              }
-            } else {
-              // For admin emails, just log the failure
-              console.error(`❌ ${emailType} email failed completely`);
+                  </div>
+                `
+              });
+              console.log('✅ Customer notification sent to admin! Email ID:', notificationResult?.data?.id);
+              return true;
+            } catch (notificationError: any) {
+              console.error('❌ Customer notification failed:', notificationError.message);
               return false;
             }
+          } else {
+            // For admin emails, just log the failure
+            console.error(`❌ ${emailType} email failed completely`);
+            return false;
           }
         }
       }
