@@ -21,15 +21,26 @@ async function waitForRateLimit() {
 }
 
 export async function POST(req: NextRequest) {
+  console.log('🔍 WEBHOOK DEBUG: Request received');
+  console.log('🔍 WEBHOOK DEBUG: Headers:', Object.fromEntries(req.headers.entries()));
+  
   const sig = req.headers.get('stripe-signature')
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
   let event
 
+  console.log('🔍 WEBHOOK DEBUG: Signature present:', !!sig);
+  console.log('🔍 WEBHOOK DEBUG: Webhook secret present:', !!webhookSecret);
+
   try {
     const body = await req.text()
+    console.log('🔍 WEBHOOK DEBUG: Body length:', body.length);
+    console.log('🔍 WEBHOOK DEBUG: Body preview:', body.substring(0, 200));
+    
     if (!sig || !webhookSecret) throw new Error('Missing Stripe webhook secret or signature')
     event = stripe.webhooks.constructEvent(body, sig, webhookSecret)
+    console.log('🔍 WEBHOOK DEBUG: Event constructed successfully');
   } catch (err: any) {
+    console.log('🔍 WEBHOOK DEBUG: Error constructing event:', err.message);
     return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 })
   }
 
