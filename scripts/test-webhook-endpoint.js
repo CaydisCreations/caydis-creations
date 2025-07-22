@@ -1,28 +1,71 @@
 require('dotenv').config({ path: '.env.local' });
+const https = require('https');
 
 async function testWebhookEndpoint() {
-  console.log('🔍 Testing webhook endpoint accessibility...\n');
-
   try {
-    // Test if the webhook endpoint is reachable
-    const response = await fetch('https://caydiscreations.com/api/stripe-webhook', {
+    console.log('🧪 Testing webhook endpoint directly...');
+    
+    // Create a mock Stripe event
+    const mockEvent = {
+      id: 'evt_test_123',
+      type: 'checkout.session.completed',
+      data: {
+        object: {
+          id: 'cs_test_123456789',
+          customer_details: {
+            name: 'Pearson Hill',
+            email: 'pearsonrhill2@gmail.com',
+            address: {
+              line1: '26 lattanzi st',
+              line2: '',
+              city: 'WEST HAVEN',
+              state: 'CT',
+              postal_code: '06516',
+              country: 'US'
+            }
+          },
+          amount_total: 2500
+        }
+      }
+    };
+
+    const postData = JSON.stringify(mockEvent);
+    
+    const options = {
+      hostname: 'caydiscreations.com',
+      port: 443,
+      path: '/api/stripe-webhook',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'stripe-signature': 'test-signature'
-      },
-      body: JSON.stringify({ test: 'webhook-endpoint-test' })
+        'Content-Length': Buffer.byteLength(postData),
+        'stripe-signature': 'test_signature' // This will fail validation but we can see the response
+      }
+    };
+
+    const req = https.request(options, (res) => {
+      console.log(`📋 Status: ${res.statusCode}`);
+      console.log(`📋 Headers:`, res.headers);
+      
+      let data = '';
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
+      
+      res.on('end', () => {
+        console.log('📋 Response body:', data);
+      });
     });
 
-    console.log('📡 Webhook endpoint response:');
-    console.log('  Status:', response.status);
-    console.log('  Status Text:', response.statusText);
-    
-    const responseText = await response.text();
-    console.log('  Response:', responseText);
+    req.on('error', (e) => {
+      console.error('❌ Error:', e.message);
+    });
 
+    req.write(postData);
+    req.end();
+    
   } catch (error) {
-    console.error('❌ Webhook endpoint test failed:', error.message);
+    console.error('❌ Error:', error.message);
   }
 }
 
