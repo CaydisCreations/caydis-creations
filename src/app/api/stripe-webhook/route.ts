@@ -107,17 +107,17 @@ export async function POST(req: NextRequest) {
         // Wait for rate limiting
         await waitForRateLimit();
         
-        // Use verified domain directly (onboarding@resend.dev)
+        // Try custom domain first (it's now working)
         try {
           console.log(`📤 Sending ${emailType} email to: ${to}`);
           console.log(`📧 ${emailType} email details:`, {
-            from: "Caydi's Creations <onboarding@resend.dev>",
+            from: "Caydi's Creations <no-reply@confirmation.caydiscreations.com>",
             to: to,
             subject: subject
           });
           
           const result = await resend.emails.send({
-            from: "Caydi's Creations <onboarding@resend.dev>",
+            from: "Caydi's Creations <no-reply@confirmation.caydiscreations.com>",
             to: to,
             subject: subject,
             html: html
@@ -134,10 +134,36 @@ export async function POST(req: NextRequest) {
             throw new Error('No email ID returned');
           }
         } catch (error: any) {
-          console.error(`❌ ${emailType} email failed:`, error.message);
+          console.error(`❌ ${emailType} email failed with custom domain:`, error.message);
           
-          // For customer emails, send notification to admin instead
-          if (emailType === 'customer') {
+          // Fallback to verified domain (onboarding@resend.dev) - only for admin emails
+          if (to === 'caydiscreations@gmail.com') {
+            try {
+              console.log(`🔄 Trying fallback for ${emailType} email...`);
+              await waitForRateLimit(); // Rate limit for fallback email
+              
+              const fallbackResult = await resend.emails.send({
+                from: "Caydi's Creations <onboarding@resend.dev>",
+                to: to,
+                subject: subject,
+                html: html
+              });
+              
+              console.log(`📋 ${emailType} fallback result:`, JSON.stringify(fallbackResult, null, 2));
+              
+              if (fallbackResult?.data?.id) {
+                console.log(`✅ ${emailType} email sent successfully with fallback! Email ID:`, fallbackResult.data.id);
+                return true;
+              } else {
+                console.error(`❌ ${emailType} fallback also failed`);
+                return false;
+              }
+            } catch (fallbackError: any) {
+              console.error(`❌ ${emailType} fallback failed:`, fallbackError.message);
+              return false;
+            }
+          } else {
+            // For customer emails, send notification to admin instead
             console.log(`📤 Sending customer notification to admin instead...`);
             try {
               await waitForRateLimit(); // Rate limit for notification email
@@ -170,10 +196,6 @@ export async function POST(req: NextRequest) {
               console.error('❌ Customer notification failed:', notificationError.message);
               return false;
             }
-          } else {
-            // For admin emails, just log the failure
-            console.error(`❌ ${emailType} email failed completely`);
-            return false;
           }
         }
       }

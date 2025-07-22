@@ -67,13 +67,13 @@ async function testWebhookFixed() {
       try {
         console.log(`📤 Sending ${emailType} email to: ${to}`);
         console.log(`📧 ${emailType} email details:`, {
-          from: "Caydi's Creations <onboarding@resend.dev>",
+          from: "Caydi's Creations <no-reply@confirmation.caydiscreations.com>",
           to: to,
           subject: subject
         });
         
         const result = await resend.emails.send({
-          from: "Caydi's Creations <onboarding@resend.dev>",
+          from: "Caydi's Creations <no-reply@confirmation.caydiscreations.com>",
           to: to,
           subject: subject,
           html: html
