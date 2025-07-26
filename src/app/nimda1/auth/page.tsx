@@ -21,10 +21,10 @@ export default function AdminAuth() {
 
   useEffect(() => {
     // If user is already authenticated and authorized, redirect to dashboard
-    if (user && user.email === 'caydiscreations@gmail.com') {
+    if (user && user.email === 'caydiscreations@gmail.com' && !authLoading) {
       router.push('/nimda1/dashboard')
     }
-  }, [user, router])
+  }, [user, authLoading, router])
 
   // Show loading while checking authentication
   if (authLoading) {

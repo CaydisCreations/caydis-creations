@@ -38,10 +38,20 @@ export default function AdminLayout({
         return
       }
 
+      // User is authenticated and authorized
       setIsAuthorized(true)
       setCheckingAuth(false)
     }
   }, [user, loading, router])
+
+  // If user is authenticated and authorized, show content immediately
+  if (user && user.email === 'caydiscreations@gmail.com' && !loading) {
+    return (
+      <div className="min-h-screen bg-[#FFF5E6]">
+        {children}
+      </div>
+    )
+  }
 
   if (loading || checkingAuth) {
     return (
