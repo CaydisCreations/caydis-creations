@@ -301,4 +301,4 @@ export async function POST(req: NextRequest) {
 
   console.log('✅ Webhook processing completed successfully');
   return NextResponse.json({ received: true })
-} 
+} // Updated webhook with new environment variables - Sat Jul 26 10:30:41 EDT 2025
