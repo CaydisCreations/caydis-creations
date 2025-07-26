@@ -355,10 +355,10 @@ export default function AdminDashboard() {
                         <button
                           onClick={() => {
                             shippingLabels.forEach((label: any) => {
-                              // Construct URL from transaction ID (compact format)
-                              const labelUrl = label.u ? `https://api.goshippo.com/transactions/${label.u}/label.pdf` : null;
-                              if (labelUrl) {
-                                window.open(labelUrl, '_blank');
+                              // Use our proxy endpoint with proper authentication
+                              if (label.u) {
+                                const downloadUrl = `/api/download-label?transactionId=${label.u}`;
+                                window.open(downloadUrl, '_blank');
                               }
                             });
                           }}
