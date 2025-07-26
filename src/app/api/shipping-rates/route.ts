@@ -170,67 +170,40 @@ export async function POST(req: NextRequest) {
       },
     ];
     
-    // For testing purposes, provide mock rates if Shippo fails
-    let shipments = [];
-    try {
-      shipments = await Promise.all(FROM_ADDRESSES.map(async (fromAddress, index) => {
-        try {
-          console.log(`shipping-rates: Creating shipment ${index + 1} with from address:`, fromAddress);
-          
-          const shipment = await shippo.shipments.create({
-            addressFrom: fromAddress,
-            addressTo: toAddress,
-            parcels: [parcel as any],
-            async: false,
-            carrierAccounts: [], // Use default test accounts for all carriers
-          });
-          
-          console.log(`shipping-rates: Shippo shipment ${index + 1} response:`, shipment);
-          
-          // Check for errors in the response
-          if (shipment.messages && shipment.messages.length > 0) {
-            console.log(`shipping-rates: Shipment ${index + 1} messages:`, shipment.messages);
-            const errorMessage = shipment.messages.find(msg => msg.code === 'ERROR')?.text;
-            if (errorMessage) {
-              console.error(`shipping-rates: Shipment ${index + 1} error:`, errorMessage);
-              return { rates: [], error: errorMessage };
-            }
+    const shipments = await Promise.all(FROM_ADDRESSES.map(async (fromAddress, index) => {
+      try {
+        console.log(`shipping-rates: Creating shipment ${index + 1} with from address:`, fromAddress);
+        
+        const shipment = await shippo.shipments.create({
+          addressFrom: fromAddress,
+          addressTo: toAddress,
+          parcels: [parcel as any],
+          async: false,
+          carrierAccounts: [], // Use default test accounts for all carriers
+        });
+        
+        console.log(`shipping-rates: Shippo shipment ${index + 1} response:`, shipment);
+        
+        // Check for errors in the response
+        if (shipment.messages && shipment.messages.length > 0) {
+          console.log(`shipping-rates: Shipment ${index + 1} messages:`, shipment.messages);
+          const errorMessage = shipment.messages.find(msg => msg.code === 'ERROR')?.text;
+          if (errorMessage) {
+            console.error(`shipping-rates: Shipment ${index + 1} error:`, errorMessage);
+            return { rates: [], error: errorMessage };
           }
-          
-          return shipment;
-        } catch (err) {
-          console.error(`shipping-rates: Shippo shipment ${index + 1} error:`, err);
-          if (err.response?.body) {
-            console.error(`shipping-rates: Error response body for shipment ${index + 1}:`, err.response.body);
-          }
-          // Don't throw here, just log the error and continue with other carriers
-          return { rates: [], error: err.message };
         }
-      }));
-    } catch (err) {
-      console.error('shipping-rates: All Shippo shipments failed:', err);
-      // Provide mock rates for testing
-      shipments = [{
-        rates: [
-          {
-            objectId: 'mock_rate_1',
-            provider: 'USPS',
-            servicelevel: { name: 'Ground Advantage' },
-            amount: '5.91',
-            days: 3,
-            durationTerms: '3-5 business days'
-          },
-          {
-            objectId: 'mock_rate_2',
-            provider: 'USPS',
-            servicelevel: { name: 'Priority Mail' },
-            amount: '7.06',
-            days: 2,
-            durationTerms: '2-3 business days'
-          }
-        ]
-      }];
-    }
+        
+        return shipment;
+      } catch (err) {
+        console.error(`shipping-rates: Shippo shipment ${index + 1} error:`, err);
+        if (err.response?.body) {
+          console.error(`shipping-rates: Error response body for shipment ${index + 1}:`, err.response.body);
+        }
+        // Don't throw here, just log the error and continue with other carriers
+        return { rates: [], error: err.message };
+      }
+    }));
     
     console.log('shipping-rates: Shippo shipments:', shipments);
     
@@ -238,39 +211,30 @@ export async function POST(req: NextRequest) {
     console.log('shipping-rates: allRates:', allRates);
     
     // Filter out rates with errors and sort by price
-    let validRates = allRates
+    const validRates = allRates
       .filter(rate => !rate.messages || rate.messages.length === 0)
       .sort((a, b) => parseFloat(a.amount) - parseFloat(b.amount));
     
     console.log('shipping-rates: validRates:', validRates);
     
-    // If no valid rates found, use mock rates for testing
+    // If no valid rates found, provide helpful error message
     if (validRates.length === 0) {
       const errors = shipments
         .filter(s => (s as any).error)
         .map(s => (s as any).error);
       
       console.log('shipping-rates: No valid rates found. Errors:', errors);
-      console.log('shipping-rates: Using mock rates for testing');
       
-      validRates = [
-        {
-          objectId: 'mock_rate_1',
-          provider: 'USPS',
-          servicelevel: { name: 'Ground Advantage' },
-          amount: '5.91',
-          days: 3,
-          durationTerms: '3-5 business days'
-        },
-        {
-          objectId: 'mock_rate_2',
-          provider: 'USPS',
-          servicelevel: { name: 'Priority Mail' },
-          amount: '7.06',
-          days: 2,
-          durationTerms: '2-3 business days'
-        }
-      ];
+      return NextResponse.json({ 
+        error: 'No shipping rates found for this address',
+        details: 'The shipping API is currently unavailable. This may be due to API key issues or service limitations.',
+        suggestions: [
+          'Please try again later',
+          'Contact support if the issue persists',
+          'Shipping rates will be calculated at checkout'
+        ],
+        rates: []
+      }, { status: 400 });
     }
     
     return NextResponse.json({ rates: validRates });
