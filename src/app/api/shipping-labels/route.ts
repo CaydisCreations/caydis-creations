@@ -152,7 +152,8 @@ export async function POST(req: NextRequest) {
           // Only throw for other types of errors
           const otherErrors = transaction.messages.filter(msg => 
             msg.code !== 'failed_address_validation' && 
-            msg.code !== 'usps_label_expired'
+            msg.code !== 'usps_label_expired' &&
+            msg.code !== '121943' // Invalid Date warning (expected in test mode)
           );
           
           if (otherErrors.length > 0) {
