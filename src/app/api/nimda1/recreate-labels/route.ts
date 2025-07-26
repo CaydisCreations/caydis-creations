@@ -53,6 +53,14 @@ export async function POST(req: NextRequest) {
 
         const product = await stripe.products.retrieve(productId);
         
+        // Skip shipping line items (they don't need labels)
+        if (product.name.toLowerCase().includes('shipping') || 
+            product.name.toLowerCase().includes('delivery') ||
+            product.name.toLowerCase().includes('postage')) {
+          console.log('recreate-labels: Skipping shipping line item:', product.name);
+          continue;
+        }
+        
         // Create parcel from product metadata
         const parcel = {
           length: product.metadata?.parcel_length || '10',
