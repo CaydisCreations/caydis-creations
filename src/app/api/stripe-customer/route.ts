@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {});
-
 export async function POST(req: NextRequest) {
   try {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {});
     const body = await req.json();
     const { email, create, name, phone, address } = body;
     if (!email) return NextResponse.json({ error: 'Email required' }, { status: 400 });

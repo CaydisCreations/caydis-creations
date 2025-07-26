@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-
 export async function POST(req: NextRequest) {
   try {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
     const { id, name, email, phone, address } = await req.json();
     if (!id) return NextResponse.json({ error: 'Missing customer id' }, { status: 400 });
     const update: Stripe.CustomerUpdateParams = {

@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-
 // GET - List all coupons
 export async function GET() {
   try {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
     const coupons = await stripe.coupons.list({ limit: 100 });
     
     return NextResponse.json({
@@ -31,6 +30,7 @@ export async function GET() {
 // POST - Create a new coupon
 export async function POST(req: NextRequest) {
   try {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
     const body = await req.json();
     const {
       id,

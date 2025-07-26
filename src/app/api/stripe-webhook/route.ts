@@ -2,9 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { Resend } from 'resend'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {})
-const resend = new Resend(process.env.RESEND_API_KEY)
-
 // Rate limiting helper
 let lastEmailTime = 0;
 const EMAIL_RATE_LIMIT = 1000; // 1 second between emails
@@ -23,6 +20,9 @@ async function waitForRateLimit() {
 export async function POST(req: NextRequest) {
   console.log('🔍 WEBHOOK DEBUG: Request received');
   console.log('🔍 WEBHOOK DEBUG: Headers:', Object.fromEntries(req.headers.entries()));
+  
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {})
+  const resend = new Resend(process.env.RESEND_API_KEY)
   
   const sig = req.headers.get('stripe-signature')
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
@@ -301,4 +301,4 @@ export async function POST(req: NextRequest) {
 
   console.log('✅ Webhook processing completed successfully');
   return NextResponse.json({ received: true })
-} // Updated webhook with new environment variables - Sat Jul 26 10:30:41 EDT 2025
+}

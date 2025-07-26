@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  // Remove apiVersion to use the default for the installed package
-})
-
 export async function POST(req: NextRequest) {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    // Remove apiVersion to use the default for the installed package
+  })
+  
   const { items, address, selectedRate, couponId } = await req.json()
   try {
     // Try to find an existing customer by email
