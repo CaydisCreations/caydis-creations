@@ -89,11 +89,9 @@ export default function NavBar() {
               Shipping
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#E8C39E] group-hover:w-full transition-all duration-300"></span>
             </Link>
-            <Link href="/cart" className="relative ml-4 group flex items-center cursor-pointer">
-              <span className="inline-block">
-                <CartIcon className="w-7 h-7 text-[#FFF5E6] group-hover:text-[#E8C39E] transition-transform duration-200 group-hover:scale-110" />
-              </span>
-            </Link>
+            <div className="relative ml-4 group flex items-center cursor-pointer">
+              <CartIcon className="w-7 h-7 text-[#FFF5E6] group-hover:text-[#E8C39E] transition-transform duration-200 group-hover:scale-110" />
+            </div>
           </div>
           <div className="bg-gradient-to-r from-[#F7D7B7] to-[#E8C39E] rounded-full p-1 flex items-center shadow-md">
             {!user ? (

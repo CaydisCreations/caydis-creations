@@ -1,6 +1,6 @@
 const { Shippo } = require('shippo');
 
-const shippo = new Shippo({ apiKeyHeader: 'shippo_test_3c002179bdb808fcb740375f237517fbbe086f0b' });
+const shippo = new Shippo({ apiKeyHeader: 'shippo_test_ce0b29202bfa631ac0cb0165016071916c03fa4c' });
 
 async function testShippo() {
   try {

@@ -90,8 +90,57 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Send emails with improved fallback system
+    // Create shipping labels automatically
     try {
+      console.log('🚚 Creating shipping labels...');
+      
+      // Prepare data for shipping label creation
+      const lineItemsForLabels = lineItems.data.map(item => ({
+        priceId: item.price?.id,
+        quantity: item.quantity || 1,
+      })).filter(item => item.priceId);
+
+      if (lineItemsForLabels.length > 0) {
+        const labelResponse = await fetch(`${req.nextUrl.origin}/api/shipping-labels`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            orderId: session.id,
+            customerDetails: session.customer_details,
+            lineItems: lineItemsForLabels,
+          }),
+        });
+
+        if (labelResponse.ok) {
+          const labelData = await labelResponse.json();
+          console.log('✅ Shipping labels created successfully:', labelData.trackingInfo);
+        } else {
+          const labelError = await labelResponse.json();
+          console.error('❌ Shipping label creation failed:', labelError);
+          
+          // Send error notification to admin
+          const errorHtml = `
+            <div style="font-size:16px; color:#d32f2f; font-family:sans-serif;">
+              <h2 style="color:#d32f2f;">⚠️ Shipping Label Creation Failed</h2>
+              <p><strong>Order Number:</strong> #${session.id}</p>
+              <p><strong>Customer:</strong> ${session.customer_details?.name || 'N/A'}</p>
+              <p><strong>Error:</strong> ${labelError.error}</p>
+              
+              <div style="margin-top: 24px; padding: 12px; background: #fff3cd; border-radius: 8px;">
+                <p style="margin: 4px 0;"><strong>Action Required:</strong></p>
+                <ul style="margin: 8px 0; padding-left: 20px;">
+                  <li>Create shipping labels manually</li>
+                  <li>Check Shippo API configuration</li>
+                  <li>Verify product metadata</li>
+                </ul>
+              </div>
+            </div>
+          `;
+          
+          await sendEmailWithFallback("caydiscreations@gmail.com", `⚠️ Shipping Label Creation Failed - Order #${session.id}`, errorHtml, "error");
+        }
+      }
+
       console.log('📧 Starting email composition...');
       
       // Compose order details
@@ -214,6 +263,36 @@ export async function POST(req: NextRequest) {
       // Send customer email
       const customerEmail = session.customer_details?.email || session.customer_email;
       if (customerEmail) {
+        // Get tracking information from session metadata
+        let trackingInfo = [];
+        try {
+          if (session.metadata?.tracking_info) {
+            trackingInfo = JSON.parse(session.metadata.tracking_info);
+          }
+        } catch (e) {
+          console.log('❌ Error parsing tracking info:', e);
+        }
+
+        // Generate tracking section HTML
+        let trackingHtml = '';
+        if (trackingInfo.length > 0) {
+          trackingHtml = `
+            <div style="margin: 24px 0; padding: 16px; background: #e8f5e8; border-radius: 8px; border-left: 4px solid #4caf50;">
+              <h3 style="color:#4A3419; margin: 0 0 12px 0;">📦 Tracking Information</h3>
+              ${trackingInfo.map(track => `
+                <div style="margin-bottom: 12px; padding: 8px; background: white; border-radius: 4px;">
+                  <p style="margin: 4px 0;"><strong>${track.productName}</strong></p>
+                  <p style="margin: 4px 0; color: #666;">Carrier: ${track.carrier}</p>
+                  ${track.trackingNumber ? `<p style="margin: 4px 0; color: #4caf50;"><strong>Tracking Number:</strong> ${track.trackingNumber}</p>` : ''}
+                </div>
+              `).join('')}
+              <p style="margin: 8px 0 0 0; font-size: 14px; color: #666;">
+                You'll receive updates as your packages make their way to you!
+              </p>
+            </div>
+          `;
+        }
+
         const customerHtml = `
           <div style="font-size:18px; color:#4A3419; font-family:sans-serif; max-width:600px; margin:0 auto;">
             <div style="text-align:center; margin-bottom:24px;">
@@ -231,7 +310,8 @@ export async function POST(req: NextRequest) {
                 <li><b>Shipping To:</b> ${session.customer_details?.address?.line1 || ''} ${session.customer_details?.address?.line2 || ''}, ${session.customer_details?.address?.city || ''}, ${session.customer_details?.address?.state || ''} ${session.customer_details?.address?.postal_code || ''}</li>
               </ul>
             </div>
-            <p>You'll receive another email with tracking info once your package is on its way.</p>
+            ${trackingHtml}
+            <p>Your shipping labels have been created and your packages will be shipped soon. You'll receive tracking updates as your packages make their way to you.</p>
             <p>If you have any questions or just want to say hi, feel free to reply to this email — I'd love to hear from you!</p>
             <p style="margin-top:32px;">
               Warmly,<br/>
@@ -248,6 +328,33 @@ export async function POST(req: NextRequest) {
       }
 
       // Send admin notification email
+      // Get tracking information from session metadata
+      let adminTrackingInfo = [];
+      try {
+        if (session.metadata?.tracking_info) {
+          adminTrackingInfo = JSON.parse(session.metadata.tracking_info);
+        }
+      } catch (e) {
+        console.log('❌ Error parsing tracking info for admin email:', e);
+      }
+
+      // Generate admin tracking section HTML
+      let adminTrackingHtml = '';
+      if (adminTrackingInfo.length > 0) {
+        adminTrackingHtml = `
+          <h3 style="color:#4A3419; margin-top:24px;">📦 Tracking Information:</h3>
+          <div style="background: #e8f5e8; padding: 12px; border-radius: 8px; margin: 12px 0;">
+            ${adminTrackingInfo.map(track => `
+              <div style="margin-bottom: 8px; padding: 8px; background: white; border-radius: 4px;">
+                <p style="margin: 4px 0;"><strong>${track.productName}</strong></p>
+                <p style="margin: 4px 0; color: #666;">Carrier: ${track.carrier}</p>
+                ${track.trackingNumber ? `<p style="margin: 4px 0; color: #4caf50;"><strong>Tracking Number:</strong> ${track.trackingNumber}</p>` : ''}
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
       const adminHtml = `
         <div style="font-size:16px; color:#4A3419; font-family:sans-serif;">
           <h2 style="color:#4A3419;">🎉 New Order Alert!</h2>
@@ -273,13 +380,15 @@ export async function POST(req: NextRequest) {
             <p style="margin: 4px 0;">${session.customer_details?.address?.country || 'N/A'}</p>
           </div>
           
-          <p style="color: #d32f2f;"><strong>⚠️ Note:</strong> Shipping labels are currently disabled. Please create shipping labels manually.</p>
+          ${adminTrackingHtml}
+          
+          <p style="color: #4caf50;"><strong>✅ Note:</strong> Shipping labels have been automatically created.</p>
           
           <div style="margin-top: 24px; padding: 12px; background: #e8f5e8; border-radius: 8px;">
             <p style="margin: 4px 0;"><strong>Action Required:</strong></p>
             <ul style="margin: 8px 0; padding-left: 20px;">
               <li>Prepare the order items</li>
-              <li>Create shipping label manually</li>
+              <li>Print shipping labels from admin dashboard</li>
               <li>Package and ship the order</li>
               <li>Update inventory if needed</li>
             </ul>
