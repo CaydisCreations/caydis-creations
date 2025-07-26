@@ -21,7 +21,8 @@ export default function AdminLayout({
     if (!loading) {
       // Check if user is authenticated
       if (!user) {
-        router.push('/nimda1/auth')
+        // No user - show 404 page
+        router.push('/404')
         return
       }
 
@@ -38,7 +39,12 @@ export default function AdminLayout({
         return
       }
 
-      // User is authenticated and authorized
+      // User is authenticated and authorized - redirect to 2FA verification
+      if (user.email === 'caydiscreations@gmail.com') {
+        router.push('/nimda1/verify')
+        return
+      }
+
       setIsAuthorized(true)
       setCheckingAuth(false)
     }
