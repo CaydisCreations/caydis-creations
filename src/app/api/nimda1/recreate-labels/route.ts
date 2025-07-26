@@ -128,17 +128,12 @@ export async function POST(req: NextRequest) {
           }
         }
 
-        // Store label info
+        // Store minimal label info for metadata (under 500 chars)
         const labelInfo = {
-          productId: product.id,
-          productName: product.name,
-          quantity: item.quantity || 1,
-          rate: selectedRate,
-          labelUrl: transaction.labelUrl,
-          trackingNumber: transaction.trackingNumber,
-          carrier: selectedRate.provider,
-          status: 'created',
-          createdAt: new Date().toISOString(),
+          p: product.name.substring(0, 20), // Short product name
+          t: transaction.trackingNumber,
+          c: selectedRate.provider,
+          u: transaction.objectId, // Transaction ID for label URL construction
         };
 
         shippingLabels.push(labelInfo);

@@ -413,9 +413,9 @@ export async function POST(req: NextRequest) {
             </p>
             ${shippingLabels.map((label, index) => `
               <div style="margin-bottom: 8px; padding: 8px; background: white; border-radius: 4px;">
-                <p style="margin: 4px 0;"><strong>${label.productName}</strong></p>
-                <p style="margin: 4px 0; color: #666;">Carrier: ${label.carrier}</p>
-                ${label.trackingNumber ? `<p style="margin: 4px 0; color: #4caf50;"><strong>Tracking Number:</strong> ${label.trackingNumber}</p>` : ''}
+                <p style="margin: 4px 0;"><strong>${label.p || 'Product'}</strong></p>
+                <p style="margin: 4px 0; color: #666;">Carrier: ${label.c || 'Unknown'}</p>
+                ${label.t ? `<p style="margin: 4px 0; color: #4caf50;"><strong>Tracking Number:</strong> ${label.t}</p>` : ''}
                 <p style="margin: 4px 0; font-size: 12px; color: #666;">Label #${index + 1} attached as PDF</p>
               </div>
             `).join('')}
@@ -478,27 +478,29 @@ export async function POST(req: NextRequest) {
           // Fetch PDF labels from Shippo URLs
           for (let i = 0; i < shippingLabels.length; i++) {
             const label = shippingLabels[i];
-            if (label.labelUrl) {
+            const labelUrl = label.u ? `https://api.goshippo.com/transactions/${label.u}/label.pdf` : null;
+            
+            if (labelUrl) {
               try {
-                console.log(`📎 Fetching PDF for ${label.productName}...`);
-                const pdfResponse = await fetch(label.labelUrl);
+                console.log(`📎 Fetching PDF for ${label.p || 'Product'}...`);
+                const pdfResponse = await fetch(labelUrl);
                 
                 if (pdfResponse.ok) {
                   const pdfBuffer = await pdfResponse.arrayBuffer();
                   const pdfBase64 = Buffer.from(pdfBuffer).toString('base64');
                   
                   adminAttachments.push({
-                    filename: `shipping-label-${label.productName.replace(/[^a-zA-Z0-9]/g, '-')}-${i + 1}.pdf`,
+                    filename: `shipping-label-${(label.p || 'Product').replace(/[^a-zA-Z0-9]/g, '-')}-${i + 1}.pdf`,
                     content: pdfBase64,
                     contentType: 'application/pdf'
                   });
                   
-                  console.log(`✅ PDF attachment prepared for ${label.productName}`);
+                  console.log(`✅ PDF attachment prepared for ${label.p || 'Product'}`);
                 } else {
-                  console.warn(`⚠️ Failed to fetch PDF for ${label.productName}: ${pdfResponse.status}`);
+                  console.warn(`⚠️ Failed to fetch PDF for ${label.p || 'Product'}: ${pdfResponse.status}`);
                 }
               } catch (pdfError) {
-                console.error(`❌ Error fetching PDF for ${label.productName}:`, pdfError);
+                console.error(`❌ Error fetching PDF for ${label.p || 'Product'}:`, pdfError);
               }
             }
           }
