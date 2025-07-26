@@ -31,7 +31,20 @@ export default function AdminAuth() {
 
     try {
       await login(email, password)
-      setStep(2) // Move to 2FA step
+      
+      // Send 2FA code to email
+      const response = await fetch('/api/nimda1/send-2fa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+
+      if (response.ok) {
+        setStep(2) // Move to 2FA step
+      } else {
+        const error = await response.json()
+        setError(error.error || 'Failed to send 2FA code')
+      }
     } catch (err: any) {
       setError('Invalid email or password')
       console.error('Login error:', err)
@@ -45,17 +58,25 @@ export default function AdminAuth() {
     setTwoFALoading(true)
     setError('')
 
-    // For demo purposes, we'll use a simple code
-    // In production, you'd integrate with a real 2FA service
-    const correctCode = '123456' // This should be generated and sent via SMS/email
+    try {
+      const response = await fetch('/api/nimda1/verify-2fa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code: twoFACode }),
+      })
 
-    if (twoFACode === correctCode) {
-      router.push('/nimda1/dashboard')
-    } else {
-      setError('Invalid 2FA code')
+      if (response.ok) {
+        router.push('/nimda1/dashboard')
+      } else {
+        const error = await response.json()
+        setError(error.error || 'Invalid 2FA code')
+      }
+    } catch (err: any) {
+      setError('Failed to verify 2FA code')
+      console.error('2FA verification error:', err)
+    } finally {
+      setTwoFALoading(false)
     }
-
-    setTwoFALoading(false)
   }
 
   if (step === 1) {
@@ -152,7 +173,7 @@ export default function AdminAuth() {
               <FaShieldAlt className="text-white text-2xl" />
             </div>
             <h1 className="text-2xl font-bold text-[#4A3419]">Two-Factor Authentication</h1>
-            <p className="text-gray-600 mt-2">Enter the 6-digit code sent to your device</p>
+            <p className="text-gray-600 mt-2">Enter the 6-digit code sent to your email</p>
           </div>
 
           <form onSubmit={handle2FA} className="space-y-6">
@@ -203,8 +224,32 @@ export default function AdminAuth() {
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-500">
-              Demo code: <strong>123456</strong>
+              Check your email for the verification code
             </p>
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  const response = await fetch('/api/nimda1/send-2fa', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email }),
+                  })
+                  if (response.ok) {
+                    setError('')
+                    alert('New code sent to your email!')
+                  } else {
+                    const error = await response.json()
+                    setError(error.error || 'Failed to send new code')
+                  }
+                } catch (err) {
+                  setError('Failed to send new code')
+                }
+              }}
+              className="text-[#4A3419] underline hover:no-underline mt-2"
+            >
+              Resend Code
+            </button>
           </div>
         </div>
       </div>
