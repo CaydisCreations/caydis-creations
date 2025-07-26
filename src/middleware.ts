@@ -6,7 +6,8 @@ export function middleware(request: NextRequest) {
 
   // Allow access to auth page, but protect dashboard and API routes
   if (pathname.startsWith('/nimda1/dashboard') || pathname.startsWith('/api/nimda1')) {
-    // Redirect to 404 for unauthorized access
+    // For now, redirect to 404 for all unauthorized access
+    // In production, you could add Firebase token verification here
     return NextResponse.redirect(new URL('/404', request.url))
   }
 

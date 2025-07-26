@@ -31,7 +31,8 @@ export default function AdminLayout({
 
       if (!authorizedEmails.includes(user.email || '')) {
         console.log('Unauthorized access attempt:', user.email)
-        router.push('/nimda1/auth')
+        // Show 404 for unauthorized users
+        router.push('/404')
         return
       }
 

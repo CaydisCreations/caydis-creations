@@ -24,6 +24,18 @@ export default function AdminAuth() {
     }
   }, [user, router])
 
+  // Show loading while checking authentication
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-[#FFF5E6] flex items-center justify-center">
+        <div className="text-center">
+          <FaSpinner className="animate-spin text-4xl text-[#4A3419] mx-auto mb-4" />
+          <p className="text-[#4A3419] text-lg">Verifying access...</p>
+        </div>
+      </div>
+    )
+  }
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
