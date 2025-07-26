@@ -49,4 +49,4 @@ src/
 ## Contact
 
 For any inquiries, please contact:
-- Email: caydicreations@gmail.com 
+- Email: caydicreations@gmail.com # Updated Shippo API key
