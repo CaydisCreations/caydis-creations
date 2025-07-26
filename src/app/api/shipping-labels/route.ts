@@ -166,7 +166,7 @@ export async function POST(req: NextRequest) {
           productId: product.id,
           productName: product.name,
           quantity: item.quantity,
-          labelUrl: transaction.labelUrl,
+          labelUrl: transaction.labelUrl || `https://api.goshippo.com/transactions/${transaction.objectId}/label.pdf`,
           trackingNumber: transaction.trackingNumber,
           carrier: selectedRate.provider,
           status: 'created',
