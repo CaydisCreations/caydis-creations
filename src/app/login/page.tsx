@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useFirebaseAuth } from '../context/FirebaseAuthContext';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -15,8 +15,13 @@ export default function LoginPage() {
   const [resetMsg, setResetMsg] = useState('');
   const router = useRouter();
 
+  useEffect(() => {
+    if (user && !loading) {
+      router.push('/');
+    }
+  }, [user, loading, router]);
+
   if (user && !loading) {
-    router.push('/');
     return null;
   }
 

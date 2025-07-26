@@ -275,6 +275,8 @@ export async function POST(req: NextRequest) {
 
         // Generate tracking section HTML
         let trackingHtml = '';
+        let shippingLabelsHtml = '';
+        
         if (trackingInfo.length > 0) {
           trackingHtml = `
             <div style="margin: 24px 0; padding: 16px; background: #e8f5e8; border-radius: 8px; border-left: 4px solid #4caf50;">
@@ -289,6 +291,24 @@ export async function POST(req: NextRequest) {
               <p style="margin: 8px 0 0 0; font-size: 14px; color: #666;">
                 You'll receive updates as your packages make their way to you!
               </p>
+            </div>
+          `;
+          
+          // Generate shipping labels section
+          shippingLabelsHtml = `
+            <div style="margin: 24px 0; padding: 16px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
+              <h3 style="color:#4A3419; margin: 0 0 12px 0;">📋 Shipping Labels</h3>
+              <p style="margin: 8px 0; color: #666; font-size: 14px;">
+                Your shipping labels have been created and are attached below. Each package will be shipped separately.
+              </p>
+              ${trackingInfo.map((track, index) => `
+                <div style="margin-bottom: 12px; padding: 8px; background: white; border-radius: 4px;">
+                  <p style="margin: 4px 0;"><strong>${track.productName}</strong></p>
+                  <p style="margin: 4px 0; color: #666;">Carrier: ${track.carrier}</p>
+                  ${track.trackingNumber ? `<p style="margin: 4px 0; color: #4caf50;"><strong>Tracking Number:</strong> ${track.trackingNumber}</p>` : ''}
+                  <p style="margin: 4px 0; font-size: 12px; color: #666;">Label #${index + 1} attached</p>
+                </div>
+              `).join('')}
             </div>
           `;
         }
@@ -311,7 +331,8 @@ export async function POST(req: NextRequest) {
               </ul>
             </div>
             ${trackingHtml}
-            <p>Your shipping labels have been created and your packages will be shipped soon. You'll receive tracking updates as your packages make their way to you.</p>
+            ${shippingLabelsHtml}
+            <p>Your packages will be shipped soon. You'll receive tracking updates as your packages make their way to you.</p>
             <p>If you have any questions or just want to say hi, feel free to reply to this email — I'd love to hear from you!</p>
             <p style="margin-top:32px;">
               Warmly,<br/>
@@ -382,7 +403,7 @@ export async function POST(req: NextRequest) {
           
           ${adminTrackingHtml}
           
-          <p style="color: #4caf50;"><strong>✅ Note:</strong> Shipping labels have been automatically created.</p>
+          <p style="color: #4caf50;"><strong>✅ Note:</strong> Shipping labels have been automatically created and tracking numbers are included above.</p>
           
           <div style="margin-top: 24px; padding: 12px; background: #e8f5e8; border-radius: 8px;">
             <p style="margin: 4px 0;"><strong>Action Required:</strong></p>
