@@ -169,7 +169,7 @@ export async function POST(req: NextRequest) {
       }));
 
       // Helper function to send email with improved fallback
-      async function sendEmailWithFallback(to: string, subject: string, html: string, emailType: string) {
+      async function sendEmailWithFallback(to: string, subject: string, html: string, emailType: string, attachments?: any[]) {
         // Wait for rate limiting
         await waitForRateLimit();
         
@@ -179,15 +179,22 @@ export async function POST(req: NextRequest) {
           console.log(`📧 ${emailType} email details:`, {
             from: "Caydi's Creations <no-reply@confirmation.caydiscreations.com>",
             to: to,
-            subject: subject
+            subject: subject,
+            attachments: attachments ? `${attachments.length} files` : 'none'
           });
           
-          const result = await resend.emails.send({
+          const emailData: any = {
             from: "Caydi's Creations <no-reply@confirmation.caydiscreations.com>",
             to: to,
             subject: subject,
             html: html
-          });
+          };
+          
+          if (attachments && attachments.length > 0) {
+            emailData.attachments = attachments;
+          }
+          
+          const result = await resend.emails.send(emailData);
           
           console.log(`📋 ${emailType} email result:`, JSON.stringify(result, null, 2));
           
@@ -208,12 +215,18 @@ export async function POST(req: NextRequest) {
               console.log(`🔄 Trying fallback for ${emailType} email...`);
               await waitForRateLimit(); // Rate limit for fallback email
               
-              const fallbackResult = await resend.emails.send({
+              const fallbackEmailData: any = {
                 from: "Caydi's Creations <onboarding@resend.dev>",
                 to: to,
                 subject: subject,
                 html: html
-              });
+              };
+              
+              if (attachments && attachments.length > 0) {
+                fallbackEmailData.attachments = attachments;
+              }
+              
+              const fallbackResult = await resend.emails.send(fallbackEmailData);
               
               console.log(`📋 ${emailType} fallback result:`, JSON.stringify(fallbackResult, null, 2));
               
@@ -358,13 +371,18 @@ export async function POST(req: NextRequest) {
       // Send admin notification email
       // Get tracking information from session metadata (updated after label creation)
       let adminTrackingInfo = [];
+      let shippingLabels = [];
       try {
         if (session.metadata?.tracking_info) {
           adminTrackingInfo = JSON.parse(session.metadata.tracking_info);
           console.log('📦 Tracking info for admin email:', adminTrackingInfo);
         }
+        if (session.metadata?.shipping_labels) {
+          shippingLabels = JSON.parse(session.metadata.shipping_labels);
+          console.log('📋 Shipping labels for admin email:', shippingLabels);
+        }
       } catch (e) {
-        console.log('❌ Error parsing tracking info for admin email:', e);
+        console.log('❌ Error parsing tracking/shipping info for admin email:', e);
       }
 
       // Generate admin tracking section HTML
@@ -378,6 +396,27 @@ export async function POST(req: NextRequest) {
                 <p style="margin: 4px 0;"><strong>${track.productName}</strong></p>
                 <p style="margin: 4px 0; color: #666;">Carrier: ${track.carrier}</p>
                 ${track.trackingNumber ? `<p style="margin: 4px 0; color: #4caf50;"><strong>Tracking Number:</strong> ${track.trackingNumber}</p>` : ''}
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      // Generate shipping labels section HTML
+      let adminShippingLabelsHtml = '';
+      if (shippingLabels.length > 0) {
+        adminShippingLabelsHtml = `
+          <h3 style="color:#4A3419; margin-top:24px;">📋 Shipping Labels:</h3>
+          <div style="background: #fff3cd; padding: 12px; border-radius: 8px; margin: 12px 0;">
+            <p style="margin: 8px 0; color: #666; font-size: 14px;">
+              Shipping labels have been created and are attached below. Each package will be shipped separately.
+            </p>
+            ${shippingLabels.map((label, index) => `
+              <div style="margin-bottom: 8px; padding: 8px; background: white; border-radius: 4px;">
+                <p style="margin: 4px 0;"><strong>${label.productName}</strong></p>
+                <p style="margin: 4px 0; color: #666;">Carrier: ${label.carrier}</p>
+                ${label.trackingNumber ? `<p style="margin: 4px 0; color: #4caf50;"><strong>Tracking Number:</strong> ${label.trackingNumber}</p>` : ''}
+                <p style="margin: 4px 0; font-size: 12px; color: #666;">Label #${index + 1} attached as PDF</p>
               </div>
             `).join('')}
           </div>
@@ -410,6 +449,7 @@ export async function POST(req: NextRequest) {
           </div>
           
           ${adminTrackingHtml}
+          ${adminShippingLabelsHtml}
           
           <p style="color: #4caf50;"><strong>✅ Note:</strong> Shipping labels have been automatically created and tracking numbers are included above.</p>
           
@@ -429,7 +469,47 @@ export async function POST(req: NextRequest) {
         </div>
       `;
       
-      await sendEmailWithFallback("caydiscreations@gmail.com", `🛍️ New Order Received! #${session.id}`, adminHtml, "admin");
+      // Prepare PDF attachments for admin email
+      let adminAttachments = [];
+      if (shippingLabels.length > 0) {
+        console.log('📎 Preparing PDF attachments for admin email...');
+        
+        try {
+          // Fetch PDF labels from Shippo URLs
+          for (let i = 0; i < shippingLabels.length; i++) {
+            const label = shippingLabels[i];
+            if (label.labelUrl) {
+              try {
+                console.log(`📎 Fetching PDF for ${label.productName}...`);
+                const pdfResponse = await fetch(label.labelUrl);
+                
+                if (pdfResponse.ok) {
+                  const pdfBuffer = await pdfResponse.arrayBuffer();
+                  const pdfBase64 = Buffer.from(pdfBuffer).toString('base64');
+                  
+                  adminAttachments.push({
+                    filename: `shipping-label-${label.productName.replace(/[^a-zA-Z0-9]/g, '-')}-${i + 1}.pdf`,
+                    content: pdfBase64,
+                    contentType: 'application/pdf'
+                  });
+                  
+                  console.log(`✅ PDF attachment prepared for ${label.productName}`);
+                } else {
+                  console.warn(`⚠️ Failed to fetch PDF for ${label.productName}: ${pdfResponse.status}`);
+                }
+              } catch (pdfError) {
+                console.error(`❌ Error fetching PDF for ${label.productName}:`, pdfError);
+              }
+            }
+          }
+          
+          console.log(`📎 Prepared ${adminAttachments.length} PDF attachments`);
+        } catch (attachmentError) {
+          console.error('❌ Error preparing PDF attachments:', attachmentError);
+        }
+      }
+      
+      await sendEmailWithFallback("caydiscreations@gmail.com", `🛍️ New Order Received! #${session.id}`, adminHtml, "admin", adminAttachments);
 
     } catch (err: any) {
       console.error('❌ Email sending failed:', err.message);

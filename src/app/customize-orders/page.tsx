@@ -187,7 +187,7 @@ export default function CustomizeOrdersPage() {
                 <li><b>Beanies:</b> 1-2 days</li>
                 <li><b>Scarves:</b> 2-3 days</li>
                 <li><b>Scrunchies:</b> 1 day</li>
-                <li><b>Thick yarn Blanket:</b> 2-4 days</li>
+                <li><b>Thick Yarn Blanket:</b> 2-4 days</li>
                 <li><b>Bags:</b> 2-4 days</li>
                 <li><b>Cardigans:</b> 2 weeks minimum</li>
                 <li><b>Sweaters:</b> 2 weeks minimum</li>
