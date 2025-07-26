@@ -62,12 +62,15 @@ export async function POST(req: NextRequest) {
       </div>
     `;
 
-    await resend.emails.send({
-      from: 'Caydi\'s Creations <admin@caydiscreations.com>',
+    // Try with a verified domain first, fallback to default
+    const emailResult = await resend.emails.send({
+      from: 'Caydi\'s Creations <onboarding@resend.dev>',
       to: email,
       subject: '🔐 Your Admin Access Code',
       html: emailHtml,
     });
+
+    console.log('📧 Email sent result:', emailResult);
 
     return NextResponse.json({ 
       success: true, 
