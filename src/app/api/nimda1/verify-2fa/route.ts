@@ -11,6 +11,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized email' }, { status: 403 });
     }
 
+    // Clean up expired codes first
+    const now = Date.now();
+    for (const [storedEmail, data] of twoFACodes.entries()) {
+      if (now > data.expires) {
+        twoFACodes.delete(storedEmail);
+      }
+    }
+
     // Get stored code
     const storedData = twoFACodes.get(email);
     
@@ -19,18 +27,20 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if code has expired
-    if (Date.now() > storedData.expires) {
+    if (now > storedData.expires) {
       twoFACodes.delete(email);
       return NextResponse.json({ error: '2FA code has expired. Please request a new code.' }, { status: 400 });
     }
 
     // Verify the code
     if (storedData.code !== code) {
+      console.log(`❌ Invalid 2FA code attempt: ${code} (expected: ${storedData.code})`);
       return NextResponse.json({ error: 'Invalid 2FA code' }, { status: 400 });
     }
 
-    // Code is valid - remove it from storage
+    // Code is valid - remove it from storage and log success
     twoFACodes.delete(email);
+    console.log(`✅ 2FA verification successful for ${email} with code ${code}`);
 
     return NextResponse.json({ 
       success: true, 

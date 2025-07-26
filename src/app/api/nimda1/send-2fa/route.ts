@@ -4,7 +4,7 @@ import { Resend } from 'resend';
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Store 2FA codes in memory (in production, use Redis or database)
-const twoFACodes = new Map<string, { code: string; expires: number }>();
+const twoFACodes = new Map<string, { code: string; expires: number; sentAt: number }>();
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,12 +16,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized email' }, { status: 403 });
     }
 
+    // Clean up expired codes first
+    const now = Date.now();
+    for (const [storedEmail, data] of twoFACodes.entries()) {
+      if (now > data.expires) {
+        twoFACodes.delete(storedEmail);
+      }
+    }
+
     // Generate random 6-digit code
     const code = Math.floor(100000 + Math.random() * 900000).toString();
-    const expires = Date.now() + 10 * 60 * 1000; // 10 minutes
+    const expires = now + 10 * 60 * 1000; // 10 minutes
+    const sentAt = now;
 
-    // Store the code
-    twoFACodes.set(email, { code, expires });
+    // Store the new code (this will overwrite any existing code)
+    twoFACodes.set(email, { code, expires, sentAt });
+
+    console.log(`📧 Sending 2FA code ${code} to ${email} at ${new Date(sentAt).toISOString()}`);
 
     // Send email with the code
     const emailHtml = `
