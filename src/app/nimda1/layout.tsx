@@ -5,6 +5,7 @@ import { useFirebaseAuth } from '../context/FirebaseAuthContext'
 import { useRouter } from 'next/navigation'
 import { FaSpinner } from 'react-icons/fa'
 import Image from 'next/image'
+import Link from 'next/link'
 
 export default function AdminLayout({
   children,
@@ -57,27 +58,38 @@ export default function AdminLayout({
             />
           </div>
 
-          {/* Loading Content */}
+          {/* 404 Content */}
           <div className="bg-white rounded-lg shadow-lg p-8">
-            <h1 className="text-6xl font-bold text-[#4A3419] mb-4">🔐</h1>
+            <h1 className="text-6xl font-bold text-[#4A3419] mb-4">404</h1>
             <h2 className="text-2xl font-semibold text-[#4A3419] mb-4">
-              Verifying Access
+              Page Not Found
             </h2>
             <p className="text-gray-700 mb-6">
-              Please wait while we verify your credentials...
+              Sorry, the page you're looking for doesn't exist or has been moved.
             </p>
 
-            {/* Loading Spinner */}
-            <div className="flex justify-center mb-6">
-              <FaSpinner className="animate-spin text-4xl text-[#4A3419]" />
+            {/* Action Buttons */}
+            <div className="space-y-3">
+              <Link 
+                href="/"
+                className="block w-full bg-[#4A3419] text-white py-3 px-6 rounded-lg hover:bg-[#6B4B26] transition-colors duration-300 text-center font-semibold"
+              >
+                Go Home
+              </Link>
+              <Link 
+                href="/products"
+                className="block w-full border border-[#4A3419] text-[#4A3419] py-3 px-6 rounded-lg hover:bg-[#4A3419] hover:text-white transition-colors duration-300 text-center font-semibold"
+              >
+                Browse Products
+              </Link>
             </div>
+          </div>
 
-            {/* Status */}
-            <div className="text-center">
-              <p className="text-sm text-gray-600">
-                Checking authentication...
-              </p>
-            </div>
+          {/* Footer */}
+          <div className="mt-8 text-center">
+            <p className="text-gray-600 text-sm">
+              Need help? <Link href="/contact" className="text-[#4A3419] underline hover:no-underline">Contact us</Link>
+            </p>
           </div>
         </div>
       </div>
