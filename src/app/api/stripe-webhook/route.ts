@@ -114,6 +114,12 @@ export async function POST(req: NextRequest) {
         if (labelResponse.ok) {
           const labelData = await labelResponse.json();
           console.log('✅ Shipping labels created successfully:', labelData.trackingInfo);
+          
+          // Store tracking info for use in emails
+          session.metadata = {
+            ...session.metadata,
+            tracking_info: JSON.stringify(labelData.trackingInfo || [])
+          };
         } else {
           const labelError = await labelResponse.json();
           console.error('❌ Shipping label creation failed:', labelError);
@@ -263,11 +269,12 @@ export async function POST(req: NextRequest) {
       // Send customer email
       const customerEmail = session.customer_details?.email || session.customer_email;
       if (customerEmail) {
-        // Get tracking information from session metadata
+        // Get tracking information from session metadata (updated after label creation)
         let trackingInfo = [];
         try {
           if (session.metadata?.tracking_info) {
             trackingInfo = JSON.parse(session.metadata.tracking_info);
+            console.log('📦 Tracking info for customer email:', trackingInfo);
           }
         } catch (e) {
           console.log('❌ Error parsing tracking info:', e);
@@ -349,11 +356,12 @@ export async function POST(req: NextRequest) {
       }
 
       // Send admin notification email
-      // Get tracking information from session metadata
+      // Get tracking information from session metadata (updated after label creation)
       let adminTrackingInfo = [];
       try {
         if (session.metadata?.tracking_info) {
           adminTrackingInfo = JSON.parse(session.metadata.tracking_info);
+          console.log('📦 Tracking info for admin email:', adminTrackingInfo);
         }
       } catch (e) {
         console.log('❌ Error parsing tracking info for admin email:', e);
