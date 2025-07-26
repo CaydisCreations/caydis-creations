@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { FaLock, FaEye, FaEyeSlash, FaShieldAlt, FaSpinner } from 'react-icons/fa'
 
 export default function AdminAuth() {
-  const { user, login } = useFirebaseAuth()
+  const { user, loading: authLoading, login } = useFirebaseAuth()
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
