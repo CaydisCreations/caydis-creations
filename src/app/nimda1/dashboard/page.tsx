@@ -355,8 +355,10 @@ export default function AdminDashboard() {
                         <button
                           onClick={() => {
                             shippingLabels.forEach((label: any) => {
-                              if (label.labelUrl) {
-                                window.open(label.labelUrl, '_blank');
+                              // Construct URL from transaction ID (compact format)
+                              const labelUrl = label.u ? `https://api.goshippo.com/transactions/${label.u}/label.pdf` : null;
+                              if (labelUrl) {
+                                window.open(labelUrl, '_blank');
                               }
                             });
                           }}
