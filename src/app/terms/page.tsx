@@ -43,10 +43,10 @@ export default function TermsPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F5F5DC] to-[#E8E8D0] -mt-8">
-      <div className="flex">
+    <div className="min-h-screen bg-gradient-to-br from-[#F5F5DC] to-[#E8E8D0]">
+      <div className="flex pt-8">
         {/* Collapsible Sidebar */}
-        <div className={`${sidebarOpen ? 'w-64' : 'w-16'} bg-white shadow-lg transition-all duration-300 h-screen sticky top-0 z-50 overflow-y-auto`}>
+        <div className={`${sidebarOpen ? 'w-64' : 'w-16'} bg-white shadow-lg transition-all duration-300 h-[calc(100vh-2rem)] sticky top-8 z-40 overflow-y-auto`}>
           <div className="p-4">
             <button
               onClick={toggleSidebar}
@@ -125,7 +125,7 @@ export default function TermsPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="bg-white rounded-lg shadow-lg p-8"
+              className="bg-white rounded-lg shadow-lg p-8 min-h-[calc(100vh-4rem)] overflow-y-auto"
             >
               <div className="text-center mb-8">
                 <h1 className="text-4xl font-bold text-[#4A3419] mb-4">Terms of Service</h1>
