@@ -90,6 +90,34 @@ export default function About() {
         </div>
       </div>
 
+      {/* Meet the Developer Section */}
+      <div className="grid md:grid-cols-2 gap-8 items-center bg-white p-8 rounded-lg shadow-md">
+        <div className="relative h-96">
+          <img
+            src="https://bbk12e1-cdn.myschoolcdn.com/ftpimages/82/news/orig_news1474039_1479351.jpg"
+            alt="Pearson - Developer"
+            className="object-cover rounded-xl shadow-lg w-full h-full"
+          />
+        </div>
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-[#4A3419]">Meet the Developer</h2>
+          <p className="text-[#4A3419] leading-relaxed">
+            My name is Pearson and I am Caydi's brother. I play football at Brown and like to develop websites. It's been awesome working with my sister and hopefully I can help her business grow.
+          </p>
+          <p className="text-[#4A3419] leading-relaxed">
+            If you guys want to learn more about what I do, here's a link to my work: 
+            <a 
+              href="https://hillwebworks.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-[#8B4513] hover:text-[#4A3419] font-medium underline transition-colors"
+            >
+              hillwebworks.com
+            </a>
+          </p>
+        </div>
+      </div>
+
       <div className="text-center space-y-4">
         <h2 className="text-2xl font-bold text-[#4A3419]">Ready to Start Shopping?</h2>
         <p className="text-[#4A3419]">
