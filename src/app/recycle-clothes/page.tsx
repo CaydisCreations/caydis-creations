@@ -173,13 +173,15 @@ export default function RecycleClothesPage() {
                       <li>• Cotton dresses and skirts</li>
                       <li>• Natural fiber clothing</li>
                       <li>• Thin blankets</li>
+                      <li>• Jeans/denim</li>
+                      <li>• Sweaters</li>
+                      <li>• Hoodies</li>
+                      <li>• Sweatpants (with no seams)</li>
                     </ul>
                   </div>
                   <div>
                     <h4 className="text-xl font-bold text-[#4A3419] mb-4">❌ Not Suitable:</h4>
                     <ul className="space-y-2 text-[#4A3419]">
-                      <li>• Jeans/denim</li>
-                      <li>• Thick sweaters</li>
                       <li>• Items with lots of seams or heavy embellishments</li>
                       <li>• Very thick or stiff fabrics</li>
                       <li>• Items with large prints/logos</li>
@@ -251,12 +253,17 @@ export default function RecycleClothesPage() {
                 </div>
                 <div className="mt-8 p-6 bg-[#FFF5E6] border border-[#E8C39E] rounded-lg text-[#4A3419]">
                   <h4 className="text-xl font-bold mb-2">Pricing & Example</h4>
-                  <ul className="list-disc ml-6 mb-2">
-                    <li>Every piece of clothing being turned into yarn: <b>$5 per item</b></li>
-                    <li>If you want an item made and we need to provide more balls of yarn made from clothes: <b>$10 per extra ball</b></li>
-                    <li><b>Example (Duffle Bag):</b> 13 shirts/balls of yarn used → 13 x $5 = $65. Made into a duffle bag: +$15. <b>Total: $80</b></li>
-                  </ul>
-                  <div className="mt-2">
+                  <div className="space-y-2">
+                    <p className="font-bold">Cost:</p>
+                    <ul className="list-disc ml-6 mb-4">
+                      <li>Shirts: $5</li>
+                      <li>Hoodies, sweats, jeans: $7</li>
+                    </ul>
+                    <p className="mb-4">If you have any questions about specific pieces of clothes, please reach out to us!</p>
+                    <p className="mb-4">If you want an item made and we need to provide more balls of yarn made from clothes: $10 per extra ball</p>
+                    <p className="font-bold">Example (Duffle Bag): 13 shirts/balls of yarn used → 13 x $5 = $65. Made into a duffle bag: +$15. Total: $80</p>
+                  </div>
+                  <div className="mt-4">
                     <b>Additional Item Costs:</b>
                     <ul className="list-disc ml-6">
                       <li>Coaster: +$5</li>
@@ -298,7 +305,7 @@ export default function RecycleClothesPage() {
                 </div>
                 <div className="text-[#4A3419] text-lg">
                   <p className="mb-2"><b>This duffle bag was made out of t-shirts (mainly cotton, some polyester).</b></p>
-                  <p className="mb-2">It was made out of about 13 shirts/balls of yarn.</p>
+                  <p className="mb-2">It was made out of about 13 shirts/balls of yarn. <b>13 balls is enough for a duffle bag that is perfect for an overnight bag.</b></p>
                   <p className="mb-2">Plain shirts and shirts without side seams work best for this type of project.</p>
                   <div className="mt-6 p-6 bg-[#FFF5E6] border border-[#E8C39E] rounded-lg text-[#4A3419] max-w-2xl">
                     <span className="font-bold">Example (Duffle Bag):</span> 13 shirts/balls of yarn used → 13 x $5 = $65. Made into a duffle bag: +$15. <span className="font-bold">Total: $80</span>
