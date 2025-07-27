@@ -27,10 +27,11 @@ function HomeContent() {
 
   useEffect(() => {
     if (!allProducts.length) return;
-    // Feature specific products: Scrunchie Set 2 and Beanie - Blue
+    // Feature specific products: Scrunchie Set 2, Beanie - Blue, and a bag
     const scrunchieSet2 = allProducts.find(p => p.name === 'Scrunchie Set 2');
     const beanieBlue = allProducts.find(p => p.name === 'Beanie - Blue');
-    setFeaturedProducts([scrunchieSet2, beanieBlue].filter(Boolean));
+    const bag = allProducts.find(p => p.metadata?.category === 'Bags' && p.name !== 'Shoulder Bag - Brown');
+    setFeaturedProducts([scrunchieSet2, beanieBlue, bag].filter(Boolean));
   }, [allProducts]);
 
   const handleProductClick = (product) => {
@@ -175,11 +176,11 @@ function HomeContent() {
             See Products <span aria-hidden="true">→</span>
           </Link>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {isLoading ? (
-            <div className="col-span-2 text-center text-[#4A3419] text-xl py-12">Loading featured products...</div>
+            <div className="col-span-3 text-center text-[#4A3419] text-xl py-12">Loading featured products...</div>
           ) : featuredProducts.length === 0 ? (
-            <div className="col-span-2 text-center text-[#4A3419] text-xl py-12">No featured products found.</div>
+            <div className="col-span-3 text-center text-[#4A3419] text-xl py-12">No featured products found.</div>
           ) : featuredProducts.map((product, index) => (
             <motion.div 
               key={product.id}
