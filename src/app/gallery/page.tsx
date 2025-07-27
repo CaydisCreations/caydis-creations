@@ -197,7 +197,7 @@ const mediaItems: MediaItem[] = [
     type: 'image-group',
     url: 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/duffleBag/IMG_6990.jpg',
     images: [
-      '/duffleBag/IMG_6990.jpg',      
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/duffleBag/IMG_6990.jpg',      
       'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/duffleBag/IMG_6988.jpg',
       'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/duffleBag/IMG_6989.jpg',
       'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/duffleBag/IMG_6986.jpg',
