@@ -41,7 +41,7 @@ const mediaItems: MediaItem[] = [
       'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/BrownHats/IMG_5914.jpeg',
     ],
     title: 'All Beanies',
-    description: 'A collection of all beanies.',
+    description: 'hand crochet beanie made from acrylic yarn and sewed on logo patch',
     categories: ['Beanies'],
     tags: ['beanies', 'collection'],
     date: '2024-06-10',
@@ -56,7 +56,7 @@ const mediaItems: MediaItem[] = [
       'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/BrownHats/IMG_5919.jpeg',
     ],
     title: 'Brown Brown Beanie',
-    description: 'A collection of brown brown beanies.',
+    description: 'hand crochet beanie made from acrylic yarn and sewed on logo patch',
     categories: ['Beanies'],
     tags: ['brown', 'beanies'],
     date: '2024-06-10',
@@ -72,7 +72,7 @@ const mediaItems: MediaItem[] = [
       'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/BrownHats/IMG_5923.jpeg',
     ],
     title: 'White Beanie',
-    description: 'A collection of white beanies.',
+    description: 'hand crochet beanie made from acrylic yarn and sewed on logo patch',
     categories: ['Beanies'],
     tags: ['white', 'beanies'],
     date: '2024-06-10',
@@ -86,9 +86,29 @@ const mediaItems: MediaItem[] = [
       'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/BrownHats/IMG_5916.jpeg',
     ],
     title: 'Black Brown Beanie',
-    description: 'A collection of black brown beanies.',
+    description: 'hand crochet beanie made from acrylic yarn and sewed on logo patch',
     categories: ['Beanies'],
     tags: ['black', 'beanies'],
+    date: '2024-06-10',
+  },
+  {
+    id: 'blue-beanie',
+    type: 'image',
+    url: 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Beanies/blue1/IMG_6109.jpeg',
+    title: 'Blue Beanie',
+    description: 'Handmade blue beanie made from acrylic yarn',
+    categories: ['Beanies'],
+    tags: ['blue', 'beanie', 'acrylic'],
+    date: '2024-06-10',
+  },
+  {
+    id: 'multicolor-beanie',
+    type: 'image',
+    url: 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Beanies/green_blue_white_brown/IMG_6104.jpeg',
+    title: 'Multi Color Beanie',
+    description: 'Handmade multi color beanie made from acrylic yarn',
+    categories: ['Beanies'],
+    tags: ['multicolor', 'beanie', 'acrylic', 'blue', 'green', 'white', 'cream'],
     date: '2024-06-10',
   },
   {
@@ -100,7 +120,7 @@ const mediaItems: MediaItem[] = [
       'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/blanket_squares_pink_purple_white/IMG_9401.JPG',
     ],
     title: 'Blanket - Pink, Purple, White Squares',
-    description: 'A beautiful blanket made with pink, purple, and white squares.',
+    description: 'Handmade baby blanket made from polyester yarn and a sewed on back',
     categories: ['Blankets'],
     tags: ['blanket', 'pink', 'purple', 'white', 'squares'],
     date: '2024-06-10',
@@ -116,7 +136,7 @@ const mediaItems: MediaItem[] = [
       'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/beanie_dark_colorful/IMG_5928.jpeg',
     ],
     title: 'Beanie - Dark Colorful',
-    description: 'A collection of dark, colorful beanies.',
+    description: 'Handmade beanie made from multicolor acrylic yarn',
     categories: ['Beanies'],
     tags: ['beanie', 'dark', 'colorful'],
     date: '2024-06-10',
@@ -126,20 +146,22 @@ const mediaItems: MediaItem[] = [
     type: 'video',
     url: '/greenCoatVideo.mp4',
     title: 'Solid Green Crochet Cardigan',
-    description: 'A beautiful solid green crochet cardigan, perfect as a top, sweatshirt, or light cardigan. Versatile and stylish design.',
+    description: 'A beautiful solid green crochet cardigan. This cardigan was the first one I ever made. It is perfect as a top or light cardigan. Versatile and stylish design.',
     categories: ['Clothing', 'Cardigans', 'Tops'],
     tags: ['green', 'solid', 'cardigan', 'sweatshirt', 'top', 'versatile', 'spring', 'fall'],
-    date: '2024-03-16'
+    date: '2024-03-16',
+    thumbnail: 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/green_cardigan_thumbnail.jpg'
   },
   {
     id: '4',
     type: 'video',
     url: '/blueWhiteCoatVideo.mp4',
     title: 'Blue & White Patterned Cardigan',
-    description: 'Stunning blue and sky blue patterned crochet cardigan with white accents. Perfect as a statement piece or everyday wear.',
+    description: 'Stunning blue and sky blue patterned crochet cardigan with white accents made from wool yarn. Perfect as a statement piece or everyday wear.',
     categories: ['Clothing', 'Cardigans', 'Patterns'],
     tags: ['blue', 'skyblue', 'white', 'pattern', 'cardigan', 'sweatshirt', 'design', 'colorful'],
-    date: '2024-03-16'
+    date: '2024-03-16',
+    thumbnail: 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/blue_white_cardigan_thumbnail.jpg'
   },
   {
     id: 'recycled-yarn',
@@ -149,7 +171,7 @@ const mediaItems: MediaItem[] = [
       'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Scrunchies/5956c54e-731a-4c33-8490-130c94bb2ed2.jpeg',
     ],
     title: 'Recycled Yarn Collection',
-    description: 'photos, recycled yarn using clothes like shirts, sweatpants, hoodie',
+    description: 'handmade yarn from clothes. Perfect when you need strong and thick yarn.',
     categories: ['Yarn', 'Recycled', 'Sustainable'],
     tags: ['recycled', 'yarn', 'upcycled', 'shirts', 'sweatpants', 'hoodie', 'eco-friendly'],
     date: '2024-03-17',
@@ -165,7 +187,7 @@ const mediaItems: MediaItem[] = [
       'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Scrunchies/c4696fba-0026-4f00-ba40-8eb9bc1d24a0.jpeg',
     ],
     title: 'Scrunchie Collection',
-    description: 'A collection of handmade acrylic scrunchies in a variety of colors and styles.',
+    description: 'A collection of handmade scrunchies in a variety of colors and types of yarn. Scroll through!',
     categories: ['Scrunchies', 'Accessories'],
     tags: ['scrunchies', 'hair', 'accessories', 'handmade'],
     date: '2024-07-04',
@@ -412,6 +434,7 @@ function GalleryContent() {
                       loop
                       autoPlay
                       playsInline
+                      muted
                       className="w-full h-full object-contain"
                       poster={selectedMedia.thumbnail}
                     />
