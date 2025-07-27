@@ -15,7 +15,7 @@ export default function CustomizeOrdersPage() {
 
   return (
     <div className="min-h-screen bg-[#FFF5E6] py-12">
-      <div className="max-w-4xl mx-auto px-4">
+      <div className="max-w-4xl mx-auto px-4 pt-8">
         {/* Hero Section */}
         <motion.section 
           initial={{ opacity: 0, y: 20 }}

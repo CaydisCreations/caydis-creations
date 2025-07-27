@@ -3,7 +3,7 @@ import Image from 'next/image';
 
 export default function ShippingServicesPage() {
   return (
-    <div className="min-h-screen bg-[#FFF5E6]">
+    <div className="min-h-screen bg-[#FFF5E6] pt-8">
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-[#E8C39E]">
         <div className="max-w-6xl mx-auto px-6 py-8">

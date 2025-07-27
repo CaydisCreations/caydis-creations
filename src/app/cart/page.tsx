@@ -508,7 +508,7 @@ function CartContent({ onCheckout, cartItems, setLoading, loading, couponCode, s
   }
 
   return (
-    <div className="max-w-4xl mx-auto mt-24">
+    <div className="max-w-4xl mx-auto mt-24 pt-8">
       <motion.header 
         className="text-center"
         initial={{ opacity: 0, y: -20 }}

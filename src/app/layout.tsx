@@ -31,7 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <CartProviderWrapper>
           <FirebaseAuthProvider>
             <NavBar />
-            <div className="max-w-7xl mx-auto px-4">
+            <div className="max-w-7xl mx-auto px-4 pt-8">
               {children}
             </div>
             <footer className="bg-[#4A3419] text-[#FFF5E6] p-8 mt-8 shadow-inner">

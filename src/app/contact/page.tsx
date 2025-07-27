@@ -4,7 +4,7 @@ import React from 'react'
 
 export default function Contact() {
   return (
-    <div className="min-h-[60vh] flex flex-col items-center justify-center text-center">
+    <div className="min-h-[60vh] flex flex-col items-center justify-center text-center pt-8">
       <h1 className="text-4xl font-bold text-[#4A3419] mb-4">Contact Us</h1>
       <p className="text-lg text-[#4A3419] mb-8">We'd love to hear from you! Please use the forms below to get in touch or leave feedback. You can also email us at <a href="mailto:caydiscreations@gmail.com" className="underline hover:text-[#6B4B26]">caydiscreations@gmail.com</a>.</p>
       <div className="flex flex-col md:flex-row gap-6 justify-center">

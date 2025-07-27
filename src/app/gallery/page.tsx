@@ -247,7 +247,7 @@ function GalleryContent() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pt-8">
       <motion.header 
         className="text-center"
         initial={{ opacity: 0, y: -20 }}
