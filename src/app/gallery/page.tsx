@@ -150,7 +150,7 @@ const mediaItems: MediaItem[] = [
     categories: ['Clothing', 'Cardigans', 'Tops'],
     tags: ['green', 'solid', 'cardigan', 'sweatshirt', 'top', 'versatile', 'spring', 'fall'],
     date: '2024-03-16',
-    thumbnail: 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/green_cardigan_thumbnail.jpg'
+    thumbnail: 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Cardigan/green/green_cardigan_thumbnail.jpg'
   },
   {
     id: '4',
@@ -161,7 +161,7 @@ const mediaItems: MediaItem[] = [
     categories: ['Clothing', 'Cardigans', 'Patterns'],
     tags: ['blue', 'skyblue', 'white', 'pattern', 'cardigan', 'sweatshirt', 'design', 'colorful'],
     date: '2024-03-16',
-    thumbnail: 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/blue_white_cardigan_thumbnail.jpg'
+    thumbnail: 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Cardigan/blue_white/blue_white_cardigan_thumbnail.jpg'
   },
   {
     id: 'recycled-yarn',
@@ -195,12 +195,12 @@ const mediaItems: MediaItem[] = [
   {
     id: 'duffle-bag',
     type: 'image-group',
-    url: '/duffleBag/IMG_6990.jpg',
+    url: 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/duffleBag/IMG_6990.jpg',
     images: [
       '/duffleBag/IMG_6990.jpg',      
-      '/duffleBag/IMG_6988.jpg',
-      '/duffleBag/IMG_6989.jpg',
-      '/duffleBag/IMG_6986.jpg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/duffleBag/IMG_6988.jpg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/duffleBag/IMG_6989.jpg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/duffleBag/IMG_6986.jpg',
     ],
     title: 'Duffle Bag',
     description: 'A duffle bag made from recycled t-shirts. See the Recycled Products page for more details.',
