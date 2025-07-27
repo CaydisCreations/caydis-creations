@@ -43,7 +43,7 @@ export default function TermsPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F5F5DC] to-[#E8E8D0]">
+    <div className="min-h-screen bg-gradient-to-br from-[#F5F5DC] to-[#E8E8D0] -mt-8">
       <div className="flex">
         {/* Collapsible Sidebar */}
         <div className={`${sidebarOpen ? 'w-64' : 'w-16'} bg-white shadow-lg transition-all duration-300 h-screen sticky top-0 z-50 overflow-y-auto`}>
