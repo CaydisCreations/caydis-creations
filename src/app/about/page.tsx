@@ -102,7 +102,7 @@ export default function About() {
         <div className="space-y-4">
           <h2 className="text-2xl font-bold text-[#4A3419]">Meet the Developer</h2>
           <p className="text-[#4A3419] leading-relaxed">
-            My name is Pearson and I am Caydi's brother. I play football at Brown and like to develop websites. It's been awesome working with my sister and hopefully I can help her business grow.
+            My name is Pearson and I am Caydi's brother. I play football at Brown and like to develop websites. It's been awesome working with my sister and I can't wait to see her business grow!
           </p>
           <p className="text-[#4A3419] leading-relaxed">
             If you guys want to learn more about what I do, here's a link to my work: 
@@ -112,7 +112,7 @@ export default function About() {
               rel="noopener noreferrer"
               className="text-[#8B4513] hover:text-[#4A3419] font-medium underline transition-colors"
             >
-              hillwebworks.com
+              HillWebWorks.com
             </a>
           </p>
         </div>
