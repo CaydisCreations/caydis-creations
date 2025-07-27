@@ -1,11 +1,12 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 export default function TermsPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [activeSection, setActiveSection] = useState('returns-exchanges');
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -17,6 +18,29 @@ export default function TermsPage() {
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
+
+  // Intersection Observer to track which section is currently visible
+  useEffect(() => {
+    const observerOptions = {
+      rootMargin: '-20% 0px -70% 0px',
+      threshold: 0
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setActiveSection(entry.target.id);
+        }
+      });
+    }, observerOptions);
+
+    const sections = document.querySelectorAll('section[id]');
+    sections.forEach((section) => observer.observe(section));
+
+    return () => {
+      sections.forEach((section) => observer.unobserve(section));
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F5F5DC] to-[#E8E8D0]">
@@ -33,41 +57,61 @@ export default function TermsPage() {
             
             {sidebarOpen && (
               <div className="space-y-2">
-                <h3 className="text-lg font-bold text-[#4A3419] mb-4">Quick Navigation</h3>
+                <h3 className="text-lg font-bold text-[#4A3419] mb-4">Contents</h3>
                 
                 <button
                   onClick={() => scrollToSection('returns-exchanges')}
-                  className="w-full text-left p-3 rounded-lg hover:bg-[#F8F8F0] text-[#4A3419] font-medium transition-colors duration-200"
+                  className={`w-full text-left p-3 rounded-lg transition-all duration-200 font-medium ${
+                    activeSection === 'returns-exchanges'
+                      ? 'bg-blue-100 text-blue-700 border-l-4 border-blue-500'
+                      : 'hover:bg-[#F8F8F0] text-[#4A3419]'
+                  }`}
                 >
-                  Returns & Exchanges
+                  1. Returns & Exchanges
                 </button>
                 
                 <button
                   onClick={() => scrollToSection('privacy-policy')}
-                  className="w-full text-left p-3 rounded-lg hover:bg-[#F8F8F0] text-[#4A3419] font-medium transition-colors duration-200"
+                  className={`w-full text-left p-3 rounded-lg transition-all duration-200 font-medium ${
+                    activeSection === 'privacy-policy'
+                      ? 'bg-blue-100 text-blue-700 border-l-4 border-blue-500'
+                      : 'hover:bg-[#F8F8F0] text-[#4A3419]'
+                  }`}
                 >
-                  Privacy Policy
+                  2. Privacy Policy
                 </button>
                 
                 <button
                   onClick={() => scrollToSection('custom-orders')}
-                  className="w-full text-left p-3 rounded-lg hover:bg-[#F8F8F0] text-[#4A3419] font-medium transition-colors duration-200"
+                  className={`w-full text-left p-3 rounded-lg transition-all duration-200 font-medium ${
+                    activeSection === 'custom-orders'
+                      ? 'bg-blue-100 text-blue-700 border-l-4 border-blue-500'
+                      : 'hover:bg-[#F8F8F0] text-[#4A3419]'
+                  }`}
                 >
-                  Custom Orders
+                  3. Custom Orders
                 </button>
                 
                 <button
                   onClick={() => scrollToSection('recycling')}
-                  className="w-full text-left p-3 rounded-lg hover:bg-[#F8F8F0] text-[#4A3419] font-medium transition-colors duration-200"
+                  className={`w-full text-left p-3 rounded-lg transition-all duration-200 font-medium ${
+                    activeSection === 'recycling'
+                      ? 'bg-blue-100 text-blue-700 border-l-4 border-blue-500'
+                      : 'hover:bg-[#F8F8F0] text-[#4A3419]'
+                  }`}
                 >
-                  Recycling Services
+                  4. Recycling Services
                 </button>
                 
                 <button
                   onClick={() => scrollToSection('media-marketing')}
-                  className="w-full text-left p-3 rounded-lg hover:bg-[#F8F8F0] text-[#4A3419] font-medium transition-colors duration-200"
+                  className={`w-full text-left p-3 rounded-lg transition-all duration-200 font-medium ${
+                    activeSection === 'media-marketing'
+                      ? 'bg-blue-100 text-blue-700 border-l-4 border-blue-500'
+                      : 'hover:bg-[#F8F8F0] text-[#4A3419]'
+                  }`}
                 >
-                  Media & Marketing
+                  5. Media & Marketing
                 </button>
               </div>
             )}
@@ -91,7 +135,7 @@ export default function TermsPage() {
               {/* Returns & Exchanges Section */}
               <section id="returns-exchanges" className="mb-12">
                 <h2 className="text-2xl font-semibold text-[#4A3419] mb-6 border-b-2 border-[#8B4513] pb-2">
-                  Returns & Exchanges
+                  1. Returns & Exchanges
                 </h2>
                 
                 <div className="space-y-6">
@@ -128,7 +172,7 @@ export default function TermsPage() {
               {/* Privacy Policy Section */}
               <section id="privacy-policy" className="mb-12">
                 <h2 className="text-2xl font-semibold text-[#4A3419] mb-6 border-b-2 border-[#8B4513] pb-2">
-                  Privacy Policy
+                  2. Privacy Policy
                 </h2>
                 
                 <div className="bg-[#F8F8F0] p-6 rounded-lg">
@@ -141,7 +185,7 @@ export default function TermsPage() {
               {/* Custom Orders Section */}
               <section id="custom-orders" className="mb-12">
                 <h2 className="text-2xl font-semibold text-[#4A3419] mb-6 border-b-2 border-[#8B4513] pb-2">
-                  Custom Orders: Order and Payment Terms
+                  3. Custom Orders: Order and Payment Terms
                 </h2>
                 
                 <div className="space-y-6">
@@ -185,7 +229,7 @@ export default function TermsPage() {
               {/* Recycling Section */}
               <section id="recycling" className="mb-12">
                 <h2 className="text-2xl font-semibold text-[#4A3419] mb-6 border-b-2 border-[#8B4513] pb-2">
-                  Recycling: Order and Payment Terms
+                  4. Recycling: Order and Payment Terms
                 </h2>
                 
                 <div className="space-y-6">
@@ -280,7 +324,7 @@ export default function TermsPage() {
               {/* Media and Marketing Section */}
               <section id="media-marketing" className="mb-8">
                 <h2 className="text-2xl font-semibold text-[#4A3419] mb-6 border-b-2 border-[#8B4513] pb-2">
-                  Media and Marketing
+                  5. Media and Marketing
                 </h2>
                 
                 <div className="bg-[#F8F8F0] p-6 rounded-lg">
