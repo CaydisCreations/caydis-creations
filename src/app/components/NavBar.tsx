@@ -85,6 +85,10 @@ export default function NavBar() {
               Contact
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#E8C39E] group-hover:w-full transition-all duration-300"></span>
             </Link>
+            <Link href="/terms" className="hover:text-[#E8C39E] relative group py-2 cursor-pointer">
+              Terms
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#E8C39E] group-hover:w-full transition-all duration-300"></span>
+            </Link>
             <Link href="/shipping-services" className="hover:text-[#E8C39E] relative group py-2 cursor-pointer">
               Shipping
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#E8C39E] group-hover:w-full transition-all duration-300"></span>
@@ -147,6 +151,7 @@ export default function NavBar() {
               <div className="border-t border-[#E8C39E] my-2"></div>
             <Link href="/about" className="py-2 text-lg font-bold hover:text-[#E8C39E] cursor-pointer" onClick={() => setMobileMenuOpen(false)}>About</Link>
             <Link href="/contact" className="py-2 text-lg font-bold hover:text-[#E8C39E] cursor-pointer" onClick={() => setMobileMenuOpen(false)}>Contact</Link>
+            <Link href="/terms" className="py-2 text-lg font-bold hover:text-[#E8C39E] cursor-pointer" onClick={() => setMobileMenuOpen(false)}>Terms</Link>
             <Link href="/shipping-services" className="py-2 text-lg font-bold hover:text-[#E8C39E] cursor-pointer" onClick={() => setMobileMenuOpen(false)}>Shipping</Link>
             </nav>
         </div>
