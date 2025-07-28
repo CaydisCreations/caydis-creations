@@ -217,6 +217,10 @@ export async function POST(req: NextRequest) {
     
     console.log('shipping-rates: validRates:', validRates);
     
+    // Log information about available carriers
+    const availableCarriers = [...new Set(validRates.map(rate => rate.provider))];
+    console.log('shipping-rates: Available carriers:', availableCarriers);
+    
     // If no valid rates found, provide helpful error message
     if (validRates.length === 0) {
       const errors = shipments

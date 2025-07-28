@@ -157,207 +157,227 @@ function ShippingModal({ open, onClose, onConfirm, initialAddress = undefined, c
   if (!open) return null;
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-lg relative">
+      <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-6xl relative">
         <button className="absolute top-2 right-2 text-[#4A3419]" onClick={onClose}><FaTimes size={20} /></button>
-        <h2 className="text-2xl font-bold mb-4 text-[#4A3419]">Shipping Address</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        {/* Side by side layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          
+          {/* Left side - Shipping Address */}
           <div>
-            <input name="name" value={address.name} onChange={handleAddressChange} placeholder="Full Name" className="border p-2 rounded" />
-            {fieldErrors.name && <div className="text-xs text-red-600">{fieldErrors.name}</div>}
+            <h2 className="text-2xl font-bold mb-4 text-[#4A3419]">Shipping Address</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <input name="name" value={address.name} onChange={handleAddressChange} placeholder="Full Name" className="border p-2 rounded w-full" />
+                {fieldErrors.name && <div className="text-xs text-red-600">{fieldErrors.name}</div>}
+              </div>
+              <div>
+                <input name="email" value={address.email} onChange={handleAddressChange} placeholder="Email" className="border p-2 rounded w-full" />
+                {fieldErrors.email && <div className="text-xs text-red-600">{fieldErrors.email}</div>}
+              </div>
+              <div>
+                <input name="phone" value={address.phone} onChange={handleAddressChange} placeholder="Phone" className="border p-2 rounded w-full" />
+                {fieldErrors.phone && <div className="text-xs text-red-600">{fieldErrors.phone}</div>}
+              </div>
+              <div>
+                <input name="line1" value={address.line1} onChange={handleAddressChange} placeholder="Address Line 1" className="border p-2 rounded w-full" />
+                {fieldErrors.line1 && <div className="text-xs text-red-600">{fieldErrors.line1}</div>}
+              </div>
+              <div className="md:col-span-2">
+                <input name="line2" value={address.line2} onChange={handleAddressChange} placeholder="Address Line 2" className="border p-2 rounded w-full" />
+              </div>
+              <div>
+                <input name="city" value={address.city} onChange={handleAddressChange} placeholder="City" className="border p-2 rounded w-full" />
+                {fieldErrors.city && <div className="text-xs text-red-600">{fieldErrors.city}</div>}
+              </div>
+              <div>
+                <input name="state" value={address.state} onChange={handleAddressChange} placeholder="State" className="border p-2 rounded w-full" />
+                {fieldErrors.state && <div className="text-xs text-red-600">{fieldErrors.state}</div>}
+              </div>
+              <div>
+                <input name="postal_code" value={address.postal_code} onChange={handleAddressChange} placeholder="Postal Code" className="border p-2 rounded w-full" />
+                {fieldErrors.postal_code && <div className="text-xs text-red-600">{fieldErrors.postal_code}</div>}
+              </div>
+              <div>
+                <select name="country" value={address.country} onChange={handleAddressChange} className="border p-2 rounded w-full">
+                  <option value="US">United States</option>
+                  <option value="CA">Canada</option>
+                  <option value="GB">United Kingdom</option>
+                  <option value="AU">Australia</option>
+                  <option value="DE">Germany</option>
+                  <option value="FR">France</option>
+                  <option value="IT">Italy</option>
+                  <option value="ES">Spain</option>
+                  <option value="JP">Japan</option>
+                  <option value="CN">China</option>
+                  <option value="IN">India</option>
+                  <option value="MX">Mexico</option>
+                  <option value="BR">Brazil</option>
+                  <option value="NL">Netherlands</option>
+                  <option value="SE">Sweden</option>
+                  <option value="CH">Switzerland</option>
+                  <option value="IE">Ireland</option>
+                  <option value="NZ">New Zealand</option>
+                  <option value="SG">Singapore</option>
+                  <option value="KR">South Korea</option>
+                  <option value="ZA">South Africa</option>
+                  <option value="BE">Belgium</option>
+                  <option value="DK">Denmark</option>
+                  <option value="NO">Norway</option>
+                  <option value="FI">Finland</option>
+                  <option value="AT">Austria</option>
+                  <option value="PL">Poland</option>
+                  <option value="PT">Portugal</option>
+                  <option value="RU">Russia</option>
+                  <option value="TR">Turkey</option>
+                  <option value="IL">Israel</option>
+                  <option value="AE">United Arab Emirates</option>
+                  <option value="AR">Argentina</option>
+                  <option value="CL">Chile</option>
+                  <option value="CO">Colombia</option>
+                  <option value="TH">Thailand</option>
+                  <option value="MY">Malaysia</option>
+                  <option value="PH">Philippines</option>
+                  <option value="ID">Indonesia</option>
+                  <option value="SA">Saudi Arabia</option>
+                  <option value="EG">Egypt</option>
+                  <option value="GR">Greece</option>
+                  <option value="CZ">Czech Republic</option>
+                  <option value="HU">Hungary</option>
+                  <option value="RO">Romania</option>
+                  <option value="SK">Slovakia</option>
+                  <option value="SI">Slovenia</option>
+                  <option value="HR">Croatia</option>
+                  <option value="BG">Bulgaria</option>
+                  <option value="EE">Estonia</option>
+                  <option value="LV">Latvia</option>
+                  <option value="LT">Lithuania</option>
+                  <option value="LU">Luxembourg</option>
+                  <option value="MT">Malta</option>
+                  <option value="CY">Cyprus</option>
+                </select>
+                {fieldErrors.country && <div className="text-xs text-red-600">{fieldErrors.country}</div>}
+              </div>
+            </div>
+            <button className="mt-4 px-4 py-2 bg-[#4A3419] text-white rounded hover:bg-[#6B4B26] disabled:opacity-60" onClick={fetchRates} disabled={fetchingRates || !isAddressValid}>
+              {fetchingRates ? 'Fetching Rates...' : 'Get Shipping Rates'}
+            </button>
+            {addressError && <div className="text-red-600 mt-2">{addressError}</div>}
           </div>
+          
+          {/* Right side - Shipping Rates */}
           <div>
-            <input name="email" value={address.email} onChange={handleAddressChange} placeholder="Email" className="border p-2 rounded" />
-            {fieldErrors.email && <div className="text-xs text-red-600">{fieldErrors.email}</div>}
-          </div>
-          <div>
-            <input name="phone" value={address.phone} onChange={handleAddressChange} placeholder="Phone" className="border p-2 rounded" />
-            {fieldErrors.phone && <div className="text-xs text-red-600">{fieldErrors.phone}</div>}
-          </div>
-          <div>
-            <input name="line1" value={address.line1} onChange={handleAddressChange} placeholder="Address Line 1" className="border p-2 rounded" />
-            {fieldErrors.line1 && <div className="text-xs text-red-600">{fieldErrors.line1}</div>}
-          </div>
-          <div>
-            <input name="line2" value={address.line2} onChange={handleAddressChange} placeholder="Address Line 2" className="border p-2 rounded" />
-          </div>
-          <div>
-            <input name="city" value={address.city} onChange={handleAddressChange} placeholder="City" className="border p-2 rounded" />
-            {fieldErrors.city && <div className="text-xs text-red-600">{fieldErrors.city}</div>}
-          </div>
-          <div>
-            <input name="state" value={address.state} onChange={handleAddressChange} placeholder="State" className="border p-2 rounded" />
-            {fieldErrors.state && <div className="text-xs text-red-600">{fieldErrors.state}</div>}
-          </div>
-          <div>
-            <input name="postal_code" value={address.postal_code} onChange={handleAddressChange} placeholder="Postal Code" className="border p-2 rounded" />
-            {fieldErrors.postal_code && <div className="text-xs text-red-600">{fieldErrors.postal_code}</div>}
-          </div>
-          <div>
-            <select name="country" value={address.country} onChange={handleAddressChange} className="border p-2 rounded">
-              <option value="US">United States</option>
-              <option value="CA">Canada</option>
-              <option value="GB">United Kingdom</option>
-              <option value="AU">Australia</option>
-              <option value="DE">Germany</option>
-              <option value="FR">France</option>
-              <option value="IT">Italy</option>
-              <option value="ES">Spain</option>
-              <option value="JP">Japan</option>
-              <option value="CN">China</option>
-              <option value="IN">India</option>
-              <option value="MX">Mexico</option>
-              <option value="BR">Brazil</option>
-              <option value="NL">Netherlands</option>
-              <option value="SE">Sweden</option>
-              <option value="CH">Switzerland</option>
-              <option value="IE">Ireland</option>
-              <option value="NZ">New Zealand</option>
-              <option value="SG">Singapore</option>
-              <option value="KR">South Korea</option>
-              <option value="ZA">South Africa</option>
-              <option value="BE">Belgium</option>
-              <option value="DK">Denmark</option>
-              <option value="NO">Norway</option>
-              <option value="FI">Finland</option>
-              <option value="AT">Austria</option>
-              <option value="PL">Poland</option>
-              <option value="PT">Portugal</option>
-              <option value="RU">Russia</option>
-              <option value="TR">Turkey</option>
-              <option value="IL">Israel</option>
-              <option value="AE">United Arab Emirates</option>
-              <option value="AR">Argentina</option>
-              <option value="CL">Chile</option>
-              <option value="CO">Colombia</option>
-              <option value="TH">Thailand</option>
-              <option value="MY">Malaysia</option>
-              <option value="PH">Philippines</option>
-              <option value="ID">Indonesia</option>
-              <option value="SA">Saudi Arabia</option>
-              <option value="EG">Egypt</option>
-              <option value="GR">Greece</option>
-              <option value="CZ">Czech Republic</option>
-              <option value="HU">Hungary</option>
-              <option value="RO">Romania</option>
-              <option value="SK">Slovakia</option>
-              <option value="SI">Slovenia</option>
-              <option value="HR">Croatia</option>
-              <option value="BG">Bulgaria</option>
-              <option value="EE">Estonia</option>
-              <option value="LV">Latvia</option>
-              <option value="LT">Lithuania</option>
-              <option value="LU">Luxembourg</option>
-              <option value="MT">Malta</option>
-              <option value="CY">Cyprus</option>
-            </select>
-            {fieldErrors.country && <div className="text-xs text-red-600">{fieldErrors.country}</div>}
-          </div>
-        </div>
-        <button className="mt-4 px-4 py-2 bg-[#4A3419] text-white rounded hover:bg-[#6B4B26] disabled:opacity-60" onClick={fetchRates} disabled={fetchingRates || !isAddressValid}>
-          {fetchingRates ? 'Fetching Rates...' : 'Get Shipping Rates'}
-        </button>
-        {addressError && <div className="text-red-600 mt-2">{addressError}</div>}
-        {rates.length > 0 && (
-          <div className="mt-6">
-            <h3 className="text-lg font-bold mb-2 text-[#4A3419]">Select Shipping Rate</h3>
-            <div className="flex flex-col gap-3 max-h-80 overflow-y-auto rounded border border-gray-200 bg-gray-50 p-3">
-              {/* Organize and deduplicate rates */}
-              {(() => {
-                const seen = new Set();
-                const uniqueRates = rates.filter(rate => {
-                  const key = `${rate.provider}-${rate.servicelevel?.name}-${rate.amount}`;
-                  if (seen.has(key)) return false;
-                  seen.add(key);
-                  return true;
-                });
-                uniqueRates.sort((a, b) => {
-                  const priceDiff = parseFloat(a.amount) - parseFloat(b.amount);
-                  if (priceDiff !== 0) return priceDiff;
-                  if (a.provider !== b.provider) return a.provider.localeCompare(b.provider);
-                  return (a.servicelevel?.name || '').localeCompare(b.servicelevel?.name || '');
-                });
-                const onlyUSPS = uniqueRates.every(rate => rate.provider === 'USPS');
-                return (
-                  <>
-                    {onlyUSPS && (
-                      <div className="text-xs text-gray-500 mb-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
-                        💡 Only USPS shipping is currently available for this address.
-                      </div>
-                    )}
-                    {uniqueRates.map(rate => {
-                      const isSelected = selectedRateKey === getRateKey(rate);
-                      const getProviderIcon = (provider: string) => {
-                        switch (provider) {
-                          case 'USPS': return '📦';
-                          case 'UPS': return '🚚';
-                          case 'FedEx': return '✈️';
-                          default: return '📦';
-                        }
-                      };
-                      const getDeliveryTimeColor = (days: string) => {
-                        const numDays = parseInt(days);
-                        if (numDays <= 3) return 'text-green-600';
-                        if (numDays <= 7) return 'text-blue-600';
-                        return 'text-gray-600';
-                      };
-                      
-                      return (
-                        <label key={getRateKey(rate)}
-                          className={`flex items-center border p-3 rounded-lg cursor-pointer transition-all duration-200 ${
-                            isSelected 
-                              ? 'border-[#4A3419] bg-[#FFF5E6] shadow-md' 
-                              : 'border-gray-200 hover:border-[#E8C39E] hover:bg-white'
-                          }`}
-                          tabIndex={0}
-                          onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { setSelectedRateKey(getRateKey(rate)); } }}
-                        >
-                          <input 
-                            type="radio" 
-                            name="shippingRate" 
-                            checked={isSelected} 
-                            onChange={() => setSelectedRateKey(getRateKey(rate))} 
-                            className="mr-3" 
-                          />
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between mb-1">
-                              <div className="flex items-center space-x-2">
-                                <span className="text-lg">{getProviderIcon(rate.provider)}</span>
-                                <div>
-                                  <span className="font-semibold text-[#4A3419]">
-                                    {rate.provider} {rate.servicelevel?.name}
+            <h3 className="text-2xl font-bold mb-4 text-[#4A3419]">Select Shipping Rate</h3>
+            {rates.length > 0 ? (
+              <div className="flex flex-col gap-3 max-h-96 overflow-y-auto rounded border border-gray-200 bg-gray-50 p-3">
+                {/* Organize and deduplicate rates */}
+                {(() => {
+                  const seen = new Set();
+                  const uniqueRates = rates.filter(rate => {
+                    const key = `${rate.provider}-${rate.servicelevel?.name}-${rate.amount}`;
+                    if (seen.has(key)) return false;
+                    seen.add(key);
+                    return true;
+                  });
+                  uniqueRates.sort((a, b) => {
+                    const priceDiff = parseFloat(a.amount) - parseFloat(b.amount);
+                    if (priceDiff !== 0) return priceDiff;
+                    if (a.provider !== b.provider) return a.provider.localeCompare(b.provider);
+                    return (a.servicelevel?.name || '').localeCompare(b.servicelevel?.name || '');
+                  });
+                  const onlyUSPS = uniqueRates.every(rate => rate.provider === 'USPS');
+                  return (
+                    <>
+                      {onlyUSPS && (
+                        <div className="text-xs text-gray-500 mb-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
+                          💡 Only USPS shipping is currently available for this address. This is normal in test mode - production will have more carriers.
+                        </div>
+                      )}
+                      {uniqueRates.map(rate => {
+                        const isSelected = selectedRateKey === getRateKey(rate);
+                        const getProviderIcon = (provider: string) => {
+                          switch (provider) {
+                            case 'USPS': return '📦';
+                            case 'UPS': return '🚚';
+                            case 'FedEx': return '✈️';
+                            default: return '📦';
+                          }
+                        };
+                        const getDeliveryTimeColor = (days: string) => {
+                          const numDays = parseInt(days);
+                          if (numDays <= 3) return 'text-green-600';
+                          if (numDays <= 7) return 'text-blue-600';
+                          return 'text-gray-600';
+                        };
+                        
+                        return (
+                          <label key={getRateKey(rate)}
+                            className={`flex items-center border p-3 rounded-lg cursor-pointer transition-all duration-200 ${
+                              isSelected 
+                                ? 'border-[#4A3419] bg-[#FFF5E6] shadow-md' 
+                                : 'border-gray-200 hover:border-[#E8C39E] hover:bg-white'
+                            }`}
+                            tabIndex={0}
+                            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { setSelectedRateKey(getRateKey(rate)); } }}
+                          >
+                            <input 
+                              type="radio" 
+                              name="shippingRate" 
+                              checked={isSelected} 
+                              onChange={() => setSelectedRateKey(getRateKey(rate))} 
+                              className="mr-3" 
+                            />
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between mb-1">
+                                <div className="flex items-center space-x-2">
+                                  <span className="text-lg">{getProviderIcon(rate.provider)}</span>
+                                  <div>
+                                    <span className="font-semibold text-[#4A3419]">
+                                      {rate.provider} {rate.servicelevel?.name}
+                                    </span>
+                                    <div className="text-xs text-gray-500">
+                                      {rate.provider === 'USPS' && rate.servicelevel?.name?.includes('Priority') && '📦 Reliable & Insured'}
+                                      {rate.provider === 'UPS' && rate.servicelevel?.name?.includes('Ground') && '🚚 Cost-effective'}
+                                      {rate.provider === 'FedEx' && rate.servicelevel?.name?.includes('Express') && '✈️ Fast & Guaranteed'}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  <span className="font-bold text-lg text-[#4A3419]">
+                                    ${parseFloat(rate.amount).toFixed(2)}
                                   </span>
-                                  <div className="text-xs text-gray-500">
-                                    {rate.provider === 'USPS' && rate.servicelevel?.name?.includes('Priority') && '📦 Reliable & Insured'}
-                                    {rate.provider === 'UPS' && rate.servicelevel?.name?.includes('Ground') && '🚚 Cost-effective'}
-                                    {rate.provider === 'FedEx' && rate.servicelevel?.name?.includes('Express') && '✈️ Fast & Guaranteed'}
+                                  <div className={`text-xs font-medium ${getDeliveryTimeColor(rate.estimated_days)}`}>
+                                    Est. {rate.estimated_days} days
                                   </div>
                                 </div>
                               </div>
-                              <div className="text-right">
-                                <span className="font-bold text-lg text-[#4A3419]">
-                                  ${parseFloat(rate.amount).toFixed(2)}
-                                </span>
-                                <div className={`text-xs font-medium ${getDeliveryTimeColor(rate.estimated_days)}`}>
-                                  Est. {rate.estimated_days} days
+                              {rate.servicelevel?.description && (
+                                <div className="text-xs text-gray-600 mt-1">
+                                  {rate.servicelevel.description}
                                 </div>
-                              </div>
+                              )}
                             </div>
-                            {rate.servicelevel?.description && (
-                              <div className="text-xs text-gray-600 mt-1">
-                                {rate.servicelevel.description}
-                              </div>
-                            )}
-                          </div>
-                        </label>
-                      );
-                    })}
-                  </>
-                );
-              })()}
-            </div>
+                          </label>
+                        );
+                      })}
+                    </>
+                  );
+                })()}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <p>Enter your shipping address and click "Get Shipping Rates" to see available options.</p>
+              </div>
+            )}
           </div>
-        )}
-        <button className="mt-6 w-full bg-[#4A3419] text-white py-2 rounded hover:bg-[#6B4B26] font-bold disabled:opacity-60" onClick={handleConfirm} disabled={!selectedRateKey || !isAddressValid}>Continue to Payment</button>
+        </div>
+        
+        {/* Bottom button */}
+        <div className="mt-6 flex justify-center">
+          <button className="px-8 py-3 bg-[#4A3419] text-white rounded hover:bg-[#6B4B26] font-bold disabled:opacity-60" onClick={handleConfirm} disabled={!selectedRateKey || !isAddressValid}>
+            Continue to Payment
+          </button>
+        </div>
       </div>
     </div>
   );
