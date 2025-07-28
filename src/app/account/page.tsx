@@ -17,8 +17,11 @@ export default function AccountPage() {
   const [saveMsg, setSaveMsg] = useState('');
   const [saveMsgType, setSaveMsgType] = useState<'success' | 'error' | ''>('');
   const [showChangePassword, setShowChangePassword] = useState(false);
-  const [passwordInput, setPasswordInput] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordMsg, setPasswordMsg] = useState('');
+  const [passwordMsgType, setPasswordMsgType] = useState<'success' | 'error' | ''>('');
   const [verifyMsg, setVerifyMsg] = useState('');
   const [verifyMsgType, setVerifyMsgType] = useState<'success' | 'error' | ''>('');
   const router = useRouter();
@@ -246,15 +249,75 @@ export default function AccountPage() {
       setVerifyMsgType('error');
     }
   };
+  // Password validation function
+  const validatePassword = (password: string) => {
+    const requirements = [
+      { label: 'Minimum 8 characters', valid: password.length >= 8 },
+      { label: 'At least one uppercase letter', valid: /[A-Z]/.test(password) },
+      { label: 'At least one lowercase letter', valid: /[a-z]/.test(password) },
+      { label: 'At least one number', valid: /[0-9]/.test(password) },
+      { label: 'At least one special character', valid: /[^A-Za-z0-9]/.test(password) },
+    ];
+    return requirements;
+  };
+
   const handleChangePassword = async () => {
     setPasswordMsg('');
-    if (user && passwordInput) {
+    setPasswordMsgType('');
+    
+    // Validate current password
+    if (!currentPassword) {
+      setPasswordMsg('Please enter your current password.');
+      setPasswordMsgType('error');
+      return;
+    }
+
+    // Validate new password
+    const requirements = validatePassword(newPassword);
+    const allValid = requirements.every(r => r.valid);
+    
+    if (!allValid) {
+      setPasswordMsg('Please meet all password requirements.');
+      setPasswordMsgType('error');
+      return;
+    }
+
+    // Check if passwords match
+    if (newPassword !== confirmPassword) {
+      setPasswordMsg('New passwords do not match.');
+      setPasswordMsgType('error');
+      return;
+    }
+
+    if (user) {
       try {
-        await updatePassword(user, passwordInput);
-        setPasswordMsg('Password updated!');
+        // First, re-authenticate with current password
+        const { signInWithEmailAndPassword, getAuth } = await import('firebase/auth');
+        const auth = getAuth();
+        await signInWithEmailAndPassword(auth, user.email, currentPassword);
+        
+        // Then update password
+        await updatePassword(user, newPassword);
+        setPasswordMsg('Password updated successfully!');
+        setPasswordMsgType('success');
         setShowChangePassword(false);
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
       } catch (err: any) {
-        setPasswordMsg('Failed to update password.');
+        console.error('Password change error:', err);
+        let errorMessage = 'Failed to update password.';
+        
+        if (err.code === 'auth/wrong-password') {
+          errorMessage = 'Current password is incorrect.';
+        } else if (err.code === 'auth/weak-password') {
+          errorMessage = 'New password is too weak. Please choose a stronger password.';
+        } else if (err.code === 'auth/requires-recent-login') {
+          errorMessage = 'Please log in again before changing your password.';
+        }
+        
+        setPasswordMsg(errorMessage);
+        setPasswordMsgType('error');
       }
     }
   };
@@ -363,25 +426,126 @@ export default function AccountPage() {
             )}
             {/* Email Security Section */}
             <div className="bg-[#FFF5E6] rounded-lg p-4 border border-[#E8C39E] flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div className="text-xl font-bold text-[#4A3419] md:w-1/3">Email Security</div>
+              <div className="flex flex-col md:w-1/3">
+                <div className="text-xl font-bold text-[#4A3419]">Email Security</div>
+                <div className="text-sm text-[#4A3419] mt-1">
+                  {user.emailVerified ? (
+                    <span className="text-green-600 font-medium">✅ Email Verified</span>
+                  ) : (
+                    <span className="text-red-600 font-medium">❌ Email Not Verified</span>
+                  )}
+                </div>
+              </div>
               <div className="flex flex-col md:flex-row gap-2 md:w-2/3">
-                {!user.emailVerified && (
-                  <button onClick={handleSendVerification} className="bg-[#4A3419] text-[#FFF5E6] px-4 py-2 rounded-lg font-bold hover:bg-[#6B4B26] transition-colors whitespace-nowrap">Verify Email</button>
+                {!user.emailVerified ? (
+                  <button 
+                    onClick={handleSendVerification} 
+                    className="bg-[#4A3419] text-[#FFF5E6] px-4 py-2 rounded-lg font-bold hover:bg-[#6B4B26] transition-colors whitespace-nowrap"
+                  >
+                    Verify Email
+                  </button>
+                ) : (
+                  <button 
+                    disabled 
+                    className="bg-gray-400 text-gray-600 px-4 py-2 rounded-lg font-bold cursor-not-allowed whitespace-nowrap"
+                  >
+                    Email Verified
+                  </button>
                 )}
-                <button onClick={() => setShowChangePassword(v => !v)} className="bg-[#E8C39E] text-[#4A3419] px-4 py-2 rounded-lg font-bold hover:bg-[#FFF5E6] transition-colors whitespace-nowrap">Change Password</button>
+                <button 
+                  onClick={() => setShowChangePassword(v => !v)} 
+                  className="bg-[#E8C39E] text-[#4A3419] px-4 py-2 rounded-lg font-bold hover:bg-[#FFF5E6] transition-colors whitespace-nowrap"
+                >
+                  Change Password
+                </button>
               </div>
             </div>
             {verifyMsg && (
               <div className={verifyMsgType === 'error' ? 'text-red-600 text-sm mt-1' : 'text-green-600 text-sm mt-1'}>{verifyMsg}</div>
             )}
             {showChangePassword && (
-              <div className="flex flex-col md:flex-row gap-2 mt-2">
-                <input type="password" value={passwordInput} onChange={e => setPasswordInput(e.target.value)} placeholder="New password" className="border p-2 rounded flex-1" />
-                <button onClick={handleChangePassword} className="bg-[#4A3419] text-[#FFF5E6] px-4 py-1 rounded-lg font-bold hover:bg-[#6B4B26] transition-colors">Save</button>
-                <button onClick={() => setShowChangePassword(false)} className="bg-[#E8C39E] text-[#4A3419] px-4 py-1 rounded-lg font-bold hover:bg-[#FFF5E6] transition-colors">Cancel</button>
+              <div className="bg-white rounded-lg p-4 border border-[#E8C39E] mt-2">
+                <h3 className="text-lg font-bold text-[#4A3419] mb-4">Change Password</h3>
+                
+                {/* Current Password */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-[#4A3419] mb-2">Current Password</label>
+                  <input 
+                    type="password" 
+                    value={currentPassword} 
+                    onChange={e => setCurrentPassword(e.target.value)} 
+                    placeholder="Enter your current password" 
+                    className="w-full border border-[#E8C39E] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#4A3419] bg-[#FFF5E6] text-[#4A3419]" 
+                  />
+                </div>
+
+                {/* New Password */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-[#4A3419] mb-2">New Password</label>
+                  <input 
+                    type="password" 
+                    value={newPassword} 
+                    onChange={e => setNewPassword(e.target.value)} 
+                    placeholder="Enter your new password" 
+                    className="w-full border border-[#E8C39E] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#4A3419] bg-[#FFF5E6] text-[#4A3419]" 
+                  />
+                  
+                  {/* Password Requirements */}
+                  {newPassword && (
+                    <div className="mt-2 text-xs">
+                      <div className="font-medium text-[#4A3419] mb-1">Password Requirements:</div>
+                      {validatePassword(newPassword).map((req, index) => (
+                        <div key={index} className={req.valid ? 'text-green-600' : 'text-red-600'}>
+                          {req.valid ? '✅' : '❌'} {req.label}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Confirm Password */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-[#4A3419] mb-2">Confirm New Password</label>
+                  <input 
+                    type="password" 
+                    value={confirmPassword} 
+                    onChange={e => setConfirmPassword(e.target.value)} 
+                    placeholder="Confirm your new password" 
+                    className="w-full border border-[#E8C39E] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#4A3419] bg-[#FFF5E6] text-[#4A3419]" 
+                  />
+                  {confirmPassword && newPassword !== confirmPassword && (
+                    <div className="text-red-600 text-xs mt-1">Passwords do not match</div>
+                  )}
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-2">
+                  <button 
+                    onClick={handleChangePassword} 
+                    className="bg-[#4A3419] text-[#FFF5E6] px-4 py-2 rounded-lg font-bold hover:bg-[#6B4B26] transition-colors"
+                  >
+                    Update Password
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setShowChangePassword(false);
+                      setCurrentPassword('');
+                      setNewPassword('');
+                      setConfirmPassword('');
+                      setPasswordMsg('');
+                    }} 
+                    className="bg-[#E8C39E] text-[#4A3419] px-4 py-2 rounded-lg font-bold hover:bg-[#FFF5E6] transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
             )}
-            {passwordMsg && <div className="text-[#4A3419] text-sm mt-1">{passwordMsg}</div>}
+            {passwordMsg && (
+              <div className={`text-sm mt-2 ${passwordMsgType === 'error' ? 'text-red-600' : 'text-green-600'}`}>
+                {passwordMsg}
+              </div>
+            )}
             <PurchaseHistory customerId={customer?.id} />
             <button onClick={logout} className="mt-6 w-full bg-red-500 text-white py-2 rounded-lg font-bold hover:bg-red-600">Log out</button>
           </div>
