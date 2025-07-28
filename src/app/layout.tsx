@@ -49,7 +49,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     <li><a href="/gallery" className="hover:text-[#E8C39E] transition-all duration-200 hover:pl-2">Gallery</a></li>
                     <li><a href="/about" className="hover:text-[#E8C39E] transition-all duration-200 hover:pl-2">About Us</a></li>
                     <li><a href="/contact" className="hover:text-[#E8C39E] transition-all duration-200 hover:pl-2">Contact Us</a></li>
-                    <li><a href="/shipping-services" className="hover:text-[#E8C39E] transition-all duration-200 hover:pl-2">Shipping</a></li>
                     <li><a href="/cart" className="hover:text-[#E8C39E] transition-all duration-200 hover:pl-2">Shopping Cart</a></li>
                   </ul>
                 </div>
