@@ -85,7 +85,7 @@ export default function LoginPage() {
       
       // Configure action code settings for custom domain
       const actionCodeSettings = {
-        url: `${window.location.origin}/login`,
+        url: `${window.location.origin}/reset-password`,
         handleCodeInApp: false,
         // Note: The custom domain is configured in Firebase Console
         // The sender email should be set to: noreply@confirmation.caydiscreations.com

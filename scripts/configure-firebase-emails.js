@@ -99,7 +99,7 @@ async function configureFirebaseEmails() {
           </div>
         `,
         actionCodeSettings: {
-          url: 'https://caydiscreations.com/login',
+          url: 'https://caydiscreations.com/reset-password',
           handleCodeInApp: false,
         }
       }
