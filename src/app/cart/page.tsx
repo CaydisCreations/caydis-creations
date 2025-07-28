@@ -166,6 +166,11 @@ function ShippingModal({ open, onClose, onConfirm, initialAddress = undefined, c
           {/* Left side - Shipping Address */}
           <div>
             <h2 className="text-2xl font-bold mb-4 text-[#4A3419]">Shipping Address</h2>
+            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800 font-medium">
+                📍 Please double-check your address and ensure it's correct, as this is essential for delivering your product successfully!
+              </p>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <input name="name" value={address.name} onChange={handleAddressChange} placeholder="Full Name" className="border p-2 rounded w-full" />
