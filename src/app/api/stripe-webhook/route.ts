@@ -463,7 +463,12 @@ export async function POST(req: NextRequest) {
             if (labelUrl) {
               try {
                 console.log(`📎 Fetching PDF for ${label.p || 'Product'}...`);
-                const pdfResponse = await fetch(labelUrl);
+                const pdfResponse = await fetch(labelUrl, {
+                  headers: {
+                    'Authorization': `ShippoToken ${process.env.SHIPPO_API_KEY}`,
+                    'Content-Type': 'application/json'
+                  }
+                });
                 
                 if (pdfResponse.ok) {
                   const pdfBuffer = await pdfResponse.arrayBuffer();
@@ -477,7 +482,41 @@ export async function POST(req: NextRequest) {
                   
                   console.log(`✅ PDF attachment prepared for ${label.p || 'Product'}`);
                 } else {
-                  console.warn(`⚠️ Failed to fetch PDF for ${label.p || 'Product'}: ${pdfResponse.status}`);
+                  console.warn(`⚠️ Failed to fetch PDF for ${label.p || 'Product'}: ${pdfResponse.status} - ${pdfResponse.statusText}`);
+                  
+                  // Try alternative endpoints if the main one fails
+                  const alternativeUrls = [
+                    `https://api.goshippo.com/transactions/${label.u}/`,
+                    `https://api.goshippo.com/transactions/${label.u}/label`
+                  ];
+                  
+                  for (const altUrl of alternativeUrls) {
+                    try {
+                      console.log(`📎 Trying alternative URL for ${label.p || 'Product'}: ${altUrl}`);
+                      const altResponse = await fetch(altUrl, {
+                        headers: {
+                          'Authorization': `ShippoToken ${process.env.SHIPPO_API_KEY}`,
+                          'Content-Type': 'application/json'
+                        }
+                      });
+                      
+                      if (altResponse.ok) {
+                        const pdfBuffer = await altResponse.arrayBuffer();
+                        const pdfBase64 = Buffer.from(pdfBuffer).toString('base64');
+                        
+                        adminAttachments.push({
+                          filename: `shipping-label-${(label.p || 'Product').replace(/[^a-zA-Z0-9]/g, '-')}-${i + 1}.pdf`,
+                          content: pdfBase64,
+                          contentType: 'application/pdf'
+                        });
+                        
+                        console.log(`✅ PDF attachment prepared via alternative URL for ${label.p || 'Product'}`);
+                        break; // Found working URL, stop trying alternatives
+                      }
+                    } catch (altError) {
+                      console.log(`📎 Alternative URL failed for ${label.p || 'Product'}: ${altUrl}`, altError);
+                    }
+                  }
                 }
               } catch (pdfError) {
                 console.error(`❌ Error fetching PDF for ${label.p || 'Product'}:`, pdfError);

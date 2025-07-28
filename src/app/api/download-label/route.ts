@@ -13,12 +13,11 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'SHIPPO_API_KEY not configured' }, { status: 500 });
     }
 
-    // Construct the Shippo label URL
-    const labelUrl = `https://api.goshippo.com/transactions/${transactionId}/label.pdf`;
-    
     console.log('download-label: Fetching label for transaction:', transactionId);
     
-    // Fetch the PDF with proper authentication
+    // Try the direct URL approach first
+    const labelUrl = `https://api.goshippo.com/transactions/${transactionId}/label.pdf`;
+    
     const response = await fetch(labelUrl, {
       headers: {
         'Authorization': `ShippoToken ${process.env.SHIPPO_API_KEY}`,
@@ -28,10 +27,47 @@ export async function GET(req: NextRequest) {
 
     if (!response.ok) {
       console.error('download-label: Failed to fetch label:', response.status, response.statusText);
+      
+      // If direct URL fails, try alternative endpoints
+      const alternativeUrls = [
+        `https://api.goshippo.com/transactions/${transactionId}/`,
+        `https://api.goshippo.com/transactions/${transactionId}/label`,
+        `https://api.goshippo.com/transactions/${transactionId}/label.pdf`
+      ];
+      
+      for (const altUrl of alternativeUrls) {
+        try {
+          console.log(`download-label: Trying alternative URL: ${altUrl}`);
+          const altResponse = await fetch(altUrl, {
+            headers: {
+              'Authorization': `ShippoToken ${process.env.SHIPPO_API_KEY}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          if (altResponse.ok) {
+            const pdfBuffer = await altResponse.arrayBuffer();
+            console.log('download-label: Successfully fetched label via alternative URL, size:', pdfBuffer.byteLength, 'bytes');
+            
+            return new NextResponse(pdfBuffer, {
+              status: 200,
+              headers: {
+                'Content-Type': 'application/pdf',
+                'Content-Disposition': `attachment; filename="shipping-label-${transactionId}.pdf"`,
+                'Cache-Control': 'no-cache'
+              }
+            });
+          }
+        } catch (altError) {
+          console.log(`download-label: Alternative URL failed: ${altUrl}`, altError);
+        }
+      }
+      
       return NextResponse.json({ 
         error: 'Failed to fetch label from Shippo',
         status: response.status,
-        details: response.statusText
+        details: response.statusText,
+        message: 'Label may have expired or transaction may be invalid. Try recreating the label.'
       }, { status: response.status });
     }
 
