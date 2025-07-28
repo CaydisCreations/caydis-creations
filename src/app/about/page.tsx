@@ -94,7 +94,7 @@ export default function About() {
       <div className="grid md:grid-cols-2 gap-8 items-center bg-white p-8 rounded-lg shadow-md">
         <div className="relative h-96">
           <img
-            src="https://bbk12e1-cdn.myschoolcdn.com/ftpimages/82/news/orig_news1474039_1479351.jpg"
+            src="/pearsonPFP_hopkins.png"
             alt="Pearson - Developer"
             className="object-cover rounded-xl shadow-lg w-full h-full"
           />
