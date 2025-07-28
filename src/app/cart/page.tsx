@@ -270,7 +270,7 @@ function ShippingModal({ open, onClose, onConfirm, initialAddress = undefined, c
             <h3 className="text-2xl font-bold mb-4 text-[#4A3419]">Select Shipping Rate</h3>
             {rates.length > 0 ? (
               <div className="flex flex-col gap-3 max-h-96 overflow-y-auto rounded border border-gray-200 bg-gray-50 p-3">
-                {/* Organize and deduplicate rates */}
+                {/* Organize and deduplicate rates by carrier */}
                 {(() => {
                   const seen = new Set();
                   const uniqueRates = rates.filter(rate => {
@@ -279,13 +279,48 @@ function ShippingModal({ open, onClose, onConfirm, initialAddress = undefined, c
                     seen.add(key);
                     return true;
                   });
-                  uniqueRates.sort((a, b) => {
-                    const priceDiff = parseFloat(a.amount) - parseFloat(b.amount);
-                    if (priceDiff !== 0) return priceDiff;
-                    if (a.provider !== b.provider) return a.provider.localeCompare(b.provider);
-                    return (a.servicelevel?.name || '').localeCompare(b.servicelevel?.name || '');
+                  
+                  // Group rates by carrier
+                  const ratesByCarrier = uniqueRates.reduce((acc, rate) => {
+                    if (!acc[rate.provider]) {
+                      acc[rate.provider] = [];
+                    }
+                    acc[rate.provider].push(rate);
+                    return acc;
+                  }, {} as Record<string, typeof uniqueRates>);
+                  
+                  // Sort rates within each carrier by price
+                  Object.keys(ratesByCarrier).forEach(carrier => {
+                    ratesByCarrier[carrier].sort((a, b) => parseFloat(a.amount) - parseFloat(b.amount));
                   });
+                  
                   const onlyUSPS = uniqueRates.every(rate => rate.provider === 'USPS');
+                  
+                  const getProviderIcon = (provider: string) => {
+                    switch (provider) {
+                      case 'USPS': return '📦';
+                      case 'UPS': return '🚚';
+                      case 'FedEx': return '✈️';
+                      default: return '📦';
+                    }
+                  };
+                  
+                  const getDeliveryTimeColor = (days: string) => {
+                    const numDays = parseInt(days);
+                    if (numDays <= 3) return 'text-green-600';
+                    if (numDays <= 7) return 'text-blue-600';
+                    return 'text-gray-600';
+                  };
+                  
+                  const getCarrierColor = (carrier: string) => {
+                    switch (carrier) {
+                      case 'USPS': return 'border-blue-200 bg-blue-50';
+                      case 'UPS': return 'border-brown-200 bg-brown-50';
+                      case 'FedEx': return 'border-purple-200 bg-purple-50';
+                      default: return 'border-gray-200 bg-gray-50';
+                    }
+                  };
+                  
                   return (
                     <>
                       {onlyUSPS && (
@@ -293,73 +328,73 @@ function ShippingModal({ open, onClose, onConfirm, initialAddress = undefined, c
                           💡 Only USPS shipping is currently available for this address. This is normal in test mode - production will have more carriers.
                         </div>
                       )}
-                      {uniqueRates.map(rate => {
-                        const isSelected = selectedRateKey === getRateKey(rate);
-                        const getProviderIcon = (provider: string) => {
-                          switch (provider) {
-                            case 'USPS': return '📦';
-                            case 'UPS': return '🚚';
-                            case 'FedEx': return '✈️';
-                            default: return '📦';
-                          }
-                        };
-                        const getDeliveryTimeColor = (days: string) => {
-                          const numDays = parseInt(days);
-                          if (numDays <= 3) return 'text-green-600';
-                          if (numDays <= 7) return 'text-blue-600';
-                          return 'text-gray-600';
-                        };
-                        
-                        return (
-                          <label key={getRateKey(rate)}
-                            className={`flex items-center border p-3 rounded-lg cursor-pointer transition-all duration-200 ${
-                              isSelected 
-                                ? 'border-[#4A3419] bg-[#FFF5E6] shadow-md' 
-                                : 'border-gray-200 hover:border-[#E8C39E] hover:bg-white'
-                            }`}
-                            tabIndex={0}
-                            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { setSelectedRateKey(getRateKey(rate)); } }}
-                          >
-                            <input 
-                              type="radio" 
-                              name="shippingRate" 
-                              checked={isSelected} 
-                              onChange={() => setSelectedRateKey(getRateKey(rate))} 
-                              className="mr-3" 
-                            />
-                            <div className="flex-1">
-                              <div className="flex items-center justify-between mb-1">
-                                <div className="flex items-center space-x-2">
-                                  <span className="text-lg">{getProviderIcon(rate.provider)}</span>
-                                  <div>
-                                    <span className="font-semibold text-[#4A3419]">
-                                      {rate.provider} {rate.servicelevel?.name}
-                                    </span>
-                                    <div className="text-xs text-gray-500">
-                                      {rate.provider === 'USPS' && rate.servicelevel?.name?.includes('Priority') && '📦 Reliable & Insured'}
-                                      {rate.provider === 'UPS' && rate.servicelevel?.name?.includes('Ground') && '🚚 Cost-effective'}
-                                      {rate.provider === 'FedEx' && rate.servicelevel?.name?.includes('Express') && '✈️ Fast & Guaranteed'}
+                      
+                      {Object.entries(ratesByCarrier).map(([carrier, carrierRates]) => (
+                        <div key={carrier} className="mb-4">
+                          {/* Carrier Header */}
+                          <div className={`flex items-center space-x-2 mb-2 p-2 rounded ${getCarrierColor(carrier)}`}>
+                            <span className="text-lg">{getProviderIcon(carrier)}</span>
+                            <h4 className="font-bold text-[#4A3419]">{carrier}</h4>
+                            <span className="text-xs text-gray-500">({(carrierRates as any[]).length} option{(carrierRates as any[]).length !== 1 ? 's' : ''})</span>
+                          </div>
+                          
+                          {/* Carrier Options */}
+                          <div className="space-y-2">
+                            {(carrierRates as any[]).map(rate => {
+                              const isSelected = selectedRateKey === getRateKey(rate);
+                              
+                              return (
+                                <label key={getRateKey(rate)}
+                                  className={`flex items-center border p-3 rounded-lg cursor-pointer transition-all duration-200 ${
+                                    isSelected 
+                                      ? 'border-[#4A3419] bg-[#FFF5E6] shadow-md' 
+                                      : 'border-gray-200 hover:border-[#E8C39E] hover:bg-white'
+                                  }`}
+                                  tabIndex={0}
+                                  onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { setSelectedRateKey(getRateKey(rate)); } }}
+                                >
+                                  <input 
+                                    type="radio" 
+                                    name="shippingRate" 
+                                    checked={isSelected} 
+                                    onChange={() => setSelectedRateKey(getRateKey(rate))} 
+                                    className="mr-3" 
+                                  />
+                                  <div className="flex-1">
+                                    <div className="flex items-center justify-between mb-1">
+                                      <div className="flex items-center space-x-2">
+                                        <div>
+                                          <span className="font-semibold text-[#4A3419]">
+                                            {rate.servicelevel?.name}
+                                          </span>
+                                          <div className="text-xs text-gray-500">
+                                            {rate.provider === 'USPS' && rate.servicelevel?.name?.includes('Priority') && '📦 Reliable & Insured'}
+                                            {rate.provider === 'UPS' && rate.servicelevel?.name?.includes('Ground') && '🚚 Cost-effective'}
+                                            {rate.provider === 'FedEx' && rate.servicelevel?.name?.includes('Express') && '✈️ Fast & Guaranteed'}
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div className="text-right">
+                                        <span className="font-bold text-lg text-[#4A3419]">
+                                          ${parseFloat(rate.amount).toFixed(2)}
+                                        </span>
+                                        <div className={`text-xs font-medium ${getDeliveryTimeColor(rate.estimated_days)}`}>
+                                          Est. {rate.estimated_days} days
+                                        </div>
+                                      </div>
                                     </div>
+                                    {rate.servicelevel?.description && (
+                                      <div className="text-xs text-gray-600 mt-1">
+                                        {rate.servicelevel.description}
+                                      </div>
+                                    )}
                                   </div>
-                                </div>
-                                <div className="text-right">
-                                  <span className="font-bold text-lg text-[#4A3419]">
-                                    ${parseFloat(rate.amount).toFixed(2)}
-                                  </span>
-                                  <div className={`text-xs font-medium ${getDeliveryTimeColor(rate.estimated_days)}`}>
-                                    Est. {rate.estimated_days} days
-                                  </div>
-                                </div>
-                              </div>
-                              {rate.servicelevel?.description && (
-                                <div className="text-xs text-gray-600 mt-1">
-                                  {rate.servicelevel.description}
-                                </div>
-                              )}
-                            </div>
-                          </label>
-                        );
-                      })}
+                                </label>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
                     </>
                   );
                 })()}
