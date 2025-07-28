@@ -384,6 +384,8 @@ export async function POST(req: NextRequest) {
 
       // Generate shipping labels section HTML
       let adminShippingLabelsHtml = '';
+      let pdfAttachmentNote = '';
+      
       if (shippingLabels.length > 0) {
         adminShippingLabelsHtml = `
           <h3 style="color:#4A3419; margin-top:24px;">📋 Shipping Labels:</h3>
@@ -432,6 +434,7 @@ export async function POST(req: NextRequest) {
           ${adminShippingLabelsHtml}
           
           <p style="color: #4caf50;"><strong>✅ Note:</strong> Shipping labels have been automatically created and tracking numbers are included above.</p>
+          ${pdfAttachmentNote}
           
           <div style="margin-top: 24px; padding: 12px; background: #e8f5e8; border-radius: 8px;">
             <p style="margin: 4px 0;"><strong>Action Required:</strong></p>
@@ -451,6 +454,7 @@ export async function POST(req: NextRequest) {
       
       // Prepare PDF attachments for admin email
       let adminAttachments = [];
+      
       if (shippingLabels.length > 0) {
         console.log('📎 Preparing PDF attachments for admin email...');
         
@@ -525,6 +529,16 @@ export async function POST(req: NextRequest) {
           }
           
           console.log(`📎 Prepared ${adminAttachments.length} PDF attachments`);
+          
+          // Add note about PDF availability
+          if (adminAttachments.length === 0 && shippingLabels.length > 0) {
+            pdfAttachmentNote = `
+              <div style="margin-top: 16px; padding: 12px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
+                <p style="margin: 4px 0; color: #856404;"><strong>📋 Note:</strong> Shipping labels are available for download from the admin dashboard.</p>
+                <p style="margin: 4px 0; color: #856404; font-size: 14px;">In test mode, PDF labels may not be automatically attached to emails due to Shippo's test environment limitations.</p>
+              </div>
+            `;
+          }
         } catch (attachmentError) {
           console.error('❌ Error preparing PDF attachments:', attachmentError);
         }
