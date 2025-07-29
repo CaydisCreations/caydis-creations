@@ -7,9 +7,9 @@ async function testAddressValidation() {
     name: 'Pearson Hill',
     line1: '26 lattanzi st',
     line2: '',
-    city: 'WEST HAVEN',
-    state: 'CT',
-    postal_code: '06516',
+      city: 'MILFORD',
+  state: 'CT',
+  postal_code: '06460',
     country: 'US',
     phone: '+12037100568',
     email: 'pearsonrhill2@gmail.com'

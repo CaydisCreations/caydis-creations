@@ -10,9 +10,9 @@ async function testShippoDirect() {
     name: 'Pearson Hill',
     street1: '26 lattanzi st',
     street2: '',
-    city: 'WEST HAVEN',
-    state: 'CT',
-    zip: '06516',
+      city: 'MILFORD',
+  state: 'CT',
+  zip: '06460',
     country: 'US',
     phone: '+12037100568',
     email: 'pearsonrhill2@gmail.com'

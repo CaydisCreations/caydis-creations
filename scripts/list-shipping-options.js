@@ -50,9 +50,9 @@ console.log('   400 Boston Post Rd, Orange, CT 06477');
 console.log('   Phone: 800-463-3339');
 console.log('   Email: admin@caydiscreations.com');
 
-console.log('\n📍 UPS Address:');
-console.log('   355 Campbell Ave, West Haven, CT 06516');
-console.log('   Phone: 800-742-5877');
+  console.log('\n📍 UPS Address:');
+  console.log('   167 Cherry St, Milford, CT 06460');
+  console.log('   Phone: 800-742-5877');
 console.log('   Email: admin@caydiscreations.com');
 
 console.log('\n📍 USPS Address:');

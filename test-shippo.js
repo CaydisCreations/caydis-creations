@@ -73,10 +73,10 @@ async function testShippo() {
     const upsShipment = await shippo.shipments.create({
       addressFrom: {
         name: 'Caydi\'s Creations',
-        street1: '355 Campbell Ave',
-        city: 'West Haven',
+        street1: '167 Cherry St',
+        city: 'Milford',
         state: 'CT',
-        zip: '06516',
+        zip: '06460',
         country: 'US',
         phone: '800-742-5877',
         email: 'admin@caydiscreations.com',

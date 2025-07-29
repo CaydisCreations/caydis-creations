@@ -13,9 +13,9 @@ async function testCompleteFlow() {
       address: {
         line1: '26 lattanzi st',
         line2: '',
-        city: 'WEST HAVEN',
-        state: 'CT',
-        postal_code: '06516',
+          city: 'MILFORD',
+  state: 'CT',
+  postal_code: '06460',
         country: 'US'
       }
     },
