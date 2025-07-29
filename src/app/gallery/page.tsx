@@ -208,6 +208,36 @@ const mediaItems: MediaItem[] = [
     tags: ['duffle bag', 'recycled', 'upcycled', 'bag'],
     date: '2024-07-02',
   },
+  {
+    id: 'bags-collection',
+    type: 'image-group',
+    url: '/logoCaydisCreation.PNG',
+    images: [
+      '/logoCaydisCreation.PNG',
+      '/logoCaydisCreation.PNG',
+      '/logoCaydisCreation.PNG',
+    ],
+    title: 'Bags Collection',
+    description: 'A collection of handmade bags including handbags, shoulder bags, and duffle bags. Each piece is crafted with care and unique design.',
+    categories: ['Bags', 'Accessories'],
+    tags: ['bags', 'handbags', 'shoulder bags', 'duffle bags', 'accessories', 'handmade'],
+    date: '2024-07-28',
+  },
+  {
+    id: 'scarves-collection',
+    type: 'image-group',
+    url: '/logoCaydisCreation.PNG',
+    images: [
+      '/logoCaydisCreation.PNG',
+      '/logoCaydisCreation.PNG',
+      '/logoCaydisCreation.PNG',
+    ],
+    title: 'Scarves Collection',
+    description: 'A beautiful collection of handmade scarves in various colors and patterns. Perfect for adding warmth and style to any outfit.',
+    categories: ['Scarves', 'Accessories'],
+    tags: ['scarves', 'winter', 'accessories', 'handmade', 'warmth', 'style'],
+    date: '2024-07-28',
+  },
 ]
 
 // Add 'Accessories' to beanie media items
