@@ -12,23 +12,28 @@ function ProductImageCarousel({ images, alt, height = "h-48" }: { images: string
 
   const prev = (e: React.MouseEvent) => {
     e.stopPropagation();
+    e.preventDefault();
     setIndex(i => (i === 0 ? images.length - 1 : i - 1));
   };
   const next = (e: React.MouseEvent) => {
     e.stopPropagation();
+    e.preventDefault();
     setIndex(i => (i === images.length - 1 ? 0 : i + 1));
   };
 
   // Touch handlers for swipe
   const onTouchStart = (e: React.TouchEvent) => {
+    e.stopPropagation();
     setTouchStart(e.targetTouches[0].clientX);
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
+    e.stopPropagation();
     setTouchEnd(e.targetTouches[0].clientX);
   };
 
-  const onTouchEnd = () => {
+  const onTouchEnd = (e: React.TouchEvent) => {
+    e.stopPropagation();
     if (!touchStart || !touchEnd) return;
     
     const distance = touchStart - touchEnd;
@@ -57,6 +62,11 @@ function ProductImageCarousel({ images, alt, height = "h-48" }: { images: string
     }
   };
 
+  // Reset index when images change
+  useEffect(() => {
+    setIndex(0);
+  }, [images]);
+
   return (
     <div 
       className={`relative ${height} rounded-md mb-4 overflow-hidden bg-[#E8C39E] flex items-center justify-center`}
@@ -67,25 +77,32 @@ function ProductImageCarousel({ images, alt, height = "h-48" }: { images: string
       tabIndex={0}
       role="region"
       aria-label={`Image ${index + 1} of ${images.length}`}
+      style={{ touchAction: 'pan-y pinch-zoom' }}
     >
-      <img src={images[index]} alt={`${alt} - Image ${index + 1} of ${images.length}`} className="object-contain w-full h-full" />
+      <img 
+        src={images[index]} 
+        alt={`${alt} - Image ${index + 1} of ${images.length}`} 
+        className="object-contain w-full h-full pointer-events-none" 
+      />
       {images.length > 1 && (
         <>
           <button 
             onClick={prev} 
-            className="absolute left-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-70 rounded-full p-2 text-[#4A3419] hover:bg-opacity-100"
+            className="absolute left-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-70 rounded-full p-2 text-[#4A3419] hover:bg-opacity-100 z-10"
             aria-label="Previous image"
+            type="button"
           >
             &#8592;
           </button>
           <button 
             onClick={next} 
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-70 rounded-full p-2 text-[#4A3419] hover:bg-opacity-100"
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-70 rounded-full p-2 text-[#4A3419] hover:bg-opacity-100 z-10"
             aria-label="Next image"
+            type="button"
           >
             &#8594;
           </button>
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-10">
             {images.map((_, i) => (
               <span 
                 key={i} 
@@ -324,8 +341,10 @@ function ProductsContent() {
                   onClick={() => handleProductClick(product)}
                 >
                   {/* Product image */}
-                  {product.images ? (
-                    <ProductImageCarousel images={product.images} alt={product.name} />
+                  {product.images && product.images.length > 0 ? (
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <ProductImageCarousel images={product.images} alt={product.name} />
+                    </div>
                   ) : (
                     <div className="bg-[#E8C39E] h-48 rounded-md mb-4 overflow-hidden relative">
                       <img src={product.image} alt={product.name} className="object-contain w-full h-full" />
@@ -379,6 +398,7 @@ function ProductsContent() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            onClick={closeModal}
           >
             <motion.div 
               className="bg-white rounded-lg max-w-3xl w-full overflow-hidden"
@@ -386,9 +406,10 @@ function ProductsContent() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 50, scale: 0.9 }}
               transition={{ type: "spring", bounce: 0.3 }}
+              onClick={(e) => e.stopPropagation()}
             >
               <div className="relative">
-                {selectedProduct.images ? (
+                {selectedProduct.images && selectedProduct.images.length > 0 ? (
                   <ProductImageCarousel images={selectedProduct.images} alt={selectedProduct.name} height="h-64" />
                 ) : (
                   <div className="bg-[#E8C39E] h-64 relative">
@@ -396,8 +417,9 @@ function ProductsContent() {
                   </div>
                 )}
                 <button 
-                  className="absolute top-4 right-4 bg-white p-2 rounded-full shadow-lg hover:bg-[#E8C39E] transition-colors duration-300"
+                  className="absolute top-4 right-4 bg-white p-2 rounded-full shadow-lg hover:bg-[#E8C39E] transition-colors duration-300 z-20"
                   onClick={closeModal}
+                  type="button"
                 >
                   <FaTimes className="text-[#4A3419]" />
                 </button>
@@ -429,6 +451,7 @@ function ProductsContent() {
                     <button 
                       onClick={decrementQuantity} 
                       className="w-8 h-8 flex items-center justify-center bg-[#E8C39E] text-[#4A3419] rounded-full hover:bg-[#d6b28e]"
+                      type="button"
                     >
                       -
                     </button>
@@ -436,6 +459,7 @@ function ProductsContent() {
                     <button 
                       onClick={incrementQuantity} 
                       className="w-8 h-8 flex items-center justify-center bg-[#E8C39E] text-[#4A3419] rounded-full hover:bg-[#d6b28e]"
+                      type="button"
                     >
                       +
                     </button>
@@ -446,6 +470,7 @@ function ProductsContent() {
                     whileTap={{ scale: 0.97 }}
                     onClick={handleAddToCartFromModal}
                     disabled={Number(selectedProduct?.metadata?.stock) === 0}
+                    type="button"
                   >
                     <FaShoppingCart /> {Number(selectedProduct?.metadata?.stock) === 0 ? 'Sold Out' : 'Add to Cart'}
                   </motion.button>

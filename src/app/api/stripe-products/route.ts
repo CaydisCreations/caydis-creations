@@ -28,6 +28,7 @@ export async function GET() {
         name: product.name,
         description: product.description,
         image: product.images && product.images.length > 0 ? product.images[0] : null,
+        images: product.images && product.images.length > 0 ? product.images : null, // Add full images array
         price: price ? (Number(price.unit_amount_decimal) / 100) : null,
         currency: price ? price.currency : null,
         priceId: price ? price.id : null,
