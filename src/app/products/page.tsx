@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { FaSearch, FaShoppingCart, FaStar, FaTimes, FaChevronDown } from 'react-icons/fa'
 import { useCart } from '../context/CartContext'
 
-function ProductImageCarousel({ images, alt, height = "h-48" }: { images: string[], alt: string, height?: string }) {
+function ProductImageCarousel({ images, alt, height = "h-64", onImageClick }: { images: string[], alt: string, height?: string, onImageClick?: () => void }) {
   const [index, setIndex] = useState(0);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
@@ -67,13 +67,22 @@ function ProductImageCarousel({ images, alt, height = "h-48" }: { images: string
     setIndex(0);
   }, [images]);
 
+  // Handle image area click
+  const handleImageClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onImageClick) {
+      onImageClick();
+    }
+  };
+
   return (
     <div 
-      className={`relative ${height} rounded-md mb-4 overflow-hidden bg-[#E8C39E] flex items-center justify-center`}
+      className={`relative ${height} rounded-md mb-4 overflow-hidden bg-[#E8C39E] flex items-center justify-center cursor-pointer`}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
       onKeyDown={onKeyDown}
+      onClick={handleImageClick}
       tabIndex={0}
       role="region"
       aria-label={`Image ${index + 1} of ${images.length}`}
@@ -82,7 +91,7 @@ function ProductImageCarousel({ images, alt, height = "h-48" }: { images: string
       <img 
         src={images[index]} 
         alt={`${alt} - Image ${index + 1} of ${images.length}`} 
-        className="object-contain w-full h-full pointer-events-none" 
+        className="object-cover w-full h-full" 
       />
       {images.length > 1 && (
         <>
@@ -342,12 +351,10 @@ function ProductsContent() {
                 >
                   {/* Product image */}
                   {product.images && product.images.length > 0 ? (
-                    <div onClick={(e) => e.stopPropagation()}>
-                      <ProductImageCarousel images={product.images} alt={product.name} />
-                    </div>
+                    <ProductImageCarousel images={product.images} alt={product.name} onImageClick={() => handleProductClick(product)} />
                   ) : (
-                    <div className="bg-[#E8C39E] h-48 rounded-md mb-4 overflow-hidden relative">
-                      <img src={product.image} alt={product.name} className="object-contain w-full h-full" />
+                    <div className="bg-[#E8C39E] h-64 rounded-md mb-4 overflow-hidden relative cursor-pointer" onClick={() => handleProductClick(product)}>
+                      <img src={product.image} alt={product.name} className="object-cover w-full h-full" />
                       <div className="absolute top-0 right-0 bg-[#4A3419] text-white px-2 py-1 m-2 rounded-full text-sm">
                         {product.rating} ★
                       </div>
@@ -410,7 +417,7 @@ function ProductsContent() {
             >
               <div className="relative">
                 {selectedProduct.images && selectedProduct.images.length > 0 ? (
-                  <ProductImageCarousel images={selectedProduct.images} alt={selectedProduct.name} height="h-64" />
+                  <ProductImageCarousel images={selectedProduct.images} alt={selectedProduct.name} height="h-64" onImageClick={() => handleProductClick(selectedProduct)} />
                 ) : (
                   <div className="bg-[#E8C39E] h-64 relative">
                     <img src={selectedProduct.image} alt={selectedProduct.name} className="object-contain w-full h-full" />
