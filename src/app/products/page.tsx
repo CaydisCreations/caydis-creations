@@ -5,8 +5,11 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { FaSearch, FaShoppingCart, FaStar, FaTimes, FaChevronDown } from 'react-icons/fa'
 import { useCart } from '../context/CartContext'
 
-function ProductImageCarousel({ images, alt }: { images: string[], alt: string }) {
+function ProductImageCarousel({ images, alt, height = "h-48" }: { images: string[], alt: string, height?: string }) {
   const [index, setIndex] = useState(0);
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
+
   const prev = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIndex(i => (i === 0 ? images.length - 1 : i - 1));
@@ -15,16 +18,80 @@ function ProductImageCarousel({ images, alt }: { images: string[], alt: string }
     e.stopPropagation();
     setIndex(i => (i === images.length - 1 ? 0 : i + 1));
   };
+
+  // Touch handlers for swipe
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe) {
+      setIndex(i => (i === images.length - 1 ? 0 : i + 1));
+    }
+    if (isRightSwipe) {
+      setIndex(i => (i === 0 ? images.length - 1 : i - 1));
+    }
+
+    setTouchStart(0);
+    setTouchEnd(0);
+  };
+
+  // Keyboard handlers
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      setIndex(i => (i === 0 ? images.length - 1 : i - 1));
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      setIndex(i => (i === images.length - 1 ? 0 : i + 1));
+    }
+  };
+
   return (
-    <div className="relative h-48 rounded-md mb-4 overflow-hidden bg-[#E8C39E] flex items-center justify-center">
-      <img src={images[index]} alt={alt} className="object-contain w-full h-full" />
+    <div 
+      className={`relative ${height} rounded-md mb-4 overflow-hidden bg-[#E8C39E] flex items-center justify-center`}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      onKeyDown={onKeyDown}
+      tabIndex={0}
+      role="region"
+      aria-label={`Image ${index + 1} of ${images.length}`}
+    >
+      <img src={images[index]} alt={`${alt} - Image ${index + 1} of ${images.length}`} className="object-contain w-full h-full" />
       {images.length > 1 && (
         <>
-          <button onClick={prev} className="absolute left-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-70 rounded-full p-2 text-[#4A3419] hover:bg-opacity-100">&#8592;</button>
-          <button onClick={next} className="absolute right-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-70 rounded-full p-2 text-[#4A3419] hover:bg-opacity-100">&#8594;</button>
+          <button 
+            onClick={prev} 
+            className="absolute left-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-70 rounded-full p-2 text-[#4A3419] hover:bg-opacity-100"
+            aria-label="Previous image"
+          >
+            &#8592;
+          </button>
+          <button 
+            onClick={next} 
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-70 rounded-full p-2 text-[#4A3419] hover:bg-opacity-100"
+            aria-label="Next image"
+          >
+            &#8594;
+          </button>
           <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
             {images.map((_, i) => (
-              <span key={i} className={`inline-block w-2 h-2 rounded-full ${i === index ? 'bg-[#4A3419]' : 'bg-[#E8C39E]'}`}></span>
+              <span 
+                key={i} 
+                className={`inline-block w-2 h-2 rounded-full ${i === index ? 'bg-[#4A3419]' : 'bg-[#E8C39E]'}`}
+                aria-label={`Go to image ${i + 1}`}
+              ></span>
             ))}
           </div>
         </>
@@ -322,7 +389,7 @@ function ProductsContent() {
             >
               <div className="relative">
                 {selectedProduct.images ? (
-                  <ProductImageCarousel images={selectedProduct.images} alt={selectedProduct.name} />
+                  <ProductImageCarousel images={selectedProduct.images} alt={selectedProduct.name} height="h-64" />
                 ) : (
                   <div className="bg-[#E8C39E] h-64 relative">
                     <img src={selectedProduct.image} alt={selectedProduct.name} className="object-contain w-full h-full" />
