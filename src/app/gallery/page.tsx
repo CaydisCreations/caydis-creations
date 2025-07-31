@@ -211,11 +211,32 @@ const mediaItems: MediaItem[] = [
   {
     id: 'bags-collection',
     type: 'image-group',
-    url: '/logoCaydisCreation.PNG',
+    url: 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/duffleBag/IMG_6990.jpg',
     images: [
-      '/logoCaydisCreation.PNG',
-      '/logoCaydisCreation.PNG',
-      '/logoCaydisCreation.PNG',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/duffleBag/IMG_6990.jpg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/duffleBag/IMG_6988.jpg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/duffleBag/IMG_6989.jpg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/duffleBag/IMG_6986.jpg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Bags/rainbow/IMG_6122.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Bags/rainbow/modeled/IMG_6168.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Bags/rainbow/modeled/IMG_6169.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Bags/rainbow/modeled/IMG_6171.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Bags/white_blue_green_yellow_red/IMG_6124.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Bags/white_blue_green_yellow_red/IMG_6125.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Bags/white_blue_green_yellow_red/modeled/IMG_6151.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Bags/white_blue_green_yellow_red/modeled/IMG_6152.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Bags/white_blue_green_yellow_red/modeled/IMG_6156.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Bags/red_pink_orange_purple/IMG_6119.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Bags/red_pink_orange_purple/modeled/IMG_6157.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Bags/red_pink_orange_purple/modeled/IMG_6159.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Bags/red_pink_orange_purple/modeled/IMG_6163.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Bags/red_pink_orange_purple/modeled/IMG_6164.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Bags/red_pink_orange_purple/modeled/IMG_6167.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Bags/cream_colored/IMG_6130.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Bags/cream_colored/modeled/IMG_6146.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Bags/cream_colored/modeled/IMG_6149.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Bags/gray/modeled/IMG_6141.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Bags/gray/modeled/IMG_6143.jpeg',
     ],
     title: 'Bags Collection',
     description: 'A collection of handmade bags including handbags, shoulder bags, and duffle bags. Each piece is crafted with care and unique design.',
@@ -538,7 +559,54 @@ function ImageGroupCarousel({ images, title }: { images: string[], title: string
           <button onClick={next} className="absolute right-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-70 rounded-full p-2 text-[#4A3419] hover:bg-opacity-100">&#8594;</button>
           <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
             {images.map((_, i) => (
-              <span key={i} className={`inline-block w-2 h-2 rounded-full ${i === index ? 'bg-[#4A3419]' : 'bg-[#E8C39E]'}`}></span>
+              <span key={i} className={`inline-block w-2 h-2 rounded-full ${i === index ? 'bg-[#4A3419]' : 'bg-[#E8C39E  {
+    id: 'modeled-beanies',
+    type: 'image-group',
+    url: 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Beanies/blue1/modeled/IMG_6182.jpeg',
+    images: [
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Beanies/blue1/modeled/IMG_6182.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Beanies/blue1/modeled/IMG_6186.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Beanies/green_blue_white_brown/modeled/FullSizeRender%202.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Beanies/green_blue_white_brown/modeled/FullSizeRender%203.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Beanies/green_blue_white_brown/modeled/FullSizeRender.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Beanies/green_blue_white_brown/modeled/IMG_6201.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Beanies/red_blue_yellow/modeled/IMG_6207.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Beanies/red_blue_yellow/modeled/IMG_6210.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Beanies/red_blue_yellow/modeled/IMG_6212.jpeg',
+    ],
+    title: 'Modeled Beanies Collection',
+    description: 'A collection of modeled beanie photos showing our handmade beanies being worn. Each beanie is crafted with care and unique design.',
+    categories: ['Beanies', 'Accessories'],
+    tags: ['modeled', 'beanies', 'worn', 'handmade', 'accessories'],
+    date: '2024-07-31',
+  },
+
+  {
+    id: 'brown-beanies',
+    type: 'image-group',
+    url: 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Beanies/BrownHats/IMG_5912.jpeg',
+    images: [
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Beanies/BrownHats/IMG_5912.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Beanies/BrownHats/IMG_5913.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Beanies/BrownHats/IMG_5914.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Beanies/BrownHats/IMG_5915.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Beanies/BrownHats/IMG_5916.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Beanies/BrownHats/IMG_5917.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Beanies/BrownHats/IMG_5918.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Beanies/BrownHats/IMG_5919.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Beanies/BrownHats/IMG_5920.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Beanies/BrownHats/IMG_5921.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Beanies/BrownHats/IMG_5922.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Beanies/BrownHats/IMG_5923.jpeg',
+    ],
+    title: 'Brown Beanies Collection',
+    description: 'A collection of brown beanies with logo patches. Each beanie is hand crocheted from acrylic yarn and features a sewed on logo patch.',
+    categories: ['Beanies', 'Accessories'],
+    tags: ['brown', 'beanies', 'logo', 'handmade', 'accessories'],
+    date: '2024-07-31',
+  },
+
+]'}`}></span>
             ))}
           </div>
         </>
