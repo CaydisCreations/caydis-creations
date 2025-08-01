@@ -55,7 +55,7 @@ const mediaItems: MediaItem[] = [
       'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Beanies/red_blue_yellow/modeled/IMG_6212.jpeg',
     ],
     title: 'All Beanies',
-    description: 'hand crochet beanie made from acrylic yarn and sewed on logo patch',
+    description: 'take a look at the beanies I\'ve made!',
     categories: ['Beanies'],
     tags: ['beanies', 'collection'],
     date: '2024-06-10',
