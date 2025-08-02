@@ -91,7 +91,7 @@ function ProductImageCarousel({ images, alt, height = "h-64", onImageClick }: { 
       <img 
         src={images[index]} 
         alt={`${alt} - Image ${index + 1} of ${images.length}`} 
-        className="object-cover w-full h-full transition-transform duration-300 hover:scale-105" 
+        className="object-contain w-full h-full transition-transform duration-300 hover:scale-105" 
       />
       {images.length > 1 && (
         <>
@@ -457,28 +457,28 @@ function ProductsContent() {
             onClick={closeModal}
           >
             <motion.div 
-              className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col lg:flex-row"
+              className="bg-white rounded-lg w-full h-full max-w-none max-h-none overflow-hidden flex flex-col lg:flex-row"
               initial={{ opacity: 0, y: 50, scale: 0.9 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 50, scale: 0.9 }}
               transition={{ type: "spring", bounce: 0.3 }}
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Image Section - Larger and more prominent */}
-              <div className="lg:w-2/3 relative">
+              {/* Image Section - Full screen size */}
+              <div className="lg:w-2/3 relative h-full">
                 {selectedProduct.images && selectedProduct.images.length > 0 ? (
                   <ProductImageCarousel 
                     images={selectedProduct.images} 
                     alt={selectedProduct.name} 
-                    height="h-96 lg:h-full min-h-[400px]" 
+                    height="h-full" 
                     onImageClick={() => handleProductClick(selectedProduct)} 
                   />
                 ) : (
-                  <div className="bg-[#E8C39E] h-96 lg:h-full min-h-[400px] relative flex items-center justify-center">
+                  <div className="bg-[#E8C39E] h-full relative flex items-center justify-center">
                     <img 
                       src={selectedProduct.image} 
                       alt={selectedProduct.name} 
-                      className="object-contain w-full h-full max-h-[70vh]" 
+                      className="object-contain w-full h-full" 
                     />
                   </div>
                 )}
