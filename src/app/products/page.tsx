@@ -219,11 +219,44 @@ function ProductsContent() {
         );
         results = [...startsWith, ...includes];
       }
+      
+      // Reorder products to move specific product to 14th position
+      results = reorderProducts(results);
+      
       setFilteredProducts(results);
       setIsLoading(false);
     }, 300);
     return () => clearTimeout(timer);
   }, [selectedCategory, searchTerm, selectedTags, allProducts]);
+
+  // Function to reorder products
+  const reorderProducts = (products) => {
+    // Find the target product (Handbag - Multicolor (Dark Bag) with green leaf pattern)
+    const targetProduct = products.find(p => 
+      p.name === "Handbag - Multicolor (Dark Bag)" && 
+      p.description?.includes("green leaf pattern")
+    );
+    
+    // Find the scarf product to move to second position
+    const scarfProduct = products.find(p => p.name === "Scarf - White");
+    
+    let reorderedProducts = [...products];
+    
+    // Move scarf to second position if found
+    if (scarfProduct) {
+      reorderedProducts = reorderedProducts.filter(p => p.id !== scarfProduct.id);
+      reorderedProducts.splice(1, 0, scarfProduct); // Insert at position 1 (second item)
+    }
+    
+    // Move dark bag to 14th position if found
+    if (targetProduct) {
+      reorderedProducts = reorderedProducts.filter(p => p.id !== targetProduct.id);
+      const insertPosition = Math.min(13, reorderedProducts.length);
+      reorderedProducts.splice(insertPosition, 0, targetProduct);
+    }
+    
+    return reorderedProducts;
+  };
 
   const handleProductClick = (product) => {
     setSelectedProduct(product);
