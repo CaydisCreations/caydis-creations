@@ -91,34 +91,50 @@ function ProductImageCarousel({ images, alt, height = "h-64", onImageClick }: { 
       <img 
         src={images[index]} 
         alt={`${alt} - Image ${index + 1} of ${images.length}`} 
-        className="object-cover w-full h-full" 
+        className="object-cover w-full h-full transition-transform duration-300 hover:scale-105" 
       />
       {images.length > 1 && (
         <>
           <button 
             onClick={prev} 
-            className="absolute left-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-70 rounded-full p-2 text-[#4A3419] hover:bg-opacity-100 z-10"
+            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full p-3 text-[#4A3419] hover:shadow-lg transition-all duration-200 z-10"
             aria-label="Previous image"
             type="button"
           >
-            &#8592;
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
           </button>
           <button 
             onClick={next} 
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-70 rounded-full p-2 text-[#4A3419] hover:bg-opacity-100 z-10"
+            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full p-3 text-[#4A3419] hover:shadow-lg transition-all duration-200 z-10"
             aria-label="Next image"
             type="button"
           >
-            &#8594;
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
           </button>
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-10">
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
             {images.map((_, i) => (
-              <span 
+              <button
                 key={i} 
-                className={`inline-block w-2 h-2 rounded-full ${i === index ? 'bg-[#4A3419]' : 'bg-[#E8C39E]'}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIndex(i);
+                }}
+                className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                  i === index 
+                    ? 'bg-[#4A3419] scale-125' 
+                    : 'bg-white bg-opacity-60 hover:bg-opacity-80'
+                }`}
                 aria-label={`Go to image ${i + 1}`}
-              ></span>
+                type="button"
+              />
             ))}
+          </div>
+          <div className="absolute top-4 left-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm z-10">
+            {index + 1} / {images.length}
           </div>
         </>
       )}
@@ -408,79 +424,123 @@ function ProductsContent() {
             onClick={closeModal}
           >
             <motion.div 
-              className="bg-white rounded-lg max-w-3xl w-full overflow-hidden"
+              className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col lg:flex-row"
               initial={{ opacity: 0, y: 50, scale: 0.9 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 50, scale: 0.9 }}
               transition={{ type: "spring", bounce: 0.3 }}
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="relative">
+              {/* Image Section - Larger and more prominent */}
+              <div className="lg:w-2/3 relative">
                 {selectedProduct.images && selectedProduct.images.length > 0 ? (
-                  <ProductImageCarousel images={selectedProduct.images} alt={selectedProduct.name} height="h-64" onImageClick={() => handleProductClick(selectedProduct)} />
+                  <ProductImageCarousel 
+                    images={selectedProduct.images} 
+                    alt={selectedProduct.name} 
+                    height="h-96 lg:h-full min-h-[400px]" 
+                    onImageClick={() => handleProductClick(selectedProduct)} 
+                  />
                 ) : (
-                  <div className="bg-[#E8C39E] h-64 relative">
-                    <img src={selectedProduct.image} alt={selectedProduct.name} className="object-contain w-full h-full" />
+                  <div className="bg-[#E8C39E] h-96 lg:h-full min-h-[400px] relative flex items-center justify-center">
+                    <img 
+                      src={selectedProduct.image} 
+                      alt={selectedProduct.name} 
+                      className="object-contain w-full h-full max-h-[70vh]" 
+                    />
                   </div>
                 )}
                 <button 
-                  className="absolute top-4 right-4 bg-white p-2 rounded-full shadow-lg hover:bg-[#E8C39E] transition-colors duration-300 z-20"
+                  className="absolute top-4 right-4 bg-white p-3 rounded-full shadow-lg hover:bg-[#E8C39E] transition-colors duration-300 z-20"
                   onClick={closeModal}
                   type="button"
+                  aria-label="Close modal"
                 >
-                  <FaTimes className="text-[#4A3419]" />
+                  <FaTimes className="text-[#4A3419]" size={20} />
                 </button>
               </div>
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-3">
-                  <h2 className="text-2xl font-bold text-[#4A3419]">{selectedProduct.name}</h2>
-                  <div className="flex items-center">
-                    <span className="text-[#4A3419] font-bold mr-1">{selectedProduct.rating}</span>
-                    <FaStar className="text-yellow-500" />
+
+              {/* Product Details Section */}
+              <div className="lg:w-1/3 p-6 lg:p-8 flex flex-col justify-between overflow-y-auto">
+                <div>
+                  <div className="flex items-start justify-between mb-4">
+                    <h2 className="text-2xl lg:text-3xl font-bold text-[#4A3419] leading-tight">{selectedProduct.name}</h2>
+                    <div className="flex items-center">
+                      <span className="text-[#4A3419] font-bold mr-1">{selectedProduct.rating}</span>
+                      <FaStar className="text-yellow-500" />
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between mb-6">
+                    <p className="text-3xl lg:text-4xl font-bold text-[#4A3419]">${selectedProduct.price}</p>
+                  </div>
+                  
+                  <p className="text-gray-700 mb-6 text-lg leading-relaxed">{selectedProduct.description}</p>
+                  
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="border border-gray-200 p-4 rounded-lg text-center">
+                      <span className="block text-sm text-gray-500 mb-1">Material</span>
+                      <span className="font-medium text-[#4A3419]">Recycled Cotton</span>
+                    </div>
+                    <div className="border border-gray-200 p-4 rounded-lg text-center">
+                      <span className="block text-sm text-gray-500 mb-1">Size</span>
+                      <span className="font-medium text-[#4A3419]">Standard</span>
+                    </div>
+                  </div>
+
+                  {/* Stock Status */}
+                  {typeof selectedProduct.metadata?.stock !== 'undefined' && (
+                    Number(selectedProduct.metadata.stock) === 0 ? (
+                      <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <span className="text-red-600 font-bold text-lg">Sold Out</span>
+                      </div>
+                    ) : (
+                      <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <span className="text-green-700 font-semibold text-lg">In Stock: {selectedProduct.metadata.stock}</span>
+                      </div>
+                    )
+                  )}
+
+                  {/* Quantity Selector */}
+                  <div className="flex items-center justify-between mb-6">
+                    <span className="text-[#4A3419] font-semibold">Quantity:</span>
+                    <div className="flex items-center border border-[#E8C39E] rounded-lg">
+                      <button
+                        onClick={decrementQuantity}
+                        className="px-4 py-2 text-[#4A3419] hover:bg-[#E8C39E] transition-colors duration-200"
+                        disabled={quantity <= 1}
+                      >
+                        -
+                      </button>
+                      <span className="px-6 py-2 text-[#4A3419] font-semibold">{quantity}</span>
+                      <button
+                        onClick={incrementQuantity}
+                        className="px-4 py-2 text-[#4A3419] hover:bg-[#E8C39E] transition-colors duration-200"
+                      >
+                        +
+                      </button>
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center justify-between mb-4">
-                  <p className="text-2xl font-bold text-[#4A3419]">${selectedProduct.price}</p>
-                </div>
-                <p className="text-gray-700 mb-6">{selectedProduct.description}</p>
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="border border-gray-200 p-3 rounded-lg text-center">
-                    <span className="block text-sm text-gray-500">Material</span>
-                    <span className="font-medium text-[#4A3419]">Recycled Cotton</span>
-                  </div>
-                  <div className="border border-gray-200 p-3 rounded-lg text-center">
-                    <span className="block text-sm text-gray-500">Size</span>
-                    <span className="font-medium text-[#4A3419]">Standard</span>
-                  </div>
-                </div>
-                <div className="flex flex-col gap-4">
-                  <div className="flex items-center justify-center border border-gray-200 rounded-lg p-2">
-                    <button 
-                      onClick={decrementQuantity} 
-                      className="w-8 h-8 flex items-center justify-center bg-[#E8C39E] text-[#4A3419] rounded-full hover:bg-[#d6b28e]"
-                      type="button"
-                    >
-                      -
-                    </button>
-                    <span className="mx-4 text-lg font-medium text-[#4A3419]">{quantity}</span>
-                    <button 
-                      onClick={incrementQuantity} 
-                      className="w-8 h-8 flex items-center justify-center bg-[#E8C39E] text-[#4A3419] rounded-full hover:bg-[#d6b28e]"
-                      type="button"
-                    >
-                      +
-                    </button>
-                  </div>
-                  <motion.button 
-                    className="w-full bg-[#4A3419] text-white py-3 rounded-lg font-bold hover:bg-[#6B4B26] transition-colors duration-300 flex items-center justify-center gap-2"
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.97 }}
-                    onClick={handleAddToCartFromModal}
-                    disabled={Number(selectedProduct?.metadata?.stock) === 0}
-                    type="button"
-                  >
-                    <FaShoppingCart /> {Number(selectedProduct?.metadata?.stock) === 0 ? 'Sold Out' : 'Add to Cart'}
-                  </motion.button>
+
+                {/* Add to Cart Button */}
+                <motion.button
+                  className="w-full bg-[#4A3419] text-white py-4 px-6 rounded-lg font-semibold text-lg hover:bg-[#6B4B26] transition-colors duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleAddToCartFromModal}
+                  disabled={Number(selectedProduct.metadata?.stock) === 0}
+                >
+                  <FaShoppingCart size={20} />
+                  Add to Cart
+                </motion.button>
+
+                {/* Product Tags */}
+                <div className="flex flex-wrap gap-2 mt-6">
+                  {(selectedProduct.metadata?.tags ? selectedProduct.metadata.tags.split(',') : []).map(tag => (
+                    <span key={tag} className="text-sm px-3 py-1 bg-[#E8C39E] text-[#4A3419] rounded-full">
+                      {tag.trim()}
+                    </span>
+                  ))}
                 </div>
               </div>
             </motion.div>
