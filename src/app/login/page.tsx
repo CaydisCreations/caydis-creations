@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useFirebaseAuth } from '../context/FirebaseAuthContext';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import PasswordInput from '../components/PasswordInput';
 
 export default function LoginPage() {
   const { login, loginWithGoogle, user, loading } = useFirebaseAuth();
@@ -150,12 +151,10 @@ export default function LoginPage() {
                 className="w-full border border-[#E8C39E] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#4A3419] bg-[#FFF5E6] text-[#4A3419]"
                 required
               />
-              <input
-                type="password"
+              <PasswordInput
                 placeholder="Password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                className="w-full border border-[#E8C39E] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#4A3419] bg-[#FFF5E6] text-[#4A3419]"
                 required
               />
               <button

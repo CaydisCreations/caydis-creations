@@ -5,6 +5,7 @@ import { useFirebaseAuth } from '../context/FirebaseAuthContext';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { sendEmailVerification, updateEmail, updatePassword, getAuth } from 'firebase/auth';
+import PasswordInput from '../components/PasswordInput';
 
 export default function AccountPage() {
   const { user, logout } = useFirebaseAuth();
@@ -469,25 +470,21 @@ export default function AccountPage() {
                 
                 {/* Current Password */}
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-[#4A3419] mb-2">Current Password</label>
-                  <input 
-                    type="password" 
+                  <PasswordInput 
                     value={currentPassword} 
                     onChange={e => setCurrentPassword(e.target.value)} 
                     placeholder="Enter your current password" 
-                    className="w-full border border-[#E8C39E] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#4A3419] bg-[#FFF5E6] text-[#4A3419]" 
+                    label="Current Password"
                   />
                 </div>
 
                 {/* New Password */}
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-[#4A3419] mb-2">New Password</label>
-                  <input 
-                    type="password" 
+                  <PasswordInput 
                     value={newPassword} 
                     onChange={e => setNewPassword(e.target.value)} 
                     placeholder="Enter your new password" 
-                    className="w-full border border-[#E8C39E] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#4A3419] bg-[#FFF5E6] text-[#4A3419]" 
+                    label="New Password"
                   />
                   
                   {/* Password Requirements */}
@@ -505,13 +502,11 @@ export default function AccountPage() {
 
                 {/* Confirm Password */}
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-[#4A3419] mb-2">Confirm New Password</label>
-                  <input 
-                    type="password" 
+                  <PasswordInput 
                     value={confirmPassword} 
                     onChange={e => setConfirmPassword(e.target.value)} 
                     placeholder="Confirm your new password" 
-                    className="w-full border border-[#E8C39E] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#4A3419] bg-[#FFF5E6] text-[#4A3419]" 
+                    label="Confirm New Password"
                   />
                   {confirmPassword && newPassword !== confirmPassword && (
                     <div className="text-red-600 text-xs mt-1">Passwords do not match</div>

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useFirebaseAuth } from '../context/FirebaseAuthContext';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import PasswordInput from '../components/PasswordInput';
 
 export default function SignupPage() {
   const { signup, loginWithGoogle, user, loading } = useFirebaseAuth();
@@ -101,23 +102,21 @@ export default function SignupPage() {
             className="w-full border border-[#E8C39E] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#4A3419] bg-[#FFF5E6] text-[#4A3419]"
             required
           />
-          <input
-            type="password"
-            placeholder="Password"
+          <PasswordInput
+            label="Password"
             value={password}
-            onChange={e => { setPassword(e.target.value); setShowValidation(true); }}
+            onChange={setPassword}
             onFocus={() => setShowValidation(true)}
-            className="w-full border border-[#E8C39E] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#4A3419] bg-[#FFF5E6] text-[#4A3419]"
-            required
+            showValidation={showValidation}
+            requirements={requirements}
           />
-          <input
-            type="password"
-            placeholder="Confirm Password"
+          <PasswordInput
+            label="Confirm Password"
             value={confirmPassword}
-            onChange={e => setConfirmPassword(e.target.value)}
+            onChange={setConfirmPassword}
             onFocus={() => setShowValidation(true)}
-            className="w-full border border-[#E8C39E] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#4A3419] bg-[#FFF5E6] text-[#4A3419]"
-            required
+            showValidation={showValidation}
+            requirements={requirements}
           />
           {showValidation && (
             <div className="bg-[#FFF5E6] border border-[#E8C39E] rounded-lg p-4 mb-2 text-[#4A3419] shadow-sm animate-fade-slide-up">
