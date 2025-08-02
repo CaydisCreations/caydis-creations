@@ -27,11 +27,12 @@ function HomeContent() {
 
   useEffect(() => {
     if (!allProducts.length) return;
-    // Feature specific products: Scrunchie Set 2, Beanie - Blue, and a bag
+    // Feature specific products: Scrunchie Set 2, Beanie - Blue, Scarf - White, and a bag
     const scrunchieSet2 = allProducts.find(p => p.name === 'Scrunchie Set 2');
     const beanieBlue = allProducts.find(p => p.name === 'Beanie - Blue');
+    const scarfWhite = allProducts.find(p => p.name === 'Scarf - White');
     const bag = allProducts.find(p => p.metadata?.category === 'Bags' && p.name !== 'Shoulder Bag - Brown');
-    setFeaturedProducts([scrunchieSet2, beanieBlue, bag].filter(Boolean));
+    setFeaturedProducts([scrunchieSet2, beanieBlue, scarfWhite, bag].filter(Boolean));
   }, [allProducts]);
 
   const handleProductClick = (product) => {
