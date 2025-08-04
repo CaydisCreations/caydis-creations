@@ -512,11 +512,11 @@ function ProductsContent() {
                   <div className="grid grid-cols-2 gap-4 mb-6">
                     <div className="border border-gray-200 p-4 rounded-lg text-center">
                       <span className="block text-sm text-gray-500 mb-1">Material</span>
-                      <span className="font-medium text-[#4A3419]">{selectedProduct.metadata?.material || 'Acrylic'}</span>
+                      <span className="font-medium text-[#4A3419]">Recycled Cotton</span>
                     </div>
                     <div className="border border-gray-200 p-4 rounded-lg text-center">
                       <span className="block text-sm text-gray-500 mb-1">Size</span>
-                      <span className="font-medium text-[#4A3419]">{selectedProduct.metadata?.size || 'Standard'}</span>
+                      <span className="font-medium text-[#4A3419]">Standard</span>
                     </div>
                   </div>
 

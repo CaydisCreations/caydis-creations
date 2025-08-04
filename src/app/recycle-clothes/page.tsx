@@ -15,10 +15,31 @@ const duffleBagImages = [
   '/duffleBag/IMG_6985.jpg',
 ];
 
+const coasterImages = [
+  'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Coasters/IMG_6332.jpeg',
+  'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Coasters/IMG_6333.jpeg',
+  'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Coasters/IMG_6334.jpeg',
+  'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Coasters/IMG_6335.jpeg',
+  'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Coasters/IMG_6336.jpeg',
+];
+
+const basketImages = [
+  'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/SmallBasket/IMG_6337.jpeg',
+  'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/SmallBasket/IMG_6338.jpeg',
+  'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/SmallBasket/IMG_6339.jpeg',
+  'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/SmallBasket/IMG_6341.jpeg',
+];
+
 export default function RecycleClothesPage() {
   const [carouselIndex, setCarouselIndex] = useState(0);
+  const [coasterCarouselIndex, setCoasterCarouselIndex] = useState(0);
+  const [basketCarouselIndex, setBasketCarouselIndex] = useState(0);
   const prevImage = () => setCarouselIndex(i => (i === 0 ? duffleBagImages.length - 1 : i - 1));
   const nextImage = () => setCarouselIndex(i => (i === duffleBagImages.length - 1 ? 0 : i + 1));
+  const prevCoasterImage = () => setCoasterCarouselIndex(i => (i === 0 ? coasterImages.length - 1 : i - 1));
+  const nextCoasterImage = () => setCoasterCarouselIndex(i => (i === coasterImages.length - 1 ? 0 : i + 1));
+  const prevBasketImage = () => setBasketCarouselIndex(i => (i === 0 ? basketImages.length - 1 : i - 1));
+  const nextBasketImage = () => setBasketCarouselIndex(i => (i === basketImages.length - 1 ? 0 : i + 1));
   const [activeTab, setActiveTab] = useState('Recycled Product Info');
   const tabs = [
     'Recycled Product Info',
@@ -261,13 +282,15 @@ export default function RecycleClothesPage() {
                     </ul>
                     <p className="mb-4">If you have any questions about specific pieces of clothes, please reach out to us!</p>
                     <p className="mb-4">If you want an item made and we need to provide more balls of yarn made from clothes: $10 per extra ball</p>
-                    <p className="font-bold">Example (Duffle Bag): 13 shirts/balls of yarn used → 13 x $5 = $65. Made into a duffle bag: +$15. Total: $80</p>
+                    <p className="font-bold">Example (Duffle Bag): 13 shirts/balls of yarn used → 13 x $5 = $65. Made into a duffle bag: +$20. Total: $85</p>
+                    <p className="text-sm mt-2">Shipping is not included in example.</p>
+                    <p className="text-sm mt-2">Please go to example tab to see more.</p>
                   </div>
                   <div className="mt-4">
                     <b>Additional Item Costs:</b>
                     <ul className="list-disc ml-6">
-                      <li>Coaster: +$5</li>
-                      <li>Duffle Bag: +$15</li>
+                      <li>Coaster: +$10</li>
+                      <li>Duffle Bag: +$20</li>
                       <li>Small Basket: +$10</li>
                     </ul>
                   </div>
@@ -308,7 +331,62 @@ export default function RecycleClothesPage() {
                   <p className="mb-2">It was made out of about 13 shirts/balls of yarn. <b>13 balls is enough for a duffle bag that is perfect for an overnight bag.</b></p>
                   <p className="mb-2">Plain shirts and shirts without side seams work best for this type of project.</p>
                   <div className="mt-6 p-6 bg-[#FFF5E6] border border-[#E8C39E] rounded-lg text-[#4A3419] max-w-2xl">
-                    <span className="font-bold">Example (Duffle Bag):</span> 13 shirts/balls of yarn used → 13 x $5 = $65. Made into a duffle bag: +$15. <span className="font-bold">Total: $80</span>
+                    <span className="font-bold">Example (Duffle Bag):</span> 13 shirts/balls of yarn used → 13 x $5 = $65. Made into a duffle bag: +$20. <span className="font-bold">Total: $85</span>
+                    <p className="text-sm mt-2">Please note that shipping is not included in the example.</p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Coasters Example Section */}
+              <div className="bg-white p-8 rounded-lg shadow-md flex flex-col md:flex-row items-center gap-8 mt-8">
+                <div className="relative w-full max-w-xs flex-shrink-0">
+                  <img src={coasterImages[coasterCarouselIndex]} alt={`Coasters Example ${coasterCarouselIndex + 1}`} className="w-full rounded-lg shadow-md object-contain" />
+                  {coasterImages.length > 1 && (
+                    <>
+                      <button onClick={prevCoasterImage} className="absolute left-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-70 rounded-full p-2 text-[#4A3419] hover:bg-opacity-100">&#8592;</button>
+                      <button onClick={nextCoasterImage} className="absolute right-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-70 rounded-full p-2 text-[#4A3419] hover:bg-opacity-100">&#8594;</button>
+                      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                        {coasterImages.map((_, i) => (
+                          <span key={i} className={`inline-block w-2 h-2 rounded-full ${i === coasterCarouselIndex ? 'bg-[#4A3419]' : 'bg-[#E8C39E]'}`}></span>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+                <div className="text-[#4A3419] text-lg">
+                  <p className="mb-2"><b>The blue coaster is made from a cotton shirt and the white coasters from a polyester shirt.</b></p>
+                  <p className="mb-2">It takes 1 shirt/ ball of yarn with extra yarn remaining.</p>
+                  <p className="mb-2">Plain shirts and shirts without side seams work best for this type of project.</p>
+                  <div className="mt-6 p-6 bg-[#FFF5E6] border border-[#E8C39E] rounded-lg text-[#4A3419] max-w-2xl">
+                    <span className="font-bold">Pricing example:</span> 1 shirt/ball → 1x$5=$5. Made into a coaster: +$10. <span className="font-bold">Total: $15</span>
+                    <p className="text-sm mt-2">Please note that shipping is not included in the example.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Small Basket Example Section */}
+              <div className="bg-white p-8 rounded-lg shadow-md flex flex-col md:flex-row items-center gap-8 mt-8">
+                <div className="relative w-full max-w-xs flex-shrink-0">
+                  <img src={basketImages[basketCarouselIndex]} alt={`Small Basket Example ${basketCarouselIndex + 1}`} className="w-full rounded-lg shadow-md object-contain" />
+                  {basketImages.length > 1 && (
+                    <>
+                      <button onClick={prevBasketImage} className="absolute left-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-70 rounded-full p-2 text-[#4A3419] hover:bg-opacity-100">&#8592;</button>
+                      <button onClick={nextBasketImage} className="absolute right-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-70 rounded-full p-2 text-[#4A3419] hover:bg-opacity-100">&#8594;</button>
+                      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                        {basketImages.map((_, i) => (
+                          <span key={i} className={`inline-block w-2 h-2 rounded-full ${i === basketCarouselIndex ? 'bg-[#4A3419]' : 'bg-[#E8C39E]'}`}></span>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+                <div className="text-[#4A3419] text-lg">
+                  <p className="mb-2"><b>The small basket is made out of cotton shirts.</b></p>
+                  <p className="mb-2">It takes 4 shirts to make.</p>
+                  <p className="mb-2">Plain shirts and shirts without side seams work best for this type of project.</p>
+                  <div className="mt-6 p-6 bg-[#FFF5E6] border border-[#E8C39E] rounded-lg text-[#4A3419] max-w-2xl">
+                    <span className="font-bold">Pricing example:</span> 4 shirts/balls→ 4x$5= $20. Made into basket: +10. <span className="font-bold">Total: $30</span>
+                    <p className="text-sm mt-2">Please note that shipping is not included in the example.</p>
                   </div>
                 </div>
               </div>

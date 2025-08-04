@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { motion } from 'framer-motion'
-import { FaRecycle, FaTools, FaArrowRight, FaGift, FaStar, FaShoppingCart, FaHeart } from 'react-icons/fa'
+import { motion, AnimatePresence } from 'framer-motion'
+import { FaRecycle, FaTools, FaArrowRight, FaGift, FaStar, FaShoppingCart, FaHeart, FaTimes } from 'react-icons/fa'
 import { useCart } from './context/CartContext'
 import Link from 'next/link'
 
@@ -177,7 +177,7 @@ function HomeContent() {
             See Products <span aria-hidden="true">→</span>
           </Link>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {isLoading ? (
             <div className="col-span-3 text-center text-[#4A3419] text-xl py-12">Loading featured products...</div>
           ) : featuredProducts.length === 0 ? (
@@ -185,25 +185,63 @@ function HomeContent() {
           ) : featuredProducts.map((product, index) => (
             <motion.div 
               key={product.id}
-              className="bg-white p-6 rounded-lg shadow-md overflow-hidden group cursor-pointer relative"
-              whileHover={{ 
-                y: -10,
-                boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
-              }}
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 * index }}
+              className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer relative group"
+              layout
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              whileHover={{ y: -5 }}
+              transition={{ duration: 0.3 }}
               onClick={() => handleProductClick(product)}
             >
-              <div className="bg-[#E8C39E] h-48 rounded-md mb-4 overflow-hidden relative transform group-hover:scale-105 transition-transform duration-500">
-                {product.image && (
-                  <Image src={product.image} alt={product.name} fill className="object-contain" />
-                )}
+              {/* Product image */}
+              {product.images && product.images.length > 0 ? (
+                <div className="bg-[#E8C39E] h-64 rounded-md mb-4 overflow-hidden relative cursor-pointer">
+                  <img src={product.images[0]} alt={product.name} className="object-contain w-full h-full" />
+                  <div className="absolute top-0 right-0 bg-[#4A3419] text-white px-2 py-1 m-2 rounded-full text-sm">
+                    {product.rating || '5'} ★
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-[#E8C39E] h-64 rounded-md mb-4 overflow-hidden relative cursor-pointer">
+                  <img src={product.image} alt={product.name} className="object-cover w-full h-full" />
+                  <div className="absolute top-0 right-0 bg-[#4A3419] text-white px-2 py-1 m-2 rounded-full text-sm">
+                    {product.rating || '5'} ★
+                  </div>
+                </div>
+              )}
+              <h2 className="text-xl font-bold text-[#4A3419] group-hover:text-[#6B4B26] transition-colors">{product.name}</h2>
+              <p className="text-[#4A3419] mb-2 line-clamp-2">{product.description}</p>
+              <div className="flex justify-between items-center mt-4">
+                <span className="text-lg font-bold text-[#4A3419]">${product.price}</span>
               </div>
-              <h3 className="text-xl font-bold text-[#4A3419] group-hover:text-[#E8C39E] transition-colors duration-300">{product.name}</h3>
-              <p className="text-[#4A3419] font-bold">${product.price}</p>
-              <div className="absolute bottom-0 left-0 right-0 bg-[#4A3419] text-white py-3 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex justify-center">
-                <span>View Details</span>
+              {typeof product.metadata?.stock !== 'undefined' && (
+                Number(product.metadata.stock) === 0 ? (
+                  <span className="block text-red-600 font-bold mt-2">Sold Out</span>
+                ) : (
+                  <span className="block text-green-700 font-semibold mt-2">In Stock: {product.metadata.stock}</span>
+                )
+              )}
+              <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-white to-transparent"></div>
+              <div className="hidden group-hover:flex absolute right-0 bottom-0 p-2">
+                <motion.button
+                  className="p-2 bg-[#4A3419] text-white rounded-full hover:bg-[#6B4B26] flex items-center gap-1"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    addToCart({ ...product, priceId: product.priceId }, 1);
+                  }}
+                  disabled={Number(product.metadata?.stock) === 0}
+                >
+                  <FaShoppingCart size={14} />
+                  <span className="text-xs">Add</span>
+                </motion.button>
+              </div>
+              <div className="flex flex-wrap gap-1 mt-2">
+                {(product.metadata?.tags ? product.metadata.tags.split(',') : []).map(tag => (
+                  <span key={tag} className="text-xs px-2 py-1 bg-[#E8C39E] text-[#4A3419] rounded-full">{tag}</span>
+                ))}
               </div>
             </motion.div>
           ))}
@@ -230,66 +268,134 @@ function HomeContent() {
         </motion.a>
       </motion.section>
 
-      {/* Product Modal */}
-      {modalOpen && activeProduct && (
+      {/* Product Details Modal */}
+      <AnimatePresence>
+        {modalOpen && activeProduct && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
           <motion.div 
-            className="bg-white rounded-lg max-w-2xl w-full overflow-hidden"
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50 }}
+            className="bg-white rounded-lg w-full h-full max-w-none max-h-none overflow-hidden flex flex-col lg:flex-row"
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 50, scale: 0.9 }}
+            transition={{ type: "spring", bounce: 0.3 }}
           >
-            <div className="bg-[#E8C39E] h-64 relative">
-              {/* Placeholder for product image */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <FaStar className="text-[#4A3419] text-6xl opacity-20" />
-              </div>
+            {/* Image Section - Full screen size */}
+            <div className="lg:w-2/3 relative h-full">
+              {activeProduct.images && activeProduct.images.length > 0 ? (
+                <div className="bg-[#E8C39E] h-full relative flex items-center justify-center">
+                  <img 
+                    src={activeProduct.images[0]} 
+                    alt={activeProduct.name} 
+                    className="object-contain w-full h-full" 
+                  />
+                </div>
+              ) : (
+                <div className="bg-[#E8C39E] h-full relative flex items-center justify-center">
+                  <img 
+                    src={activeProduct.image} 
+                    alt={activeProduct.name} 
+                    className="object-contain w-full h-full" 
+                  />
+                </div>
+              )}
               <button 
-                className="absolute top-2 right-2 bg-white rounded-full p-2 shadow-md"
+                className="absolute top-4 right-4 bg-white p-3 rounded-full shadow-lg hover:bg-[#E8C39E] transition-colors duration-300 z-20"
                 onClick={() => setModalOpen(false)}
+                type="button"
+                aria-label="Close modal"
               >
-                ✕
+                <FaTimes className="text-[#4A3419]" size={20} />
               </button>
             </div>
-            <div className="p-6">
-              <h3 className="text-2xl font-bold text-[#4A3419]">{activeProduct.name}</h3>
-              <div className="flex items-center justify-between mt-2 mb-4">
-                <p className="text-2xl font-bold text-[#4A3419]">${activeProduct.price}</p>
-                <span className="bg-[#E8C39E] text-[#4A3419] px-3 py-1 rounded-full text-sm">
-                  {activeProduct.category}
-                </span>
-              </div>
-              <p className="text-gray-700 mb-6">{activeProduct.description}</p>
-              
-              <div className="flex flex-col gap-4">
-                <div className="flex items-center justify-center border border-gray-200 rounded-lg p-2">
-                  <button 
-                    onClick={decrementQuantity} 
-                    className="w-8 h-8 flex items-center justify-center bg-[#E8C39E] text-[#4A3419] rounded-full hover:bg-[#d6b28e]"
-                  >
-                    -
-                  </button>
-                  <span className="mx-4 text-lg font-medium text-[#4A3419]">{quantity}</span>
-                  <button 
-                    onClick={incrementQuantity} 
-                    className="w-8 h-8 flex items-center justify-center bg-[#E8C39E] text-[#4A3419] rounded-full hover:bg-[#d6b28e]"
-                  >
-                    +
-                  </button>
+
+            {/* Product Details Section */}
+            <div className="lg:w-1/3 p-6 lg:p-8 flex flex-col justify-between overflow-y-auto">
+              <div>
+                <div className="flex items-start justify-between mb-4">
+                  <h2 className="text-2xl lg:text-3xl font-bold text-[#4A3419] leading-tight">{activeProduct.name}</h2>
+                  <div className="flex items-center">
+                    <span className="text-[#4A3419] font-bold mr-1">{activeProduct.rating || '5'}</span>
+                    <FaStar className="text-yellow-500" />
+                  </div>
                 </div>
-                <motion.button 
-                  className="flex items-center justify-center gap-2 bg-[#4A3419] text-white py-3 rounded-lg font-medium"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleAddToCart}
-                >
-                  <FaShoppingCart /> Add to Cart
-                </motion.button>
+                
+                <div className="flex items-center justify-between mb-6">
+                  <p className="text-3xl lg:text-4xl font-bold text-[#4A3419]">${activeProduct.price}</p>
+                </div>
+                
+                <p className="text-gray-700 mb-6 text-lg leading-relaxed">{activeProduct.description}</p>
+                
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className="border border-gray-200 p-4 rounded-lg text-center">
+                    <span className="block text-sm text-gray-500 mb-1">Material</span>
+                    <span className="font-medium text-[#4A3419]">{activeProduct.metadata?.material || 'Acrylic'}</span>
+                  </div>
+                  <div className="border border-gray-200 p-4 rounded-lg text-center">
+                    <span className="block text-sm text-gray-500 mb-1">Size</span>
+                    <span className="font-medium text-[#4A3419]">{activeProduct.metadata?.size || 'Standard'}</span>
+                  </div>
+                </div>
+
+                {/* Stock Status */}
+                {typeof activeProduct.metadata?.stock !== 'undefined' && (
+                  Number(activeProduct.metadata.stock) === 0 ? (
+                    <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                      <span className="text-red-600 font-bold text-lg">Sold Out</span>
+                    </div>
+                  ) : (
+                    <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <span className="text-green-700 font-semibold text-lg">In Stock: {activeProduct.metadata.stock}</span>
+                    </div>
+                  )
+                )}
+
+                {/* Quantity Selector */}
+                <div className="flex items-center justify-between mb-6">
+                  <span className="text-[#4A3419] font-semibold">Quantity:</span>
+                  <div className="flex items-center border border-[#E8C39E] rounded-lg">
+                    <button
+                      onClick={decrementQuantity}
+                      className="px-4 py-2 text-[#4A3419] hover:bg-[#E8C39E] transition-colors duration-200"
+                      disabled={quantity <= 1}
+                    >
+                      -
+                    </button>
+                    <span className="px-6 py-2 text-[#4A3419] font-semibold">{quantity}</span>
+                    <button
+                      onClick={incrementQuantity}
+                      className="px-4 py-2 text-[#4A3419] hover:bg-[#E8C39E] transition-colors duration-200"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Add to Cart Button */}
+              <motion.button
+                className="w-full bg-[#4A3419] text-white py-4 px-6 rounded-lg font-semibold text-lg hover:bg-[#6B4B26] transition-colors duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleAddToCart}
+                disabled={Number(activeProduct.metadata?.stock) === 0}
+              >
+                <FaShoppingCart size={20} />
+                Add to Cart
+              </motion.button>
+
+              {/* Product Tags */}
+              <div className="flex flex-wrap gap-2 mt-6">
+                {(activeProduct.metadata?.tags ? activeProduct.metadata.tags.split(',') : []).map(tag => (
+                  <span key={tag} className="text-sm px-3 py-1 bg-[#E8C39E] text-[#4A3419] rounded-full">
+                    {tag.trim()}
+                  </span>
+                ))}
               </div>
             </div>
           </motion.div>
         </div>
       )}
+      </AnimatePresence>
     </div>
   )
 }
