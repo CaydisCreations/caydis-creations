@@ -3,6 +3,11 @@
 import React, { useState } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
+interface PasswordRequirement {
+  label: string;
+  valid: boolean;
+}
+
 interface PasswordInputProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -10,6 +15,9 @@ interface PasswordInputProps {
   className?: string;
   required?: boolean;
   label?: string;
+  onFocus?: () => void;
+  showValidation?: boolean;
+  requirements?: PasswordRequirement[];
 }
 
 export default function PasswordInput({ 
@@ -18,7 +26,10 @@ export default function PasswordInput({
   placeholder = "Password", 
   className = "", 
   required = false,
-  label
+  label,
+  onFocus,
+  showValidation = false,
+  requirements = []
 }: PasswordInputProps) {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -38,6 +49,7 @@ export default function PasswordInput({
           type={showPassword ? "text" : "password"}
           value={value}
           onChange={onChange}
+          onFocus={onFocus}
           placeholder={placeholder}
           required={required}
           className={`w-full border border-[#E8C39E] rounded-lg p-3 pr-12 focus:outline-none focus:ring-2 focus:ring-[#4A3419] bg-[#FFF5E6] text-[#4A3419] ${className}`}

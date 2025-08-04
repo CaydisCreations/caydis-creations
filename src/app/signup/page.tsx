@@ -105,7 +105,7 @@ export default function SignupPage() {
           <PasswordInput
             label="Password"
             value={password}
-            onChange={setPassword}
+            onChange={(e) => setPassword(e.target.value)}
             onFocus={() => setShowValidation(true)}
             showValidation={showValidation}
             requirements={requirements}
@@ -113,7 +113,7 @@ export default function SignupPage() {
           <PasswordInput
             label="Confirm Password"
             value={confirmPassword}
-            onChange={setConfirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             onFocus={() => setShowValidation(true)}
             showValidation={showValidation}
             requirements={requirements}
