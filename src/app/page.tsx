@@ -217,9 +217,13 @@ function HomeContent() {
               </div>
               {typeof product.metadata?.stock !== 'undefined' && (
                 Number(product.metadata.stock) === 0 ? (
-                  <span className="block text-red-600 font-bold mt-2">Sold Out</span>
+                  <div className="text-left">
+                    <span className="block text-red-600 font-bold mt-2">Sold Out</span>
+                  </div>
                 ) : (
-                  <span className="block text-green-700 font-semibold mt-2">In Stock: {product.metadata.stock}</span>
+                  <div className="text-left">
+                    <span className="block text-green-700 font-semibold mt-2">In Stock: {product.metadata.stock}</span>
+                  </div>
                 )
               )}
               <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-white to-transparent"></div>
