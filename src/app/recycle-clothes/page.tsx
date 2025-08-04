@@ -308,7 +308,7 @@ export default function RecycleClothesPage() {
               className="mb-16"
             >
               <h2 className="text-3xl font-bold text-[#4A3419] text-center mb-8">
-                Duffle Bag Example
+                Products Examples
               </h2>
               {/* Duffle Bag Example Section with Carousel */}
               <div className="bg-white p-8 rounded-lg shadow-md flex flex-col md:flex-row items-center gap-8">

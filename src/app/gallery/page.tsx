@@ -222,6 +222,39 @@ const mediaItems: MediaItem[] = [
     tags: ['recycled', 'yarn', 'upcycled', 'shirts', 'sweatpants', 'hoodie', 'eco-friendly'],
     date: '2024-03-17',
   },
+  {
+    id: 'recycled-coasters',
+    type: 'image-group',
+    url: 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Coasters/IMG_6332.jpeg',
+    images: [
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Coasters/IMG_6332.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Coasters/IMG_6333.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Coasters/IMG_6334.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Coasters/IMG_6335.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Coasters/IMG_6336.jpeg',
+    ],
+    title: 'Recycled Coasters',
+    description: 'Handmade coasters crafted from recycled yarn made from cotton and polyester shirts. The blue coaster is made from a cotton shirt and the white coasters from a polyester shirt. Each coaster takes 1 shirt/ball of yarn with extra yarn remaining.',
+    categories: ['Coasters', 'Recycled', 'Accessories', 'Home Decor'],
+    tags: ['recycled', 'coasters', 'upcycled', 'cotton', 'polyester', 'home decor', 'eco-friendly'],
+    date: '2024-08-03',
+  },
+  {
+    id: 'recycled-small-basket',
+    type: 'image-group',
+    url: 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/SmallBasket/IMG_6337.jpeg',
+    images: [
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/SmallBasket/IMG_6337.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/SmallBasket/IMG_6338.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/SmallBasket/IMG_6339.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/SmallBasket/IMG_6341.jpeg',
+    ],
+    title: 'Recycled Small Basket',
+    description: 'A small basket handmade from recycled yarn made from cotton shirts. It takes 4 shirts to make this functional and beautiful basket. Perfect for storage or as a decorative piece.',
+    categories: ['Baskets', 'Recycled', 'Home Decor', 'Storage'],
+    tags: ['recycled', 'basket', 'upcycled', 'cotton', 'storage', 'home decor', 'eco-friendly'],
+    date: '2024-08-03',
+  },
 ]
 
 // Add 'Accessories' to beanie media items
