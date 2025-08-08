@@ -36,6 +36,19 @@ export async function GET() {
       };
     });
 
+    // Sort products by display_order if available, otherwise by creation date
+    result.sort((a, b) => {
+      const orderA = a.metadata?.display_order ? parseInt(a.metadata.display_order) : 999;
+      const orderB = b.metadata?.display_order ? parseInt(b.metadata.display_order) : 999;
+      
+      if (orderA !== 999 || orderB !== 999) {
+        return orderA - orderB;
+      }
+      
+      // Fallback to creation date if no display_order
+      return 0;
+    });
+
     return NextResponse.json({ products: result });
   } catch (err) {
     return NextResponse.json({ error: 'Failed to fetch Stripe products', details: err }, { status: 500 });
