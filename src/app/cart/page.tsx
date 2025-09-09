@@ -134,7 +134,7 @@ function ShippingModal({ open, onClose, onConfirm, initialAddress = undefined, c
       });
       const parcelData = await parcelRes.json();
       const cartWithParcel = parcelData.cartItems;
-      const response = await fetch('/api/shipping-rates', {
+      const response = await fetch('/api/shipstation-shipping-rates', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ address, cartItems: cartWithParcel })
       });
       const data = await response.json();
@@ -509,7 +509,7 @@ function CartContent({ onCheckout, cartItems, setLoading, loading, couponCode, s
       })
       const parcelData = await parcelRes.json()
       const cartWithParcel = parcelData.cartItems
-      const response = await fetch('/api/shipping-rates', {
+      const response = await fetch('/api/shipstation-shipping-rates', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ address, cartItems: cartWithParcel })

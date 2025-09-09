@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FaTruck, FaDownload, FaEye, FaRedo, FaCheck, FaTimes, FaSpinner } from 'react-icons/fa';
+import { FaTruck, FaDownload, FaEye, FaRedo, FaCheck, FaTimes, FaSpinner, FaExclamationTriangle } from 'react-icons/fa';
 
 interface Order {
   id: string;
@@ -51,6 +51,7 @@ export default function AdminDashboard() {
   const [recreatingLabels, setRecreatingLabels] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'pending' | 'shipped' | 'delivered'>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [showConfirmDialog, setShowConfirmDialog] = useState<{show: boolean, orderId: string | null}>({show: false, orderId: null});
 
   useEffect(() => {
     fetchOrders();
@@ -91,9 +92,15 @@ export default function AdminDashboard() {
     }
   };
 
+  const showRecreateConfirmation = (orderId: string) => {
+    setShowConfirmDialog({show: true, orderId});
+  };
+
   const recreateLabels = async (orderId: string) => {
     try {
       setRecreatingLabels(orderId);
+      setShowConfirmDialog({show: false, orderId: null});
+      
       const response = await fetch('/api/nimda1/recreate-labels', {
         method: 'POST',
         headers: { 
@@ -204,6 +211,49 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-[#FFF5E6]">
+      {/* Confirmation Dialog */}
+      {showConfirmDialog.show && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md mx-4 shadow-xl">
+            <div className="flex items-center mb-4">
+              <FaExclamationTriangle className="text-yellow-500 text-2xl mr-3" />
+              <h3 className="text-lg font-bold text-[#4A3419]">Confirm Label Recreation</h3>
+            </div>
+            <div className="mb-6">
+              <p className="text-gray-700 mb-3">
+                <strong>⚠️ This will cost money!</strong>
+              </p>
+              <p className="text-gray-600 mb-2">
+                Recreating labels will:
+              </p>
+              <ul className="text-gray-600 text-sm space-y-1 ml-4">
+                <li>• Charge you the shipping cost again</li>
+                <li>• Void the original label (no refund)</li>
+                <li>• Generate a new tracking number</li>
+                <li>• Make the old tracking number invalid</li>
+              </ul>
+              <p className="text-gray-600 mt-3">
+                <strong>Are you sure you want to proceed?</strong>
+              </p>
+            </div>
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowConfirmDialog({show: false, orderId: null})}
+                className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors duration-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => recreateLabels(showConfirmDialog.orderId!)}
+                className="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors duration-300"
+              >
+                Yes, Recreate Label
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-[#E8C39E]">
         <div className="max-w-7xl mx-auto px-6 py-8">
@@ -371,32 +421,32 @@ export default function AdminDashboard() {
                     </div>
                     <div className="flex items-center space-x-2">
                       {shippingStatus === 'pending' && (
-                                                 <button
-                           onClick={() => recreateLabels(order.id)}
-                           disabled={recreatingLabels === order.id}
-                           className="bg-[#4A3419] text-white px-3 py-1 rounded text-sm hover:bg-[#6B4B26] transition-colors duration-300 flex items-center space-x-1 disabled:opacity-50"
-                         >
-                           {recreatingLabels === order.id ? (
-                             <FaSpinner className="animate-spin text-xs" />
-                           ) : (
-                             <FaRedo className="text-xs" />
-                           )}
-                           <span>Create Labels</span>
-                         </button>
+                        <button
+                          onClick={() => recreateLabels(order.id)}
+                          disabled={recreatingLabels === order.id}
+                          className="bg-[#4A3419] text-white px-3 py-1 rounded text-sm hover:bg-[#6B4B26] transition-colors duration-300 flex items-center space-x-1 disabled:opacity-50"
+                        >
+                          {recreatingLabels === order.id ? (
+                            <FaSpinner className="animate-spin text-xs" />
+                          ) : (
+                            <FaRedo className="text-xs" />
+                          )}
+                          <span>Create Labels</span>
+                        </button>
                       )}
                       {shippingStatus === 'labels_created' && (
-                                                 <button
-                           onClick={() => recreateLabels(order.id)}
-                           disabled={recreatingLabels === order.id}
-                           className="bg-yellow-600 text-white px-3 py-1 rounded text-sm hover:bg-yellow-700 transition-colors duration-300 flex items-center space-x-1 disabled:opacity-50"
-                         >
-                           {recreatingLabels === order.id ? (
-                             <FaSpinner className="animate-spin text-xs" />
-                           ) : (
-                             <FaRedo className="text-xs" />
-                           )}
-                           <span>Recreate Labels</span>
-                         </button>
+                        <button
+                          onClick={() => showRecreateConfirmation(order.id)}
+                          disabled={recreatingLabels === order.id}
+                          className="bg-yellow-600 text-white px-3 py-1 rounded text-sm hover:bg-yellow-700 transition-colors duration-300 flex items-center space-x-1 disabled:opacity-50"
+                        >
+                          {recreatingLabels === order.id ? (
+                            <FaSpinner className="animate-spin text-xs" />
+                          ) : (
+                            <FaRedo className="text-xs" />
+                          )}
+                          <span>Recreate Labels</span>
+                        </button>
                       )}
                     </div>
                   </div>
@@ -408,4 +458,4 @@ export default function AdminDashboard() {
       </div>
     </div>
   );
-} 
+}

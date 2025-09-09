@@ -101,7 +101,7 @@ export async function POST(req: NextRequest) {
       })).filter(item => item.priceId);
 
       if (lineItemsForLabels.length > 0) {
-        const labelResponse = await fetch(`${req.nextUrl.origin}/api/shipping-labels`, {
+        const labelResponse = await fetch(`${req.nextUrl.origin}/api/shipstation-shipping-labels`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

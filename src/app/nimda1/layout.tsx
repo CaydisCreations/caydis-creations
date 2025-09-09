@@ -21,8 +21,8 @@ export default function AdminLayout({
     if (!loading) {
       // Check if user is authenticated
       if (!user) {
-        // No user - show 404 page
-        router.push('/404')
+        // No user - redirect to login
+        router.push('/login')
         return
       }
 
@@ -39,27 +39,45 @@ export default function AdminLayout({
         return
       }
 
-      // User is authenticated and authorized - redirect to 2FA verification
-      if (user.email === 'caydiscreations@gmail.com') {
-        router.push('/nimda1/verify')
-        return
-      }
-
+      // User is authenticated and authorized
       setIsAuthorized(true)
       setCheckingAuth(false)
     }
   }, [user, loading, router])
 
-  // If user is authenticated and authorized, show content immediately
-  if (user && user.email === 'caydiscreations@gmail.com' && !loading) {
+  // Show loading while checking authentication
+  if (loading || checkingAuth) {
     return (
-      <div className="min-h-screen bg-[#FFF5E6]">
-        {children}
+      <div className="min-h-screen bg-[#FFF5E6] flex flex-col justify-center items-center px-4">
+        <div className="text-center max-w-md">
+          {/* Logo */}
+          <div className="mb-8">
+            <Image 
+              src="/logoCaydisCreation.PNG" 
+              alt="Caydi's Creations Logo" 
+              width={80} 
+              height={80} 
+              className="mx-auto rounded-full bg-white p-2 shadow-lg"
+            />
+          </div>
+
+          {/* Loading Content */}
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <div className="flex items-center justify-center mb-4">
+              <FaSpinner className="animate-spin text-[#4A3419] text-2xl mr-3" />
+              <h1 className="text-2xl font-bold text-[#4A3419]">Loading Admin...</h1>
+            </div>
+            <p className="text-gray-700">
+              Checking authentication and permissions...
+            </p>
+          </div>
+        </div>
       </div>
     )
   }
 
-  if (loading || checkingAuth) {
+  // If not authorized, show 404
+  if (!user || !isAuthorized) {
     return (
       <div className="min-h-screen bg-[#FFF5E6] flex flex-col justify-center items-center px-4">
         <div className="text-center max-w-md">
@@ -112,13 +130,10 @@ export default function AdminLayout({
     )
   }
 
-  if (!isAuthorized) {
-    return null // Will redirect to auth
-  }
-
+  // If user is authenticated and authorized, show content
   return (
     <div className="min-h-screen bg-[#FFF5E6]">
       {children}
     </div>
   )
-} 
+}
