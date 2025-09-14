@@ -14,9 +14,23 @@ export async function GET() {
       expand: ['data.default_price']
     });
 
+    // Fetch all active prices for fallback
+    const allPrices = await stripe.prices.list({ active: true, limit: 100 });
+    const priceMap: Record<string, Stripe.Price> = {};
+    for (const price of allPrices.data) {
+      if (typeof price.product === 'string') {
+        priceMap[price.product] = price;
+      }
+    }
+
     // Combine product and price info
     const result = products.data.map(product => {
-      const price = product.default_price as Stripe.Price | null;
+      // Try to use default_price first, fallback to priceMap
+      let price = product.default_price as Stripe.Price | null;
+      if (!price) {
+        price = priceMap[product.id];
+      }
+      
       return {
         id: product.id,
         name: product.name,
