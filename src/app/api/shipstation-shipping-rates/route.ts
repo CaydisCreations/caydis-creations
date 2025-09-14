@@ -27,6 +27,49 @@ function getParcelFromCart(cartItems) {
   };
 }
 
+// Function to create optimized packages for different USPS package types
+function createOptimizedUSPSPackages(parcel) {
+  const packages = [];
+  
+  // Only include the most commonly used and cost-effective package types
+  const priorityPackages = [
+    'flat_rate_envelope',        // Usually cheapest for light items
+    'flat_rate_padded_envelope', // Good for small items
+    'small_flat_rate_box',       // Good for small heavy items
+    'medium_flat_rate_box',      // Most popular box
+    'package'                    // Custom size package
+  ];
+  
+  // Add flat rate packages (no dimensions) - these are usually fastest to calculate
+  priorityPackages.slice(0, -1).forEach(packageCode => {
+    packages.push({
+      packageCode: packageCode,
+      weight: {
+        value: parcel.weight,
+        unit: 'ounce'
+      }
+      // No dimensions for flat rate packages
+    });
+  });
+  
+  // Add regular package with dimensions last
+  packages.push({
+    packageCode: 'package',
+    weight: {
+      value: parcel.weight,
+      unit: 'ounce'
+    },
+    dimensions: {
+      unit: 'inch',
+      length: parcel.length,
+      width: parcel.width,
+      height: parcel.height
+    }
+  });
+  
+  return packages;
+}
+
 export async function POST(req: NextRequest) {
   try {
     if (!process.env.SHIPSTATION_API_KEY) {
@@ -61,6 +104,7 @@ export async function POST(req: NextRequest) {
     };
     console.log('shipstation-shipping-rates: toAddress:', toAddress);
     
+    // Use only the primary warehouse for speed (can add second one back if needed)
     const FROM_ADDRESSES = [
       {
         name: 'Caydi\'s Creations',
@@ -71,17 +115,18 @@ export async function POST(req: NextRequest) {
         countryCode: 'US',
         phone: '800-463-3339',
         email: 'admin@caydiscreations.com',
-      },
-      {
-        name: 'Caydi\'s Creations',
-        addressLine1: '167 Cherry St',
-        cityLocality: 'Milford',
-        stateProvince: 'CT',
-        postalCode: '06460',
-        countryCode: 'US',
-        phone: '800-742-5877',
-        email: 'admin@caydiscreations.com',
       }
+      // Removed second warehouse for speed - can add back if needed:
+      // {
+      //   name: 'Caydi\'s Creations',
+      //   addressLine1: '167 Cherry St',
+      //   cityLocality: 'Milford',
+      //   stateProvince: 'CT',
+      //   postalCode: '06460',
+      //   countryCode: 'US',
+      //   phone: '800-742-5877',
+      //   email: 'admin@caydiscreations.com',
+      // }
     ];
 
     // Your connected carrier IDs
@@ -96,36 +141,43 @@ export async function POST(req: NextRequest) {
       try {
         console.log(`shipstation-shipping-rates: Getting rates from warehouse ${index + 1}:`, fromAddress);
         
-        // Use ShipEngine's proper rate calculation method with address validation
-        const rates = await shipstation.getRatesWithShipmentDetails({
-          rateOptions: {
-            carrierIds: CARRIER_IDS // Use your specific carrier IDs
-          },
-          shipment: {
-            validateAddress: 'no_validation', // Enable real address validation
-            shipFrom: fromAddress,
-            shipTo: toAddress,
-            packages: [{
-              packageCode: 'package',
-              weight: {
-                value: parcel.weight,
-                unit: 'ounce'
+        // Create optimized packages for different USPS package types
+        const packages = createOptimizedUSPSPackages(parcel);
+        console.log(`shipstation-shipping-rates: Optimized packages for warehouse ${index + 1}:`, packages);
+        
+        // Use Promise.allSettled to make parallel requests for better speed
+        const ratePromises = packages.map(async (packageConfig) => {
+          try {
+            console.log(`shipstation-shipping-rates: Getting rates for package type: ${packageConfig.packageCode}`);
+            
+            const rates = await shipstation.getRatesWithShipmentDetails({
+              rateOptions: {
+                carrierIds: CARRIER_IDS
               },
-              dimensions: {
-                unit: 'inch',
-                length: parcel.length,
-                width: parcel.width,
-                height: parcel.height
+              shipment: {
+                validateAddress: 'no_validation',
+                shipFrom: fromAddress,
+                shipTo: toAddress,
+                packages: [packageConfig] // Single package per request
               }
-            }]
+            });
+            
+            return rates.rateResponse?.rates || [];
+          } catch (packageErr) {
+            console.error(`shipstation-shipping-rates: Error getting rates for package ${packageConfig.packageCode}:`, packageErr.message);
+            return []; // Return empty array on error
           }
         });
         
-        console.log(`shipstation-shipping-rates: Rates from warehouse ${index + 1}:`, rates);
+        // Wait for all rate requests to complete
+        const allPackageRates = await Promise.allSettled(ratePromises);
         
-        if (rates.rateResponse?.rates && rates.rateResponse.rates.length > 0) {
-          allRates.push(...rates.rateResponse.rates);
-        }
+        // Collect all successful rates
+        allPackageRates.forEach((result) => {
+          if (result.status === 'fulfilled' && result.value.length > 0) {
+            allRates.push(...result.value);
+          }
+        });
         
       } catch (err) {
         console.error(`shipstation-shipping-rates: Error getting rates from warehouse ${index + 1}:`, err);
@@ -145,9 +197,14 @@ export async function POST(req: NextRequest) {
     
     console.log('shipstation-shipping-rates: allRates:', allRates);
     
-    // Filter out rates with errors and sort by price
+    // Filter out rates with errors, deduplicate, and sort by price
     const validRates = allRates
       .filter(rate => rate && !rate.errorMessages?.length)
+      .filter((rate, index, self) => {
+        // Deduplicate based on service type and package type
+        const key = `${rate.serviceCode}-${rate.packageType}`;
+        return index === self.findIndex(r => `${r.serviceCode}-${r.packageType}` === key);
+      })
       .sort((a, b) => parseFloat(a.shippingAmount.amount) - parseFloat(b.shippingAmount.amount));
     
     console.log('shipstation-shipping-rates: validRates:', validRates);
@@ -174,7 +231,12 @@ export async function POST(req: NextRequest) {
       delivery_days: rate.deliveryDays || 3,
       delivery_date: rate.estimatedDeliveryDate,
       delivery_date_guaranteed: rate.guaranteedService || false,
+      package_type: rate.packageType, // Include package type for debugging
+      validation_status: rate.validationStatus, // Include validation status
+      warning_messages: rate.warningMessages || [], // Include warnings
     }));
+
+    const packages = createOptimizedUSPSPackages(parcel); // Define packages here for the response
 
     return NextResponse.json({ 
       success: true, 
@@ -184,7 +246,12 @@ export async function POST(req: NextRequest) {
       production_mode: true,
       carriers_used: CARRIER_IDS,
       address_validated: true,
-      message: 'Real shipping rates from ShipEngine API with address validation'
+      message: 'Optimized shipping rates from ShipEngine API with priority package types',
+      performance: {
+        packages_checked: packages.length,
+        parallel_requests: true,
+        optimization: 'enabled'
+      }
     });
 
   } catch (err) {
