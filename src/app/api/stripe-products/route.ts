@@ -7,28 +7,22 @@ export async function GET() {
       apiVersion: '2025-06-30.basil',
     });
     
-    // Fetch all active products
-    const products = await stripe.products.list({ active: true, limit: 100 });
-    // Fetch all prices
-    const prices = await stripe.prices.list({ active: true, limit: 100 });
-
-    // Map prices by product id
-    const priceMap: Record<string, Stripe.Price> = {};
-    for (const price of prices.data) {
-      if (typeof price.product === 'string') {
-        priceMap[price.product] = price;
-      }
-    }
+    // Fetch all active products with their default prices expanded
+    const products = await stripe.products.list({ 
+      active: true, 
+      limit: 100,
+      expand: ['data.default_price']
+    });
 
     // Combine product and price info
     const result = products.data.map(product => {
-      const price = priceMap[product.id];
+      const price = product.default_price as Stripe.Price | null;
       return {
         id: product.id,
         name: product.name,
         description: product.description,
         image: product.images && product.images.length > 0 ? product.images[0] : null,
-        images: product.images && product.images.length > 0 ? product.images : null, // Add full images array
+        images: product.images && product.images.length > 0 ? product.images : null,
         price: price ? (Number(price.unit_amount_decimal) / 100) : null,
         currency: price ? price.currency : null,
         priceId: price ? price.id : null,
@@ -53,4 +47,4 @@ export async function GET() {
   } catch (err) {
     return NextResponse.json({ error: 'Failed to fetch Stripe products', details: err }, { status: 500 });
   }
-} 
+}
