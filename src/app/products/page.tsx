@@ -157,22 +157,35 @@ function ProductsContent() {
   const [fetchAttempts, setFetchAttempts] = useState(0);
   const [noProductsTimeout, setNoProductsTimeout] = useState(false);
   const [tagDropdownOpen, setTagDropdownOpen] = useState(false);
+  const [lastFetchTime, setLastFetchTime] = useState(null);
 
-  // Fetch products from Stripe API
-  useEffect(() => {
-    let isMounted = true;
-    let timeoutId;
+  // Function to fetch products (can be called manually)
+  const fetchProducts = async () => {
     setIsLoading(true);
     setNoProductsTimeout(false);
-
-    fetch('/api/stripe-products')
-      .then(res => res.json())
-      .then(data => {
-        if (!isMounted) return;
-        setAllProducts(data.products || []);
-        setIsLoading(false);
+    
+    try {
+      const res = await fetch("/api/stripe-products", {
+        cache: "no-store",
+        headers: {
+          "Cache-Control": "no-cache",
+          "Pragma": "no-cache"
+        }
       });
-
+      const data = await res.json();
+      console.log("📦 Products fetched at:", data.timestamp);
+      setAllProducts(data.products || []);
+      setLastFetchTime(new Date());
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  // Fetch products from Stripe API
+  useEffect(() => {
+    fetchProducts();
+  }, []);
     timeoutId = setTimeout(() => {
       setNoProductsTimeout(true);
     }, 10000);
@@ -303,6 +316,22 @@ function ProductsContent() {
       >
         <h1 className="text-4xl font-bold text-[#4A3419]">Our Products</h1>
         <p className="mt-2 text-[#4A3419]">Browse our handcrafted collection</p>
+        <div className="flex justify-between items-center mt-4">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={fetchProducts}
+              disabled={isLoading}
+              className="px-4 py-2 bg-[#4A3419] text-white rounded hover:bg-[#6B4B26] disabled:opacity-50 flex items-center gap-2"
+            >
+              {isLoading ? "Refreshing..." : "🔄 Refresh Stock"}
+            </button>
+            {lastFetchTime && (
+              <span className="text-sm text-gray-600">
+                Last updated: {lastFetchTime.toLocaleTimeString()}
+              </span>
+            )}
+          </div>
+        </div>
       </motion.header>
 
       <motion.div 
@@ -414,13 +443,23 @@ function ProductsContent() {
                   <div className="flex justify-between items-center mt-4">
                     <span className="text-lg font-bold text-[#4A3419]">${product.price}</span>
                   </div>
-                  {typeof product.metadata?.stock !== 'undefined' && (
+                  {typeof product.metadata?.stock !== "undefined" ? (
                     Number(product.metadata.stock) === 0 ? (
-                      <span className="block text-red-600 font-bold mt-2">Sold Out</span>
+                      <div className="mt-2">
+                        <span className="block text-red-600 font-bold bg-red-50 px-3 py-1 rounded-full text-center">❌ Sold Out</span>
+                        <span className="block text-xs text-gray-500 mt-1 text-center">Last updated: Just now</span>
+                      </div>
                     ) : (
-                      <span className="block text-green-700 font-semibold mt-2">In Stock: {product.metadata.stock}</span>
+                      <div className="mt-2">
+                        <span className="block text-green-700 font-semibold bg-green-50 px-3 py-1 rounded-full text-center">✅ In Stock: {product.metadata.stock}</span>
+                        <span className="block text-xs text-gray-500 mt-1 text-center">Stock live from Stripe</span>
+                      </div>
                     )
-                  )}
+                  ) : (
+                    <div className="mt-2">
+                      <span className="block text-gray-500 font-medium bg-gray-50 px-3 py-1 rounded-full text-center">📦 Stock Info Loading...</span>
+                    </div>
+                  )}                  )}
                   <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-white to-transparent"></div>
                   <div className="hidden group-hover:flex absolute right-0 bottom-0 p-2">
                     <motion.button

@@ -2,6 +2,11 @@ import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
 export async function GET() {
+  // Add cache-busting headers to ensure fresh data
+  const response = new NextResponse();
+  response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate");
+  response.headers.set("Pragma", "no-cache");
+  response.headers.set("Expires", "0");
   try {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
       apiVersion: '2025-06-30.basil',
@@ -21,6 +26,7 @@ export async function GET() {
       if (typeof price.product === 'string') {
         priceMap[price.product] = price;
       }
+    console.log(`📦 Product fetched: ${product.name} - Stock: ${product.metadata?.stock || "not set"} - Last purchase: ${product.metadata?.last_purchase_date || "never"}`);
     }
 
     // Combine product and price info
@@ -57,8 +63,27 @@ export async function GET() {
       return 0;
     });
 
-    return NextResponse.json({ products: result });
+    const responseData = NextResponse.json({ 
+      products: result,
+      timestamp: new Date().toISOString(),
+      source: "fresh_stripe_data"
+    });
+    
+    // Set cache-busting headers
+    responseData.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+    responseData.headers.set("Pragma", "no-cache");
+    responseData.headers.set("Expires", "0");
+    
+    return responseData;
   } catch (err) {
-    return NextResponse.json({ error: 'Failed to fetch Stripe products', details: err }, { status: 500 });
-  }
+    console.error("stripe-products API error:", err);
+    const errorResponse = NextResponse.json({ 
+      error: "Failed to fetch Stripe products", 
+      details: err.message,
+      timestamp: new Date().toISOString()
+    }, { status: 500 });
+    
+    // Set cache-busting headers for errors too
+    errorResponse.headers.set("Cache-Control", "no-store, no-cache, must-revalidate");
+    return errorResponse;  }
 }
