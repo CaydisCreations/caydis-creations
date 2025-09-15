@@ -1,472 +1,86 @@
-import { NextRequest, NextResponse } from 'next/server'
-import Stripe from 'stripe'
-import { Resend } from 'resend'
+import { NextRequest, NextResponse } from 'next/server';
+import Stripe from 'stripe';
+import { Resend } from 'resend';
 
-// Rate limiting helper
-let lastEmailTime = 0;
-const EMAIL_RATE_LIMIT = 1000; // 1 second between emails
-
-async function waitForRateLimit() {
-  const now = Date.now();
-  const timeSinceLastEmail = now - lastEmailTime;
-  if (timeSinceLastEmail < EMAIL_RATE_LIMIT) {
-    const waitTime = EMAIL_RATE_LIMIT - timeSinceLastEmail;
-    console.log(`⏳ Rate limiting: waiting ${waitTime}ms before next email`);
-    await new Promise(resolve => setTimeout(resolve, waitTime));
-  }
-  lastEmailTime = Date.now();
-}
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: NextRequest) {
-  console.log('[DEBUG] WEBHOOK DEBUG: Request received');
-  console.log('[DEBUG] WEBHOOK DEBUG: Headers:', Object.fromEntries(req.headers.entries()));
-  
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {})
-  const resend = new Resend(process.env.RESEND_API_KEY)
-  
-  const sig = req.headers.get('stripe-signature')
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
-  let event
+  const sig = req.headers.get('stripe-signature');
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-  console.log('[DEBUG] WEBHOOK DEBUG: Signature present:', !!sig);
-  console.log('[DEBUG] WEBHOOK DEBUG: Webhook secret present:', !!webhookSecret);
+  if (!sig || !webhookSecret) {
+    return NextResponse.json({ error: 'Missing signature or webhook secret' }, { status: 400 });
+  }
 
+  let event: Stripe.Event;
+  
   try {
-    const body = await req.text()
-    console.log('[DEBUG] WEBHOOK DEBUG: Body length:', body.length);
-    console.log('[DEBUG] WEBHOOK DEBUG: Body preview:', body.substring(0, 200));
-    
-    if (!sig || !webhookSecret) throw new Error('Missing Stripe webhook secret or signature')
-    event = stripe.webhooks.constructEvent(body, sig, webhookSecret)
-    console.log('[DEBUG] WEBHOOK DEBUG: Event constructed successfully');
+    const body = await req.text();
+    event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
   } catch (err: any) {
-    console.log('[DEBUG] WEBHOOK DEBUG: Error constructing event:', err.message);
-    return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 })
+    console.error('Webhook signature verification failed:', err.message);
+    return NextResponse.json({ error: 'Webhook signature verification failed' }, { status: 400 });
   }
 
   if (event.type === 'checkout.session.completed') {
-    console.log('[EVENT] Webhook received: checkout.session.completed');
-    const session = event.data.object as Stripe.Checkout.Session
-    console.log('[PACKAGE] Session details:', {
-      id: session.id,
-      customer_email: session.customer_email,
-      customer_details: session.customer_details,
-      amount_total: session.amount_total
-    });
+    const session = event.data.object as Stripe.Checkout.Session;
+    console.log('Processing completed checkout session:', session.id);
 
-    // Update inventory
-    const lineItems = await stripe.checkout.sessions.listLineItems(session.id, { limit: 100 })
-    for (const item of lineItems.data) {
-      let productId = null;
-      if (item.price && item.price.product) {
-        if (typeof item.price.product === 'string') {
-          productId = item.price.product;
-        } else if (typeof item.price.product === 'object' && item.price.product.id) {
-          productId = item.price.product.id;
-        }
-      }
-      if (productId) {
-        try {
-          console.log(`[PACKAGE] Updating stock for product: ${productId}`);
-          const product = await stripe.products.retrieve(productId);
-          const currentStock = product.metadata && product.metadata.stock ? Number(product.metadata.stock) : null;
-          const currentTotalSold = product.metadata && product.metadata.total_sold ? Number(product.metadata.total_sold) : 0;
-          const quantity = item.quantity || 1;
-          
-          console.log(`[STATS] Current stock: ${currentStock}, Quantity purchased: ${quantity}`);
-          
-          if (currentStock !== null && !isNaN(currentStock)) {
-            const newStock = Math.max(0, currentStock - quantity);
-            const newTotalSold = currentTotalSold + quantity;
-            const currentDate = new Date().toISOString();
-            
-            console.log(`[STATS] Updating stock from ${currentStock} to ${newStock}`);
-            
-            const updateResult = await stripe.products.update(productId, {
-              metadata: { 
-                ...product.metadata, 
-                stock: String(newStock),
-                total_sold: String(newTotalSold),
-                last_purchase_date: currentDate
-              }
-            });
-            
-            console.log(`[SUCCESS] Stock updated successfully for ${product.name}: ${currentStock} → ${newStock}`);
-          } else {
-            console.log(`[WARNING] Product ${productId} has no stock metadata or invalid stock value: ${currentStock}`);
-          }
-        } catch (err) {
-          console.error(`[ERROR] Failed to update stock for product ${productId}:`, err.message);
-          console.error(`[DEBUG] Product update error details:`, err);
-        }
-      } else {
-        console.log(`[WARNING] No product ID found for line item:`, item);
-      }    }
-
-    // Create shipping labels automatically
     try {
-      console.log('[SHIPPING] Creating shipping labels...');
+      // Get line items
+      const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
       
-      // Prepare data for shipping label creation
-      const lineItemsForLabels = lineItems.data.map(item => ({
-        priceId: item.price?.id,
-        quantity: item.quantity || 1,
-      })).filter(item => item.priceId);
-
-      if (lineItemsForLabels.length > 0) {
-        const labelResponse = await fetch(`${req.nextUrl.origin}/api/shipstation-shipping-labels`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            orderId: session.id,
-            customerDetails: session.customer_details,
-            lineItems: lineItemsForLabels,
-          }),
-        });
-
-        if (labelResponse.ok) {
-          const labelData = await labelResponse.json();
-          console.log("[SUCCESS] Shipping labels created successfully:", labelData);
+      // Update stock for each item
+      for (const item of lineItems.data) {
+        if (item.price?.product) {
+          const productId = typeof item.price.product === 'string' 
+            ? item.price.product 
+            : item.price.product.id;
           
-          // Store both tracking info and label data for use in emails
-          const shipstationLabelData = {
-            trackingNumber: labelData.trackingNumber,
-            carrier: labelData.carrier,
-            service: labelData.service,
-            cost: labelData.cost,
-            downloadUrl: labelData.downloadUrl,
-            labelDownloadPdf: labelData.labelDownloadPdf,
-            productName: lineItems.data[0]?.description || "Product"
-          };
-          
-          session.metadata = {
-            ...session.metadata,
-            tracking_info: JSON.stringify(labelData.tracking || []),
-            shipping_labels: JSON.stringify([shipstationLabelData])
-          };        } else {
-          const labelError = await labelResponse.json();
-          console.error('[ERROR] Shipping label creation failed:', labelError);
-          
-          // Send error notification to admin
-          const errorHtml = `
-            <div style="font-size:16px; color:#d32f2f; font-family:sans-serif;">
-              <h2 style="color:#d32f2f;">[WARNING] Shipping Label Creation Failed</h2>
-              <p><strong>Order Number:</strong> #`#${session.id}`</p>
-              <p><strong>Customer:</strong> session.customer_details?.name || "N/A"</p>
-              <p><strong>Error:</strong> ${labelError.error}</p>
-              
-              <div style="margin-top: 24px; padding: 12px; background: #fff3cd; border-radius: 8px;">
-                <p style="margin: 4px 0;"><strong>Action Required:</strong></p>
-                <ul style="margin: 8px 0; padding-left: 20px;">
-                  <li>Create shipping labels manually</li>
-                  <li>Check Shippo API configuration</li>
-                  <li>Verify product metadata</li>
-                </ul>
-              </div>
-            </div>
-          `;
-          
-          await sendEmailWithFallback("caydiscreations@gmail.com", `[WARNING] Shipping Label Creation Failed - Order #`#${session.id}``, errorHtml, "error");
-        }
-      }
-
-      console.log('[EMAIL] Starting email composition...');
-      
-      // Compose order details
-      const itemsHtml = await Promise.all(lineItems.data.map(async item => {
-        let imageUrl = 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/logoCaydisCreation.PNG';
-        let productName = item.description;
-        if (item.price && item.price.product) {
-          let productId = typeof item.price.product === 'string' ? item.price.product : item.price.product.id;
           try {
             const product = await stripe.products.retrieve(productId);
-            if (product.images && product.images.length > 0) {
-              imageUrl = product.images[0];
-            } else if (product.metadata && product.metadata.image) {
-              imageUrl = product.metadata.image;
-            }
-            productName = product.name;
-          } catch {}
-        }
-        return `<li style="margin-bottom:16px;display:flex;align-items:center;"><img src="${imageUrl}" alt="${productName}" style="max-width:60px;max-height:60px;margin-right:12px;border-radius:8px;object-fit:contain;" /><b>${item.description}</b> — Qty: ${item.quantity} — $${((item.amount_total || 0) / 100).toFixed(2)}</li>`;
-      }));
-
-      // Helper function to send email with improved fallback
-      async function sendEmailWithFallback(to: string, subject: string, html: string, emailType: string, attachments?: any[]) {
-        // Wait for rate limiting
-        await waitForRateLimit();
-        
-        // Try custom domain first (confirmation.caydiscreations.com)
-        try {
-          console.log(`[SEND] Sending ${emailType} email to: ${to}`);
-          console.log(`[EMAIL] ${emailType} email details:`, {
-            from: "Caydi's Creations <no-reply@confirmation.caydiscreations.com>",
-            to: to,
-            subject: subject,
-            attachments: attachments ? `${attachments.length} files` : 'none'
-          });
-          
-          const emailData: any = {
-            from: "Caydi's Creations <no-reply@confirmation.caydiscreations.com>",
-            to: to,
-            subject: subject,
-            html: html
-          };
-          
-          if (attachments && attachments.length > 0) {
-            emailData.attachments = attachments;
-          }
-          
-          const result = await resend.emails.send(emailData);
-          
-          console.log(`[LABELS] ${emailType} email result:`, JSON.stringify(result, null, 2));
-          
-          if (result?.data?.id) {
-            console.log(`[SUCCESS] ${emailType} email sent successfully! Email ID:`, result.data.id);
-            return true;
-          } else {
-            console.error(`[WARNING] Warning: ${emailType} email sent but no ID returned`);
-            console.error(`[LABELS] Full ${emailType} email result:`, result);
-            throw new Error('No email ID returned');
-          }
-        } catch (error: any) {
-          console.error(`[ERROR] ${emailType} email failed with custom domain:`, error.message);
-          
-          // Fallback to verified domain (onboarding@resend.dev) - only for admin emails
-          if (to === 'caydiscreations@gmail.com') {
-            try {
-              console.log(`🔄 Trying fallback for ${emailType} email...`);
-              await waitForRateLimit(); // Rate limit for fallback email
-              
-              const fallbackEmailData: any = {
-                from: "Caydi's Creations <onboarding@resend.dev>",
-                to: to,
-                subject: subject,
-                html: html
-              };
-              
-              if (attachments && attachments.length > 0) {
-                fallbackEmailData.attachments = attachments;
-              }
-              
-              const fallbackResult = await resend.emails.send(fallbackEmailData);
-              
-              console.log(`[LABELS] ${emailType} fallback result:`, JSON.stringify(fallbackResult, null, 2));
-              
-              if (fallbackResult?.data?.id) {
-                console.log(`[SUCCESS] ${emailType} email sent successfully with fallback! Email ID:`, fallbackResult.data.id);
-                return true;
-              } else {
-                console.error(`[ERROR] ${emailType} fallback also failed`);
-                return false;
-              }
-            } catch (fallbackError: any) {
-              console.error(`[ERROR] ${emailType} fallback failed:`, fallbackError.message);
-              return false;
-            }
-          } else {
-            // For customer emails, send notification to admin instead
-            console.log(`[SEND] Sending customer notification to admin instead...`);
-            try {
-              await waitForRateLimit(); // Rate limit for notification email
-              const notificationResult = await resend.emails.send({
-                from: "Caydi's Creations <onboarding@resend.dev>",
-                to: "caydiscreations@gmail.com",
-                subject: `[EMAIL] Customer Email Failed - Manual Contact Needed`,
-                html: `
-                  <div style="font-size:16px; color:#4A3419; font-family:sans-serif;">
-                    <h2 style="color:#d32f2f;">[WARNING] Customer Email Failed</h2>
-                    <p><strong>Customer Email:</strong> ${to}</p>
-                    <p><strong>Customer Name:</strong> session.customer_details?.name || "N/A"</p>
-                    <p><strong>Order Number:</strong> #`#${session.id}`</p>
-                    <p><strong>Error:</strong> ${error.message}</p>
-                    
-                    <div style="margin-top: 24px; padding: 12px; background: #fff3cd; border-radius: 8px;">
-                      <p style="margin: 4px 0;"><strong>Action Required:</strong></p>
-                      <ul style="margin: 8px 0; padding-left: 20px;">
-                        <li>Manually send order confirmation to: ${to}</li>
-                        <li>Include order details and tracking information</li>
-                        <li>Domain verification issue detected</li>
-                      </ul>
-                    </div>
-                  </div>
-                `
-              });
-              console.log('[SUCCESS] Customer notification sent to admin! Email ID:', notificationResult?.data?.id);
-              return true;
-            } catch (notificationError: any) {
-              console.error('[ERROR] Customer notification failed:', notificationError.message);
-              return false;
-            }
+            const currentStock = parseInt(product.metadata?.stock || '0');
+            const newStock = Math.max(0, currentStock - item.quantity!);
+            
+            await stripe.products.update(productId, {
+              metadata: { ...product.metadata, stock: newStock.toString() }
+            });
+            
+            console.log('Stock updated for product:', product.name, 'Old:', currentStock, 'New:', newStock);
+          } catch (err: any) {
+            console.error('Error updating stock for product:', productId, err.message);
           }
         }
-      }
-
-      // Send customer email
-      const customerEmail = session.customer_details?.email || session.customer_email;
-      if (customerEmail) {
-        // Get tracking information from session metadata (updated after label creation)
-        let trackingInfo = [];
-        try {
-          if (session.metadata?.tracking_info) {
-            trackingInfo = JSON.parse(session.metadata.tracking_info);
-            console.log('[PACKAGE] Tracking info for customer email:', trackingInfo);
-          }
-        } catch (e) {
-          console.log('[ERROR] Error parsing tracking info:', e);
-        }
-
-        // Generate tracking section HTML (CUSTOMER ONLY GETS TRACKING NUMBERS)
-        let trackingHtml = '';
-        
-        if (trackingInfo.length > 0) {
-          trackingHtml = `
-            <div style="margin: 24px 0; padding: 16px; background: #e8f5e8; border-radius: 8px; border-left: 4px solid #4caf50;">
-              <h3 style="color:#4A3419; margin: 0 0 12px 0;">[PACKAGE] Tracking Information</h3>
-              ${trackingInfo.map(track => `
-                <div style="margin-bottom: 12px; padding: 8px; background: white; border-radius: 4px;">
-                  <p style="margin: 4px 0;"><strong>${track.productName}</strong></p>
-                  <p style="margin: 4px 0; color: #666;">Carrier: ${track.carrier}</p>
-                  ${track.trackingNumber ? `<p style="margin: 4px 0; color: #4caf50;"><strong>Tracking Number:</strong> ${track.trackingNumber}</p>` : ''}
-                </div>
-              `).join('')}
-              <p style="margin: 8px 0 0 0; font-size: 14px; color: #666;">
-                You'll receive updates as your packages make their way to you!
-              </p>
-            </div>
-          `;
-        }
-
-        const customerHtml = `
-          <div style="font-size:18px; color:#4A3419; font-family:sans-serif; max-width:600px; margin:0 auto;">
-            <div style="text-align:center; margin-bottom:24px;">
-              <img src="https://caydiscreations.s3.us-east-2.amazonaws.com/Public/logoCaydisCreation.PNG" alt="Caydi's Creations Logo" style="max-width:120px; width:120px; height:auto; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08); background:#fff;" />
-            </div>
-            <p>Hi ${session.customer_details?.name?.split(' ')[0] || 'there'},</p>
-            <p>Thank you so much for your order — we're thrilled you chose Caydi's Creations for your handmade crochet item!</p>
-            <p>We've received your order and are getting it ready just for you. Each piece is carefully handmade with love, and we can't wait for you to receive yours.</p>
-            <div style="margin: 24px 0; padding: 16px; background: #FFF5E6; border-radius: 8px;">
-              <b>Here are the details of your order:</b>
-              <ul style="margin: 12px 0 0 0; padding: 0; list-style: none;">
-                <li><b>Order Number:</b> #`#${session.id}`</li>
-                <li><b>Item(s):</b><ul style="margin: 0; padding-left: 16px;">${itemsHtml.join('')}</ul></li>
-                <li><b>Total:</b> $`$${((session.amount_total || 0) / 100).toFixed(2)}`</li>
-                <li><b>Shipping To:</b> ${session.customer_details?.address?.line1 || ''} ${session.customer_details?.address?.line2 || ''}, ${session.customer_details?.address?.city || ''}, ${session.customer_details?.address?.state || ''} ${session.customer_details?.address?.postal_code || ''}</li>
-              </ul>
-            </div>
-            ${trackingHtml}
-            <p>Your packages will be shipped soon. You'll receive tracking updates as your packages make their way to you.</p>
-            <p>If you have any questions or just want to say hi, feel free to reply to this email — I'd love to hear from you!</p>
-            <p style="margin-top:32px;">
-              Warmly,<br/>
-              <b>Caydance Hill</b><br/>
-              Owner & Maker, Caydi's Creations<br/>
-              <a href="https://caydiscreations.com" style="color:#4A3419; text-decoration:underline;">caydiscreations.com</a> | <a href="mailto:caydiscreations@gmail.com" style="color:#4A3419; text-decoration:underline;">caydiscreations@gmail.com</a> | Insta: @caydiscreations
-            </p>
-          </div>
-        `;
-        
-        await sendEmailWithFallback(customerEmail, "🧶 Thank You for Your Order! Confirmation Inside", customerHtml, "customer");
-      } else {
-        console.error('[ERROR] No customer email found in session');
       }
 
       // Send admin notification email
-      // Get tracking information from session metadata (updated after label creation)
-      let adminTrackingInfo = [];
-      let shippingLabels = [];
-      try {
-        if (session.metadata?.tracking_info) {
-          adminTrackingInfo = JSON.parse(session.metadata.tracking_info);
-          console.log('[PACKAGE] Tracking info for admin email:', adminTrackingInfo);
-        }
-        if (session.metadata?.shipping_labels) {
-          shippingLabels = JSON.parse(session.metadata.shipping_labels);
-          console.log('[LABELS] Shipping labels for admin email:', shippingLabels);
-        }
-      } catch (e) {
-        console.log('[ERROR] Error parsing tracking/shipping info for admin email:', e);
-      }
-
-      // Generate admin tracking section HTML
-      let adminTrackingHtml = '';
-      if (adminTrackingInfo.length > 0) {
-        adminTrackingHtml = `
-          <h3 style="color:#4A3419; margin-top:24px;">[PACKAGE] Tracking Information:</h3>
-          <div style="background: #e8f5e8; padding: 12px; border-radius: 8px; margin: 12px 0;">
-            ${adminTrackingInfo.map(track => `
-              <div style="margin-bottom: 8px; padding: 8px; background: white; border-radius: 4px;">
-                <p style="margin: 4px 0;"><strong>${track.productName}</strong></p>
-                <p style="margin: 4px 0; color: #666;">Carrier: ${track.carrier}</p>
-                ${track.trackingNumber ? `<p style="margin: 4px 0; color: #4caf50;"><strong>Tracking Number:</strong> ${track.trackingNumber}</p>` : ''}
-              </div>
-            `).join('')}
-          </div>
-        `;
-      }
-
-      // Generate shipping labels section HTML
-      let adminShippingLabelsHtml = '';
-      let pdfAttachmentNote = '';
+      const customerName = session.customer_details?.name || 'N/A';
+      const customerEmail = session.customer_details?.email || session.customer_email || 'N/A';
+      const totalAmount = '$' + ((session.amount_total || 0) / 100).toFixed(2);
       
-      if (shippingLabels.length > 0) {
-        const labelItems = shippingLabels.map((label, index) => {
-          const trackingInfo = label.trackingNumber ? 
-            `<p style="margin: 4px 0; color: #4caf50;"><strong>Tracking Number:</strong> ${label.trackingNumber}</p>` : "";
-          
-          return `
-            <div style="margin-bottom: 8px; padding: 8px; background: white; border-radius: 4px;">
-              <p style="margin: 4px 0;"><strong>${label.productName || "Product"}</strong></p>
-              <p style="margin: 4px 0; color: #666;">Carrier: ${label.carrier || "Unknown"}</p>
-              <p style="margin: 4px 0; color: #666;">Service: ${label.service || "Standard"}</p>
-              <p style="margin: 4px 0; color: #666;">Cost: $${label.cost || "N/A"}</p>
-              ${trackingInfo}
-              <p style="margin: 4px 0; font-size: 12px; color: #666;">Label #${index + 1} created</p>
-            </div>
-          `;
-        }).join("");
-
-        adminShippingLabelsHtml = `
-          <h3 style="color:#4A3419; margin-top:24px;">Shipping Labels:</h3>
-          <div style="background: #fff3cd; padding: 12px; border-radius: 8px; margin: 12px 0;">
-            <p style="margin: 8px 0; color: #666; font-size: 14px;">
-              Shipping labels have been created for this order.
-            </p>
-            ${labelItems}
-          </div>
-        `;
-      }
+      const orderItems = lineItems.data.map(item => 
+        '<li><strong>' + item.description + '</strong> - Qty: ' + item.quantity + ' - $' + ((item.amount_total || 0) / 100).toFixed(2) + '</li>'
+      ).join('');
 
       const adminHtml = `
         <div style="font-size:16px; color:#4A3419; font-family:sans-serif;">
-          <h2 style="color:#4A3419;">[EVENT] New Order Alert!</h2>
-          <p><strong>Order Number:</strong> #`#${session.id}`</p>
-          <p><strong>Customer:</strong> session.customer_details?.name || "N/A"</p>
-          <p><strong>Email:</strong> session.customer_details?.email || session.customer_email || "N/A"</p>
-          <p><strong>Phone:</strong> session.customer_details?.phone || "N/A"</p>
-          <p><strong>Total Amount:</strong> $`$${((session.amount_total || 0) / 100).toFixed(2)}`</p>
+          <h2 style="color:#4A3419;">New Order Alert!</h2>
+          <p><strong>Order Number:</strong> #${session.id}</p>
+          <p><strong>Customer:</strong> ${customerName}</p>
+          <p><strong>Email:</strong> ${customerEmail}</p>
+          <p><strong>Total:</strong> ${totalAmount}</p>
           
-          <h3 style="color:#4A3419; margin-top:24px;">[PACKAGE] Order Items:</h3>
+          <h3 style="color:#4A3419; margin-top:24px;">Order Items:</h3>
           <ul style="margin: 12px 0; padding-left: 20px;">
-            ${lineItems.data.map(item => 
-              `<li><strong>${item.description}</strong> — Qty: ${item.quantity} — $${((item.amount_total || 0) / 100).toFixed(2)}</li>`
-            ).join('')}
+            ${orderItems}
           </ul>
           
-          <h3 style="color:#4A3419; margin-top:24px;">[ADDRESS] Shipping Address:</h3>
+          <h3 style="color:#4A3419; margin-top:24px;">Shipping Address:</h3>
           <div style="background: #FFF5E6; padding: 12px; border-radius: 8px; margin: 12px 0;">
-            <p style="margin: 4px 0;">session.customer_details?.name || "N/A"</p>
-            <p style="margin: 4px 0;">${session.customer_details?.address?.line1 || 'N/A'}</p>
-            ${session.customer_details?.address?.line2 ? `<p style="margin: 4px 0;">${session.customer_details.address.line2}</p>` : ''}
-            <p style="margin: 4px 0;">${session.customer_details?.address?.city || 'N/A'}, ${session.customer_details?.address?.state || 'N/A'} ${session.customer_details?.address?.postal_code || 'N/A'}</p>
-            <p style="margin: 4px 0;">${session.customer_details?.address?.country || 'N/A'}</p>
+            <p style="margin: 4px 0;">${customerName}</p>
+            <p style="margin: 4px 0;">Address details provided in Stripe dashboard</p>
           </div>
-          
-          ${adminTrackingHtml}
-          ${adminShippingLabelsHtml}
-          
-          <p style="color: #4caf50;"><strong>[SUCCESS] Note:</strong> Shipping labels have been automatically created and tracking numbers are included above.</p>
-          ${pdfAttachmentNote}
           
           <div style="margin-top: 24px; padding: 12px; background: #e8f5e8; border-radius: 8px;">
             <p style="margin: 4px 0;"><strong>Action Required:</strong></p>
@@ -479,65 +93,61 @@ export async function POST(req: NextRequest) {
           </div>
           
           <p style="margin-top:24px; font-size:14px; color:#666;">
-            This email was automatically generated when a new order was placed on your website.
+            This email was automatically generated when a new order was placed.
+          </p>
+        </div>
+      `;
+
+      // Send admin email
+      try {
+        await resend.emails.send({
+          from: 'orders@caydiscreations.com',
+          to: 'caydiscreations@gmail.com',
+          subject: 'New Order Received! #' + session.id,
+          html: adminHtml,
+        });
+        console.log('Admin notification email sent successfully');
+      } catch (emailError: any) {
+        console.error('Failed to send admin email:', emailError.message);
+      }
+
+      // Send customer confirmation email
+      const customerHtml = `
+        <div style="font-size:16px; font-family:sans-serif;">
+          <h2 style="color:#4A3419;">Thank you for your order!</h2>
+          <p>Hi ${customerName},</p>
+          <p>Your order has been received and is being processed.</p>
+          
+          <h3>Order Details:</h3>
+          <ul style="margin: 12px 0; padding-left: 20px;">
+            <li><b>Order Number:</b> #${session.id}</li>
+            <li><b>Total:</b> ${totalAmount}</li>
+          </ul>
+          
+          <p>You will receive tracking information once your order ships.</p>
+          <p>Thank you for shopping with Caydis Creations!</p>
+        </div>
+      `;
+
+      if (customerEmail && customerEmail !== 'N/A') {
         try {
-          // Fetch PDF labels from ShipStation URLs
-          for (let i = 0; i < shippingLabels.length; i++) {
-            const label = shippingLabels[i];
-            const labelUrl = label.labelDownloadPdf || label.downloadUrl;
-            
-            if (labelUrl) {
-              try {
-                console.log("[PDF] Fetching PDF for product:", label.productName || "Product");
-                console.log("[PDF] PDF URL:", labelUrl);
-                
-                const pdfResponse = await fetch(labelUrl, {
-                  headers: {
-                    "Authorization": "Bearer " + process.env.SHIPSTATION_API_KEY,
-                    "Content-Type": "application/json"
-                  }
-                });
-                
-                if (pdfResponse.ok) {
-                  const pdfBuffer = await pdfResponse.arrayBuffer();
-                  const pdfBase64 = Buffer.from(pdfBuffer).toString("base64");
-                  
-                  adminAttachments.push({
-                    filename: "shipping-label-" + (i + 1) + ".pdf",
-                    content: pdfBase64,
-                    contentType: "application/pdf"
-                  });
-                  
-                  console.log("[SUCCESS] PDF attachment prepared");
-                } else {
-                  console.warn("[WARNING] Failed to fetch PDF - status:", pdfResponse.status);
-                }
-              } catch (pdfError) {
-                console.error("[ERROR] Error fetching PDF:", pdfError);
-              }
-            } else {
-              console.warn("[WARNING] No PDF URL found");
-            }
-          
-          console.log("[PDF] Prepared", adminAttachments.length, "PDF attachments");
-          
-          // Add note about PDF availability
-          if (adminAttachments.length === 0 && shippingLabels.length > 0) {
-            pdfAttachmentNote = '<div style="margin-top: 16px; padding: 12px; background: #fff3cd; border-radius: 8px;"><p style="margin: 4px 0; color: #856404;"><strong>Note:</strong> Shipping labels are available in your dashboard.</p></div>';
-          }
-        } catch (attachmentError) {
-          console.error('[ERROR] Error preparing PDF attachments:', attachmentError);
+          await resend.emails.send({
+            from: 'orders@caydiscreations.com',
+            to: customerEmail,
+            subject: 'Order Confirmation - Caydis Creations',
+            html: customerHtml,
+          });
+          console.log('Customer confirmation email sent to:', customerEmail);
+        } catch (emailError: any) {
+          console.error('Failed to send customer email:', emailError.message);
         }
       }
-      
-      await sendEmailWithFallback("caydiscreations@gmail.com", "[ORDER] New Order Received! #" + session.id, adminHtml, "admin", adminAttachments);
 
     } catch (err: any) {
-      console.error('[ERROR] Email sending failed:', err.message);
-      console.error('[DEBUG] Full email error:', err);
+      console.error('Error processing webhook:', err.message);
     }
   }
 
-  console.log('[SUCCESS] Webhook processing completed successfully');
+  console.log('Webhook processing completed successfully');
   return NextResponse.json({ received: true });
 }

@@ -449,7 +449,7 @@ function ProductsContent() {
                     <div className="mt-2">
                       <span className="block text-gray-500 font-medium bg-gray-50 px-3 py-1 rounded-full text-center">📦 Stock Info Loading...</span>
                     </div>
-                  )}                  )}
+                  )}
                   <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-white to-transparent"></div>
                   <div className="hidden group-hover:flex absolute right-0 bottom-0 p-2">
                     <motion.button

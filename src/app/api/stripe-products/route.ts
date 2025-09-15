@@ -26,7 +26,6 @@ export async function GET() {
       if (typeof price.product === 'string') {
         priceMap[price.product] = price;
       }
-    console.log(`[PACKAGE] Product fetched: ${product.name} - Stock: ${product.metadata?.stock || "not set"} - Last purchase: ${product.metadata?.last_purchase_date || "never"}`);
     }
 
     // Combine product and price info
