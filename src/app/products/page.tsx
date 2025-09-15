@@ -165,7 +165,13 @@ function ProductsContent() {
     setIsLoading(true);
     setNoProductsTimeout(false);
 
-    fetch('/api/stripe-products')
+    fetch('/api/stripe-products', {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      })
       .then(res => res.json())
       .then(data => {
         if (!isMounted) return;
