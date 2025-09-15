@@ -488,12 +488,12 @@ export async function POST(req: NextRequest) {
             
             if (labelUrl) {
               try {
-                console.log(`[PDF] Fetching PDF for ${label.productName || "Product"}...`);
-                console.log(`[PDF] PDF URL: ${labelUrl}`);
+                console.log("[PDF] Fetching PDF for product:", label.productName || "Product");
+                console.log("[PDF] PDF URL:", labelUrl);
                 
                 const pdfResponse = await fetch(labelUrl, {
                   headers: {
-                    "Authorization": `Bearer ${process.env.SHIPSTATION_API_KEY}`,
+                    "Authorization": "Bearer " + process.env.SHIPSTATION_API_KEY,
                     "Content-Type": "application/json"
                   }
                 });
@@ -503,32 +503,27 @@ export async function POST(req: NextRequest) {
                   const pdfBase64 = Buffer.from(pdfBuffer).toString("base64");
                   
                   adminAttachments.push({
-                    filename: `shipping-label-${(label.productName || "Product").replace(/[^a-zA-Z0-9]/g, "-")}-${i + 1}.pdf`,
+                    filename: "shipping-label-" + (i + 1) + ".pdf",
                     content: pdfBase64,
                     contentType: "application/pdf"
                   });
                   
-                  console.log(`[SUCCESS] PDF attachment prepared for ${label.productName || "Product"}`);
+                  console.log("[SUCCESS] PDF attachment prepared");
                 } else {
-                  console.warn(`[WARNING] Failed to fetch PDF for ${label.productName || "Product"}: ${pdfResponse.status} - ${pdfResponse.statusText}`);
+                  console.warn("[WARNING] Failed to fetch PDF - status:", pdfResponse.status);
                 }
               } catch (pdfError) {
-                console.error(`[ERROR] Error fetching PDF for ${label.productName || "Product"}:`, pdfError);
+                console.error("[ERROR] Error fetching PDF:", pdfError);
               }
             } else {
-              console.warn(`[WARNING] No PDF URL found for ${label.productName || "Product"}`);
+              console.warn("[WARNING] No PDF URL found");
             }
           
-          console.log(`[PDF] Prepared ${adminAttachments.length} PDF attachments`);
+          console.log("[PDF] Prepared", adminAttachments.length, "PDF attachments");
           
           // Add note about PDF availability
           if (adminAttachments.length === 0 && shippingLabels.length > 0) {
-            pdfAttachmentNote = `
-              <div style="margin-top: 16px; padding: 12px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
-                <p style="margin: 4px 0; color: #856404;"><strong>[LABELS] Note:</strong> Shipping labels are available for download from the admin dashboard.</p>
-                <p style="margin: 4px 0; color: #856404; font-size: 14px;">In test mode, PDF labels may not be automatically attached to emails due to Shippo's test environment limitations.</p>
-              </div>
-            `;
+            pdfAttachmentNote = '<div style="margin-top: 16px; padding: 12px; background: #fff3cd; border-radius: 8px;"><p style="margin: 4px 0; color: #856404;"><strong>Note:</strong> Shipping labels are available in your dashboard.</p></div>';
           }
         } catch (attachmentError) {
           console.error('[ERROR] Error preparing PDF attachments:', attachmentError);
