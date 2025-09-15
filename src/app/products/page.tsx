@@ -186,16 +186,6 @@ function ProductsContent() {
   useEffect(() => {
     fetchProducts();
   }, []);
-    timeoutId = setTimeout(() => {
-      setNoProductsTimeout(true);
-    }, 10000);
-
-    return () => {
-      isMounted = false;
-      clearTimeout(timeoutId);
-    };
-  }, []);
-
   // Define the allowed categories
   const allowedCategories = ["All", "Wearables", "Bags", "Accessories", "Baby Clothes"];
   // Collect all unique categories from product metadata (not tags)
