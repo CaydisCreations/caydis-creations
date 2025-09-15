@@ -151,8 +151,8 @@ export async function POST(req: NextRequest) {
           const errorHtml = `
             <div style="font-size:16px; color:#d32f2f; font-family:sans-serif;">
               <h2 style="color:#d32f2f;">[WARNING] Shipping Label Creation Failed</h2>
-              <p><strong>Order Number:</strong> #${session.id}</p>
-              <p><strong>Customer:</strong> ${session.customer_details?.name || 'N/A'}</p>
+              <p><strong>Order Number:</strong> #`#${session.id}`</p>
+              <p><strong>Customer:</strong> session.customer_details?.name || "N/A"</p>
               <p><strong>Error:</strong> ${labelError.error}</p>
               
               <div style="margin-top: 24px; padding: 12px; background: #fff3cd; border-radius: 8px;">
@@ -166,7 +166,7 @@ export async function POST(req: NextRequest) {
             </div>
           `;
           
-          await sendEmailWithFallback("caydiscreations@gmail.com", `[WARNING] Shipping Label Creation Failed - Order #${session.id}`, errorHtml, "error");
+          await sendEmailWithFallback("caydiscreations@gmail.com", `[WARNING] Shipping Label Creation Failed - Order #`#${session.id}``, errorHtml, "error");
         }
       }
 
@@ -277,8 +277,8 @@ export async function POST(req: NextRequest) {
                   <div style="font-size:16px; color:#4A3419; font-family:sans-serif;">
                     <h2 style="color:#d32f2f;">[WARNING] Customer Email Failed</h2>
                     <p><strong>Customer Email:</strong> ${to}</p>
-                    <p><strong>Customer Name:</strong> ${session.customer_details?.name || 'N/A'}</p>
-                    <p><strong>Order Number:</strong> #${session.id}</p>
+                    <p><strong>Customer Name:</strong> session.customer_details?.name || "N/A"</p>
+                    <p><strong>Order Number:</strong> #`#${session.id}`</p>
                     <p><strong>Error:</strong> ${error.message}</p>
                     
                     <div style="margin-top: 24px; padding: 12px; background: #fff3cd; border-radius: 8px;">
@@ -348,9 +348,9 @@ export async function POST(req: NextRequest) {
             <div style="margin: 24px 0; padding: 16px; background: #FFF5E6; border-radius: 8px;">
               <b>Here are the details of your order:</b>
               <ul style="margin: 12px 0 0 0; padding: 0; list-style: none;">
-                <li><b>Order Number:</b> #${session.id}</li>
+                <li><b>Order Number:</b> #`#${session.id}`</li>
                 <li><b>Item(s):</b><ul style="margin: 0; padding-left: 16px;">${itemsHtml.join('')}</ul></li>
-                <li><b>Total:</b> $${((session.amount_total || 0) / 100).toFixed(2)}</li>
+                <li><b>Total:</b> $`$${((session.amount_total || 0) / 100).toFixed(2)}`</li>
                 <li><b>Shipping To:</b> ${session.customer_details?.address?.line1 || ''} ${session.customer_details?.address?.line2 || ''}, ${session.customer_details?.address?.city || ''}, ${session.customer_details?.address?.state || ''} ${session.customer_details?.address?.postal_code || ''}</li>
               </ul>
             </div>
@@ -440,11 +440,11 @@ export async function POST(req: NextRequest) {
       const adminHtml = `
         <div style="font-size:16px; color:#4A3419; font-family:sans-serif;">
           <h2 style="color:#4A3419;">[EVENT] New Order Alert!</h2>
-          <p><strong>Order Number:</strong> #${session.id}</p>
-          <p><strong>Customer:</strong> ${session.customer_details?.name || 'N/A'}</p>
-          <p><strong>Email:</strong> ${session.customer_details?.email || session.customer_email || 'N/A'}</p>
-          <p><strong>Phone:</strong> ${session.customer_details?.phone || 'N/A'}</p>
-          <p><strong>Total Amount:</strong> $${((session.amount_total || 0) / 100).toFixed(2)}</p>
+          <p><strong>Order Number:</strong> #`#${session.id}`</p>
+          <p><strong>Customer:</strong> session.customer_details?.name || "N/A"</p>
+          <p><strong>Email:</strong> session.customer_details?.email || session.customer_email || "N/A"</p>
+          <p><strong>Phone:</strong> session.customer_details?.phone || "N/A"</p>
+          <p><strong>Total Amount:</strong> $`$${((session.amount_total || 0) / 100).toFixed(2)}`</p>
           
           <h3 style="color:#4A3419; margin-top:24px;">[PACKAGE] Order Items:</h3>
           <ul style="margin: 12px 0; padding-left: 20px;">
@@ -455,7 +455,7 @@ export async function POST(req: NextRequest) {
           
           <h3 style="color:#4A3419; margin-top:24px;">[ADDRESS] Shipping Address:</h3>
           <div style="background: #FFF5E6; padding: 12px; border-radius: 8px; margin: 12px 0;">
-            <p style="margin: 4px 0;">${session.customer_details?.name || 'N/A'}</p>
+            <p style="margin: 4px 0;">session.customer_details?.name || "N/A"</p>
             <p style="margin: 4px 0;">${session.customer_details?.address?.line1 || 'N/A'}</p>
             ${session.customer_details?.address?.line2 ? `<p style="margin: 4px 0;">${session.customer_details.address.line2}</p>` : ''}
             <p style="margin: 4px 0;">${session.customer_details?.address?.city || 'N/A'}, ${session.customer_details?.address?.state || 'N/A'} ${session.customer_details?.address?.postal_code || 'N/A'}</p>
@@ -530,7 +530,7 @@ export async function POST(req: NextRequest) {
         }
       }
       
-      await sendEmailWithFallback("caydiscreations@gmail.com", `[ORDER] New Order Received! #${session.id}`, adminHtml, "admin", adminAttachments);
+      await sendEmailWithFallback("caydiscreations@gmail.com", "[ORDER] New Order Received! #" + session.id, adminHtml, "admin", adminAttachments);
 
     } catch (err: any) {
       console.error('[ERROR] Email sending failed:', err.message);
@@ -539,5 +539,5 @@ export async function POST(req: NextRequest) {
   }
 
   console.log('[SUCCESS] Webhook processing completed successfully');
-  return NextResponse.json({ received: true })
+  return NextResponse.json({ received: true });
 }
