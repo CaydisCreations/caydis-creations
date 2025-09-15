@@ -67,15 +67,22 @@ export async function POST(req: NextRequest) {
       }
       if (productId) {
         try {
+          console.log(`📦 Updating stock for product: ${productId}`);
           const product = await stripe.products.retrieve(productId);
           const currentStock = product.metadata && product.metadata.stock ? Number(product.metadata.stock) : null;
           const currentTotalSold = product.metadata && product.metadata.total_sold ? Number(product.metadata.total_sold) : 0;
           const quantity = item.quantity || 1;
+          
+          console.log(`📊 Current stock: ${currentStock}, Quantity purchased: ${quantity}`);
+          
           if (currentStock !== null && !isNaN(currentStock)) {
             const newStock = Math.max(0, currentStock - quantity);
             const newTotalSold = currentTotalSold + quantity;
             const currentDate = new Date().toISOString();
-            await stripe.products.update(productId, {
+            
+            console.log(`📊 Updating stock from ${currentStock} to ${newStock}`);
+            
+            const updateResult = await stripe.products.update(productId, {
               metadata: { 
                 ...product.metadata, 
                 stock: String(newStock),
@@ -83,12 +90,18 @@ export async function POST(req: NextRequest) {
                 last_purchase_date: currentDate
               }
             });
+            
+            console.log(`✅ Stock updated successfully for ${product.name}: ${currentStock} → ${newStock}`);
+          } else {
+            console.log(`⚠️ Product ${productId} has no stock metadata or invalid stock value: ${currentStock}`);
           }
         } catch (err) {
-          // Silently fail for product update errors
+          console.error(`❌ Failed to update stock for product ${productId}:`, err.message);
+          console.error(`🔍 Product update error details:`, err);
         }
-      }
-    }
+      } else {
+        console.log(`⚠️ No product ID found for line item:`, item);
+      }    }
 
     // Create shipping labels automatically
     try {
@@ -113,14 +126,24 @@ export async function POST(req: NextRequest) {
 
         if (labelResponse.ok) {
           const labelData = await labelResponse.json();
-          console.log('✅ Shipping labels created successfully:', labelData.trackingInfo);
+          console.log("✅ Shipping labels created successfully:", labelData);
           
-          // Store tracking info for use in emails
+          // Store both tracking info and label data for use in emails
+          const shipstationLabelData = {
+            trackingNumber: labelData.trackingNumber,
+            carrier: labelData.carrier,
+            service: labelData.service,
+            cost: labelData.cost,
+            downloadUrl: labelData.downloadUrl,
+            labelDownloadPdf: labelData.labelDownloadPdf,
+            productName: lineItems.data[0]?.description || "Product"
+          };
+          
           session.metadata = {
             ...session.metadata,
-            tracking_info: JSON.stringify(labelData.trackingInfo || [])
-          };
-        } else {
+            tracking_info: JSON.stringify(labelData.tracking || []),
+            shipping_labels: JSON.stringify([shipstationLabelData])
+          };        } else {
           const labelError = await labelResponse.json();
           console.error('❌ Shipping label creation failed:', labelError);
           
@@ -391,15 +414,19 @@ export async function POST(req: NextRequest) {
           <h3 style="color:#4A3419; margin-top:24px;">📋 Shipping Labels:</h3>
           <div style="background: #fff3cd; padding: 12px; border-radius: 8px; margin: 12px 0;">
             <p style="margin: 8px 0; color: #666; font-size: 14px;">
-              Shipping labels have been created and are attached below. Each package will be shipped separately.
+              Shipping labels have been created and are attached below.
             </p>
             ${shippingLabels.map((label, index) => `
               <div style="margin-bottom: 8px; padding: 8px; background: white; border-radius: 4px;">
-                <p style="margin: 4px 0;"><strong>${label.p || 'Product'}</strong></p>
-                <p style="margin: 4px 0; color: #666;">Carrier: ${label.c || 'Unknown'}</p>
-                ${label.t ? `<p style="margin: 4px 0; color: #4caf50;"><strong>Tracking Number:</strong> ${label.t}</p>` : ''}
+                <p style="margin: 4px 0;"><strong>${label.productName || "Product"}</strong></p>
+                <p style="margin: 4px 0; color: #666;">Carrier: ${label.carrier || "Unknown"}</p>
+                <p style="margin: 4px 0; color: #666;">Service: ${label.service || "Standard"}</p>
+                <p style="margin: 4px 0; color: #666;">Cost: $${label.cost || "N/A"}</p>
+                ${label.trackingNumber ? `<p style="margin: 4px 0; color: #4caf50;"><strong>Tracking Number:</strong> ${label.trackingNumber}</p>` : ""}
                 <p style="margin: 4px 0; font-size: 12px; color: #666;">Label #${index + 1} attached as PDF</p>
               </div>
+            `).join("")}
+          </div>              </div>
             `).join('')}
           </div>
         `;
@@ -448,85 +475,44 @@ export async function POST(req: NextRequest) {
           
           <p style="margin-top:24px; font-size:14px; color:#666;">
             This email was automatically generated when a new order was placed on your website.
-          </p>
-        </div>
-      `;
-      
-      // Prepare PDF attachments for admin email
-      let adminAttachments = [];
-      
-      if (shippingLabels.length > 0) {
-        console.log('📎 Preparing PDF attachments for admin email...');
-        
         try {
-          // Fetch PDF labels from Shippo URLs
+          // Fetch PDF labels from ShipStation URLs
           for (let i = 0; i < shippingLabels.length; i++) {
             const label = shippingLabels[i];
-            const labelUrl = label.u ? `https://api.goshippo.com/transactions/${label.u}/label.pdf` : null;
+            const labelUrl = label.labelDownloadPdf || label.downloadUrl;
             
             if (labelUrl) {
               try {
-                console.log(`📎 Fetching PDF for ${label.p || 'Product'}...`);
+                console.log(`📎 Fetching PDF for ${label.productName || "Product"}...`);
+                console.log(`📎 PDF URL: ${labelUrl}`);
+                
                 const pdfResponse = await fetch(labelUrl, {
                   headers: {
-                    'Authorization': `ShippoToken ${process.env.SHIPPO_API_KEY}`,
-                    'Content-Type': 'application/json'
+                    "Authorization": `Bearer ${process.env.SHIPSTATION_API_KEY}`,
+                    "Content-Type": "application/json"
                   }
                 });
                 
                 if (pdfResponse.ok) {
                   const pdfBuffer = await pdfResponse.arrayBuffer();
-                  const pdfBase64 = Buffer.from(pdfBuffer).toString('base64');
+                  const pdfBase64 = Buffer.from(pdfBuffer).toString("base64");
                   
                   adminAttachments.push({
-                    filename: `shipping-label-${(label.p || 'Product').replace(/[^a-zA-Z0-9]/g, '-')}-${i + 1}.pdf`,
+                    filename: `shipping-label-${(label.productName || "Product").replace(/[^a-zA-Z0-9]/g, "-")}-${i + 1}.pdf`,
                     content: pdfBase64,
-                    contentType: 'application/pdf'
+                    contentType: "application/pdf"
                   });
                   
-                  console.log(`✅ PDF attachment prepared for ${label.p || 'Product'}`);
+                  console.log(`✅ PDF attachment prepared for ${label.productName || "Product"}`);
                 } else {
-                  console.warn(`⚠️ Failed to fetch PDF for ${label.p || 'Product'}: ${pdfResponse.status} - ${pdfResponse.statusText}`);
-                  
-                  // Try alternative endpoints if the main one fails
-                  const alternativeUrls = [
-                    `https://api.goshippo.com/transactions/${label.u}/`,
-                    `https://api.goshippo.com/transactions/${label.u}/label`
-                  ];
-                  
-                  for (const altUrl of alternativeUrls) {
-                    try {
-                      console.log(`📎 Trying alternative URL for ${label.p || 'Product'}: ${altUrl}`);
-                      const altResponse = await fetch(altUrl, {
-                        headers: {
-                          'Authorization': `ShippoToken ${process.env.SHIPPO_API_KEY}`,
-                          'Content-Type': 'application/json'
-                        }
-                      });
-                      
-                      if (altResponse.ok) {
-                        const pdfBuffer = await altResponse.arrayBuffer();
-                        const pdfBase64 = Buffer.from(pdfBuffer).toString('base64');
-                        
-                        adminAttachments.push({
-                          filename: `shipping-label-${(label.p || 'Product').replace(/[^a-zA-Z0-9]/g, '-')}-${i + 1}.pdf`,
-                          content: pdfBase64,
-                          contentType: 'application/pdf'
-                        });
-                        
-                        console.log(`✅ PDF attachment prepared via alternative URL for ${label.p || 'Product'}`);
-                        break; // Found working URL, stop trying alternatives
-                      }
-                    } catch (altError) {
-                      console.log(`📎 Alternative URL failed for ${label.p || 'Product'}: ${altUrl}`, altError);
-                    }
-                  }
+                  console.warn(`⚠️ Failed to fetch PDF for ${label.productName || "Product"}: ${pdfResponse.status} - ${pdfResponse.statusText}`);
                 }
               } catch (pdfError) {
-                console.error(`❌ Error fetching PDF for ${label.p || 'Product'}:`, pdfError);
+                console.error(`❌ Error fetching PDF for ${label.productName || "Product"}:`, pdfError);
               }
+            } else {
+              console.warn(`⚠️ No PDF URL found for ${label.productName || "Product"}`);
             }
-          }
           
           console.log(`📎 Prepared ${adminAttachments.length} PDF attachments`);
           
