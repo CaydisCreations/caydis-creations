@@ -174,16 +174,17 @@ export async function POST(req: NextRequest) {
           `}
           
           <p>Thank you for shopping with Caydis Creations!</p>
-        </div>
-      `;
+              </div>
+            `;
 
       if (customerEmail && customerEmail !== 'N/A') {
         try {
           await resend.emails.send({
-            from: 'Caydis Creations <onboarding@resend.dev>',
+            from: 'Caydis Creations <orders@caydiscreations.com>',
             to: customerEmail,
             subject: 'Order Confirmation - Caydis Creations',
             html: customerHtml,
+            replyTo: 'caydiscreations@gmail.com',
           });
           console.log('Customer confirmation email sent to:', customerEmail);
         } catch (emailError: any) {
@@ -194,10 +195,11 @@ export async function POST(req: NextRequest) {
       // Send admin email (after label creation)
       try {
         await resend.emails.send({
-          from: 'Caydis Creations <onboarding@resend.dev>',
+          from: 'Caydis Creations <orders@caydiscreations.com>',
           to: 'caydiscreations@gmail.com',
           subject: 'New Order Received! #' + session.id,
           html: adminHtml,
+          replyTo: 'caydiscreations@gmail.com',
         });
         console.log('Admin notification email sent successfully');
       } catch (emailError: any) {
