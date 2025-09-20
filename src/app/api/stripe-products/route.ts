@@ -2,11 +2,13 @@ import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
 export async function GET() {
-  // Add cache-busting headers to ensure fresh data
+  // Add aggressive cache-busting headers to ensure fresh data
   const response = new NextResponse();
-  response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate");
+  response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
   response.headers.set("Pragma", "no-cache");
   response.headers.set("Expires", "0");
+  response.headers.set("Last-Modified", new Date().toUTCString());
+  response.headers.set("ETag", `"${Date.now()}"`);
   try {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
       apiVersion: '2025-06-30.basil',
@@ -66,7 +68,8 @@ export async function GET() {
     const responseData = NextResponse.json({ 
       products: result,
       timestamp: new Date().toISOString(),
-      source: "fresh_stripe_data"
+      source: "fresh_stripe_data",
+      cacheBuster: Date.now()
     });
     
     // Set cache-busting headers

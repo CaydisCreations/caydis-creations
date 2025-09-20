@@ -157,6 +157,8 @@ function ProductsContent() {
   const [fetchAttempts, setFetchAttempts] = useState(0);
   const [noProductsTimeout, setNoProductsTimeout] = useState(false);
   const [tagDropdownOpen, setTagDropdownOpen] = useState(false);
+  const [refreshInterval, setRefreshInterval] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Fetch products from Stripe API
   useEffect(() => {
@@ -165,11 +167,12 @@ function ProductsContent() {
     setIsLoading(true);
     setNoProductsTimeout(false);
 
-    fetch('/api/stripe-products', {
+    fetch('/api/stripe-products?' + Date.now(), {
         cache: 'no-store',
         headers: {
           'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
+          'Pragma': 'no-cache',
+          'If-Modified-Since': '0'
         }
       })
       .then(res => res.json())
@@ -183,9 +186,36 @@ function ProductsContent() {
       setNoProductsTimeout(true);
     }, 10000);
 
+    // Set up periodic refresh every 30 seconds
+    const interval = setInterval(() => {
+      if (isMounted) {
+        setIsRefreshing(true);
+        fetch('/api/stripe-products?' + Date.now(), {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache',
+            'If-Modified-Since': '0'
+          }
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (isMounted) {
+            setAllProducts(data.products || []);
+            setIsRefreshing(false);
+          }
+        })
+        .catch(err => {
+          console.error('Auto-refresh error:', err);
+          setIsRefreshing(false);
+        });
+      }
+    }, 30000); // Refresh every 30 seconds
+
     return () => {
       isMounted = false;
       clearTimeout(timeoutId);
+      clearInterval(interval);
     };
   }, []);
 
@@ -308,7 +338,12 @@ function ProductsContent() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1 className="text-4xl font-bold text-[#4A3419]">Our Products</h1>
+        <div className="flex items-center justify-center gap-2">
+          <h1 className="text-4xl font-bold text-[#4A3419]">Our Products</h1>
+          {isRefreshing && (
+            <div className="animate-spin w-4 h-4 border-2 border-[#4A3419] border-t-transparent rounded-full"></div>
+          )}
+        </div>
         <p className="mt-2 text-[#4A3419]">Browse our handcrafted collection</p>
       </motion.header>
 
