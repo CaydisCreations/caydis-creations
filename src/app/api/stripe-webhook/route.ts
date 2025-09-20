@@ -63,6 +63,40 @@ export async function POST(req: NextRequest) {
         '<li><strong>' + item.description + '</strong> - Qty: ' + item.quantity + ' - $' + ((item.amount_total || 0) / 100).toFixed(2) + '</li>'
       ).join('');
 
+      // Create shipping labels automatically
+      let labelData = null;
+      try {
+        console.log('Creating shipping labels for order:', session.id);
+        
+        const labelResponse = await fetch(`${req.nextUrl.origin}/api/shipstation-shipping-labels`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            orderId: session.id,
+            customerDetails: session.customer_details,
+            lineItems: lineItems.data.map(item => ({
+              name: item.description,
+              quantity: item.quantity,
+              parcel_weight_oz: '8', // Default weight
+              parcel_length: '10',
+              parcel_width: '8', 
+              parcel_height: '4'
+            }))
+          }),
+        });
+
+        if (labelResponse.ok) {
+          labelData = await labelResponse.json();
+          console.log('Shipping labels created successfully:', labelData);
+        } else {
+          const labelError = await labelResponse.json();
+          console.error('Shipping label creation failed:', labelError);
+        }
+      } catch (labelError: any) {
+        console.error('Error creating shipping labels:', labelError.message);
+      }
+
+      // Create admin HTML with label information
       const adminHtml = `
         <div style="font-size:16px; color:#4A3419; font-family:sans-serif;">
           <h2 style="color:#4A3419;">New Order Alert!</h2>
@@ -79,14 +113,33 @@ export async function POST(req: NextRequest) {
           <h3 style="color:#4A3419; margin-top:24px;">Shipping Address:</h3>
           <div style="background: #FFF5E6; padding: 12px; border-radius: 8px; margin: 12px 0;">
             <p style="margin: 4px 0;">${customerName}</p>
-            <p style="margin: 4px 0;">Address details provided in Stripe dashboard</p>
+            <p style="margin: 4px 0;">${session.customer_details?.address?.line1 || ''}</p>
+            <p style="margin: 4px 0;">${session.customer_details?.address?.city || ''}, ${session.customer_details?.address?.state || ''} ${session.customer_details?.address?.postal_code || ''}</p>
+            <p style="margin: 4px 0;">${session.customer_details?.address?.country || 'US'}</p>
           </div>
+          
+          ${labelData && labelData.trackingNumber ? `
+            <h3 style="color:#4A3419; margin-top:24px;">Shipping Label Created:</h3>
+            <div style="background: #e8f5e8; padding: 12px; border-radius: 8px; margin: 12px 0;">
+              <p style="margin: 4px 0;"><strong>Tracking Number:</strong> ${labelData.trackingNumber}</p>
+              <p style="margin: 4px 0;"><strong>Carrier:</strong> ${labelData.carrier}</p>
+              <p style="margin: 4px 0;"><strong>Service:</strong> ${labelData.service}</p>
+              <p style="margin: 4px 0;"><strong>Cost:</strong> $${labelData.cost}</p>
+              <p style="margin: 4px 0;"><strong>Label ID:</strong> ${labelData.labelId}</p>
+              <p style="margin: 8px 0;"><a href="${labelData.downloadUrl}" style="color: #4A3419; text-decoration: underline;">Download Shipping Label PDF</a></p>
+            </div>
+          ` : `
+            <div style="background: #ffe6e6; padding: 12px; border-radius: 8px; margin: 12px 0;">
+              <p style="margin: 4px 0; color: #d32f2f;"><strong>Warning:</strong> Shipping label could not be created automatically.</p>
+              <p style="margin: 4px 0;">Please create the shipping label manually in the admin dashboard.</p>
+            </div>
+          `}
           
           <div style="margin-top: 24px; padding: 12px; background: #e8f5e8; border-radius: 8px;">
             <p style="margin: 4px 0;"><strong>Action Required:</strong></p>
             <ul style="margin: 8px 0; padding-left: 20px;">
               <li>Prepare the order items</li>
-              <li>Print shipping labels from admin dashboard</li>
+              ${labelData && labelData.downloadUrl ? '<li>Print the shipping label (link provided above)</li>' : '<li>Create shipping label in admin dashboard</li>'}
               <li>Package and ship the order</li>
               <li>Update inventory if needed</li>
             </ul>
@@ -97,19 +150,6 @@ export async function POST(req: NextRequest) {
           </p>
         </div>
       `;
-
-      // Send admin email
-      try {
-        await resend.emails.send({
-          from: 'orders@caydiscreations.com',
-          to: 'caydiscreations@gmail.com',
-          subject: 'New Order Received! #' + session.id,
-          html: adminHtml,
-        });
-        console.log('Admin notification email sent successfully');
-      } catch (emailError: any) {
-        console.error('Failed to send admin email:', emailError.message);
-      }
 
       // Send customer confirmation email
       const customerHtml = `
@@ -124,7 +164,15 @@ export async function POST(req: NextRequest) {
             <li><b>Total:</b> ${totalAmount}</li>
           </ul>
           
-          <p>You will receive tracking information once your order ships.</p>
+          ${labelData && labelData.trackingNumber ? `
+            <h3>Tracking Information:</h3>
+            <p><b>Tracking Number:</b> ${labelData.trackingNumber}</p>
+            <p><b>Carrier:</b> ${labelData.carrier}</p>
+            <p>You can track your package using the tracking number above.</p>
+          ` : `
+            <p>You will receive tracking information once your order ships.</p>
+          `}
+          
           <p>Thank you for shopping with Caydis Creations!</p>
         </div>
       `;
@@ -141,6 +189,19 @@ export async function POST(req: NextRequest) {
         } catch (emailError: any) {
           console.error('Failed to send customer email:', emailError.message);
         }
+      }
+
+      // Send admin email (after label creation)
+      try {
+        await resend.emails.send({
+          from: 'orders@caydiscreations.com',
+          to: 'caydiscreations@gmail.com',
+          subject: 'New Order Received! #' + session.id,
+          html: adminHtml,
+        });
+        console.log('Admin notification email sent successfully');
+      } catch (emailError: any) {
+        console.error('Failed to send admin email:', emailError.message);
       }
 
     } catch (err: any) {
