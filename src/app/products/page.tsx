@@ -175,6 +175,11 @@ function ProductsContent() {
       .then(res => res.json())
       .then(data => {
         if (!isMounted) return;
+        console.log('Products fetched from API:', data.products);
+        // Debug stock data
+        data.products?.forEach(product => {
+          console.log(`Frontend - Product: ${product.name}, Stock: ${product.metadata?.stock}, Metadata:`, product.metadata);
+        });
         setAllProducts(data.products || []);
         setIsLoading(false);
       });
@@ -421,11 +426,16 @@ function ProductsContent() {
                     <span className="text-lg font-bold text-[#4A3419]">${product.price}</span>
                   </div>
                   {typeof product.metadata?.stock !== 'undefined' && (
-                    Number(product.metadata.stock) === 0 ? (
-                      <span className="block text-red-600 font-bold mt-2">Sold Out</span>
-                    ) : (
-                      <span className="block text-green-700 font-semibold mt-2">In Stock: {product.metadata.stock}</span>
-                    )
+                    (() => {
+                      const stockValue = product.metadata.stock;
+                      const stockNumber = Number(stockValue);
+                      console.log(`Stock display - Product: ${product.name}, Raw stock: "${stockValue}", Parsed: ${stockNumber}`);
+                      return stockNumber === 0 ? (
+                        <span className="block text-red-600 font-bold mt-2">Sold Out</span>
+                      ) : (
+                        <span className="block text-green-700 font-semibold mt-2">In Stock: {stockValue}</span>
+                      );
+                    })()
                   )}
                   <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-white to-transparent"></div>
                   <div className="hidden group-hover:flex absolute right-0 bottom-0 p-2">
@@ -528,15 +538,20 @@ function ProductsContent() {
 
                   {/* Stock Status */}
                   {typeof selectedProduct.metadata?.stock !== 'undefined' && (
-                    Number(selectedProduct.metadata.stock) === 0 ? (
-                      <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                        <span className="text-red-600 font-bold text-lg">Sold Out</span>
-                      </div>
-                    ) : (
-                      <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                        <span className="text-green-700 font-semibold text-lg">In Stock: {selectedProduct.metadata.stock}</span>
-                      </div>
-                    )
+                    (() => {
+                      const stockValue = selectedProduct.metadata.stock;
+                      const stockNumber = Number(stockValue);
+                      console.log(`Modal stock display - Product: ${selectedProduct.name}, Raw stock: "${stockValue}", Parsed: ${stockNumber}`);
+                      return stockNumber === 0 ? (
+                        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                          <span className="text-red-600 font-bold text-lg">Sold Out</span>
+                        </div>
+                      ) : (
+                        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                          <span className="text-green-700 font-semibold text-lg">In Stock: {stockValue}</span>
+                        </div>
+                      );
+                    })()
                   )}
 
                   {/* Quantity Selector */}
