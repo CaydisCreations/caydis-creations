@@ -73,6 +73,7 @@ export async function GET() {
     responseData.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
     responseData.headers.set("Pragma", "no-cache");
     responseData.headers.set("Expires", "0");
+    responseData.headers.set("Last-Modified", new Date().toUTCString());
     
     return responseData;
   } catch (err) {

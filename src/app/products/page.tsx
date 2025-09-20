@@ -157,7 +157,6 @@ function ProductsContent() {
   const [fetchAttempts, setFetchAttempts] = useState(0);
   const [noProductsTimeout, setNoProductsTimeout] = useState(false);
   const [tagDropdownOpen, setTagDropdownOpen] = useState(false);
-  const [lastRefresh, setLastRefresh] = useState(null);
 
   // Fetch products from Stripe API
   useEffect(() => {
@@ -177,7 +176,6 @@ function ProductsContent() {
       .then(data => {
         if (!isMounted) return;
         setAllProducts(data.products || []);
-        setLastRefresh(new Date());
         setIsLoading(false);
       });
 
@@ -301,27 +299,6 @@ function ProductsContent() {
     );
   };
 
-  // Manual refresh function
-  const refreshProducts = () => {
-    setIsLoading(true);
-    fetch('/api/stripe-products', {
-      cache: 'no-store',
-      headers: {
-        'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache'
-      }
-    })
-    .then(res => res.json())
-    .then(data => {
-      setAllProducts(data.products || []);
-      setLastRefresh(new Date());
-      setIsLoading(false);
-    })
-    .catch(err => {
-      console.error('Error refreshing products:', err);
-      setIsLoading(false);
-    });
-  };
 
   return (
     <div className="space-y-8 pt-8">
@@ -331,28 +308,8 @@ function ProductsContent() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold text-[#4A3419]">Our Products</h1>
-            <p className="mt-2 text-[#4A3419]">Browse our handcrafted collection</p>
-          </div>
-          <div className="flex items-center gap-4">
-            {lastRefresh && (
-              <p className="text-sm text-[#4A3419]">
-                Last updated: {lastRefresh.toLocaleTimeString()}
-              </p>
-            )}
-            <motion.button
-              onClick={refreshProducts}
-              disabled={isLoading}
-              className="px-4 py-2 bg-[#4A3419] text-white rounded-lg hover:bg-[#6B4B26] disabled:opacity-50 flex items-center gap-2"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              {isLoading ? '🔄' : '🔄'} Refresh Stock
-            </motion.button>
-          </div>
-        </div>
+        <h1 className="text-4xl font-bold text-[#4A3419]">Our Products</h1>
+        <p className="mt-2 text-[#4A3419]">Browse our handcrafted collection</p>
       </motion.header>
 
       <motion.div 
