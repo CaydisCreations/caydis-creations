@@ -121,12 +121,18 @@ export async function POST(req: NextRequest) {
           ${labelData && labelData.trackingNumber ? `
             <h3 style="color:#4A3419; margin-top:24px;">Shipping Label Created:</h3>
             <div style="background: #e8f5e8; padding: 12px; border-radius: 8px; margin: 12px 0;">
-              <p style="margin: 4px 0;"><strong>Tracking Number:</strong> ${labelData.trackingNumber}</p>
-              <p style="margin: 4px 0;"><strong>Carrier:</strong> ${labelData.carrier}</p>
-              <p style="margin: 4px 0;"><strong>Service:</strong> ${labelData.service}</p>
-              <p style="margin: 4px 0;"><strong>Cost:</strong> $${labelData.cost}</p>
-              <p style="margin: 4px 0;"><strong>Label ID:</strong> ${labelData.labelId}</p>
-              <p style="margin: 8px 0;"><a href="${labelData.downloadUrl}" style="color: #4A3419; text-decoration: underline;">Download Shipping Label PDF</a></p>
+              <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div style="flex: 1;">
+                  <p style="margin: 4px 0;"><strong>Tracking Number:</strong> ${labelData.trackingNumber}</p>
+                  <p style="margin: 4px 0;"><strong>Carrier:</strong> ${labelData.carrier}</p>
+                  <p style="margin: 4px 0;"><strong>Service:</strong> ${labelData.service}</p>
+                  <p style="margin: 4px 0;"><strong>Cost:</strong> $${labelData.cost}</p>
+                  <p style="margin: 4px 0;"><strong>Label ID:</strong> ${labelData.labelId}</p>
+                </div>
+                <div style="margin-left: 20px; text-align: right;">
+                  <a href="${labelData.downloadUrl}" style="display: inline-block; background: #4A3419; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 8px;">📥 Download Label</a>
+                </div>
+              </div>
             </div>
           ` : `
             <div style="background: #ffe6e6; padding: 12px; border-radius: 8px; margin: 12px 0;">
