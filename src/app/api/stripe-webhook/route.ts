@@ -180,7 +180,7 @@ export async function POST(req: NextRequest) {
       if (customerEmail && customerEmail !== 'N/A') {
         try {
           await resend.emails.send({
-            from: 'orders@caydiscreations.com',
+            from: 'Caydis Creations <onboarding@resend.dev>',
             to: customerEmail,
             subject: 'Order Confirmation - Caydis Creations',
             html: customerHtml,
@@ -194,7 +194,7 @@ export async function POST(req: NextRequest) {
       // Send admin email (after label creation)
       try {
         await resend.emails.send({
-          from: 'orders@caydiscreations.com',
+          from: 'Caydis Creations <onboarding@resend.dev>',
           to: 'caydiscreations@gmail.com',
           subject: 'New Order Received! #' + session.id,
           html: adminHtml,
