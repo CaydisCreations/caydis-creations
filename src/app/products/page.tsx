@@ -157,6 +157,7 @@ function ProductsContent() {
   const [fetchAttempts, setFetchAttempts] = useState(0);
   const [noProductsTimeout, setNoProductsTimeout] = useState(false);
   const [tagDropdownOpen, setTagDropdownOpen] = useState(false);
+  const [lastRefresh, setLastRefresh] = useState(null);
 
   // Fetch products from Stripe API
   useEffect(() => {
@@ -175,12 +176,8 @@ function ProductsContent() {
       .then(res => res.json())
       .then(data => {
         if (!isMounted) return;
-        console.log('Products fetched from API:', data.products);
-        // Debug stock data
-        data.products?.forEach(product => {
-          console.log(`Frontend - Product: ${product.name}, Stock: ${product.metadata?.stock}, Metadata:`, product.metadata);
-        });
         setAllProducts(data.products || []);
+        setLastRefresh(new Date());
         setIsLoading(false);
       });
 
@@ -304,6 +301,28 @@ function ProductsContent() {
     );
   };
 
+  // Manual refresh function
+  const refreshProducts = () => {
+    setIsLoading(true);
+    fetch('/api/stripe-products', {
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      setAllProducts(data.products || []);
+      setLastRefresh(new Date());
+      setIsLoading(false);
+    })
+    .catch(err => {
+      console.error('Error refreshing products:', err);
+      setIsLoading(false);
+    });
+  };
+
   return (
     <div className="space-y-8 pt-8">
       <motion.header 
@@ -312,8 +331,28 @@ function ProductsContent() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1 className="text-4xl font-bold text-[#4A3419]">Our Products</h1>
-        <p className="mt-2 text-[#4A3419]">Browse our handcrafted collection</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold text-[#4A3419]">Our Products</h1>
+            <p className="mt-2 text-[#4A3419]">Browse our handcrafted collection</p>
+          </div>
+          <div className="flex items-center gap-4">
+            {lastRefresh && (
+              <p className="text-sm text-[#4A3419]">
+                Last updated: {lastRefresh.toLocaleTimeString()}
+              </p>
+            )}
+            <motion.button
+              onClick={refreshProducts}
+              disabled={isLoading}
+              className="px-4 py-2 bg-[#4A3419] text-white rounded-lg hover:bg-[#6B4B26] disabled:opacity-50 flex items-center gap-2"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              {isLoading ? '🔄' : '🔄'} Refresh Stock
+            </motion.button>
+          </div>
+        </div>
       </motion.header>
 
       <motion.div 
@@ -426,16 +465,11 @@ function ProductsContent() {
                     <span className="text-lg font-bold text-[#4A3419]">${product.price}</span>
                   </div>
                   {typeof product.metadata?.stock !== 'undefined' && (
-                    (() => {
-                      const stockValue = product.metadata.stock;
-                      const stockNumber = Number(stockValue);
-                      console.log(`Stock display - Product: ${product.name}, Raw stock: "${stockValue}", Parsed: ${stockNumber}`);
-                      return stockNumber === 0 ? (
-                        <span className="block text-red-600 font-bold mt-2">Sold Out</span>
-                      ) : (
-                        <span className="block text-green-700 font-semibold mt-2">In Stock: {stockValue}</span>
-                      );
-                    })()
+                    Number(product.metadata.stock) === 0 ? (
+                      <span className="block text-red-600 font-bold mt-2">Sold Out</span>
+                    ) : (
+                      <span className="block text-green-700 font-semibold mt-2">In Stock: {product.metadata.stock}</span>
+                    )
                   )}
                   <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-white to-transparent"></div>
                   <div className="hidden group-hover:flex absolute right-0 bottom-0 p-2">
@@ -538,20 +572,15 @@ function ProductsContent() {
 
                   {/* Stock Status */}
                   {typeof selectedProduct.metadata?.stock !== 'undefined' && (
-                    (() => {
-                      const stockValue = selectedProduct.metadata.stock;
-                      const stockNumber = Number(stockValue);
-                      console.log(`Modal stock display - Product: ${selectedProduct.name}, Raw stock: "${stockValue}", Parsed: ${stockNumber}`);
-                      return stockNumber === 0 ? (
-                        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                          <span className="text-red-600 font-bold text-lg">Sold Out</span>
-                        </div>
-                      ) : (
-                        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                          <span className="text-green-700 font-semibold text-lg">In Stock: {stockValue}</span>
-                        </div>
-                      );
-                    })()
+                    Number(selectedProduct.metadata.stock) === 0 ? (
+                      <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <span className="text-red-600 font-bold text-lg">Sold Out</span>
+                      </div>
+                    ) : (
+                      <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <span className="text-green-700 font-semibold text-lg">In Stock: {selectedProduct.metadata.stock}</span>
+                      </div>
+                    )
                   )}
 
                   {/* Quantity Selector */}

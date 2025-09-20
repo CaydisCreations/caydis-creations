@@ -36,8 +36,6 @@ export async function GET() {
         price = priceMap[product.id];
       }
       
-      // Debug logging for stock data
-      console.log(`Product: ${product.name}, Stock: ${product.metadata?.stock}, Metadata:`, product.metadata);
       
       return {
         id: product.id,
