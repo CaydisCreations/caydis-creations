@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FaRecycle, FaTools, FaArrowRight, FaGift, FaStar, FaShoppingCart, FaHeart, FaTimes } from 'react-icons/fa'
 import { useCart } from './context/CartContext'
+import { Toast, useToast } from './components/Toast'
 import Link from 'next/link'
 
 function HomeContent() {
@@ -12,6 +13,7 @@ function HomeContent() {
   const [activeProduct, setActiveProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const { addToCart } = useCart();
+  const { toast, showToast, hideToast } = useToast();
   const [allProducts, setAllProducts] = useState([]);
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -55,7 +57,13 @@ function HomeContent() {
   };
 
   return (
-    <div className="space-y-16">
+    <div className="max-w-7xl mx-auto px-4 pt-8 space-y-16">
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.isVisible}
+        onClose={hideToast}
+      />
       {/* Hero Section with Animation */}
       <motion.section 
         initial={{ opacity: 0, y: 20 }}
@@ -232,9 +240,14 @@ function HomeContent() {
                   className="p-2 bg-[#4A3419] text-white rounded-full hover:bg-[#6B4B26] flex items-center gap-1"
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
-                  onClick={(e) => {
+                  onClick={async (e) => {
                     e.stopPropagation();
-                    addToCart({ ...product, priceId: product.priceId }, 1);
+                    const result = await addToCart({ ...product, priceId: product.priceId }, 1);
+                    if (!result.success) {
+                      showToast(result.message, 'error');
+                    } else {
+                      showToast('Item added to cart!', 'success');
+                    }
                   }}
                   disabled={Number(product.metadata?.stock) === 0}
                 >

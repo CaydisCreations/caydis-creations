@@ -18,9 +18,9 @@ export interface CartItem {
 // Cart context interface
 interface CartContextType {
   cartItems: CartItem[]
-  addToCart: (product: any, quantity?: number) => void
+  addToCart: (product: any, quantity?: number) => Promise<{ success: boolean; message?: string }>
   removeFromCart: (productId: number) => void
-  updateQuantity: (productId: number, quantity: number) => void
+  updateQuantity: (productId: number, quantity: number) => Promise<{ success: boolean; message?: string }>
   clearCart: () => void
   getCartTotal: () => number
   getCartCount: () => number
@@ -65,12 +65,32 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [cartItems, isLoaded])
 
-  // Add item to cart
-  const addToCart = useCallback((product: any, quantity: number = 1) => {
+  // Add item to cart with stock validation
+  const addToCart = useCallback(async (product: any, quantity: number = 1) => {
+    // Check stock availability
+    const stock = Number(product.metadata?.stock) || 0
+    
+    if (stock === 0) {
+      return {
+        success: false,
+        message: "Sorry, this item is currently out of stock. Please check back later or browse our other available products."
+      }
+    }
+
+    // Check if product is already in cart
+    const existingItem = cartItems.find(item => item.id === product.id)
+    const currentQuantityInCart = existingItem ? existingItem.quantity : 0
+    const totalQuantityAfterAdd = currentQuantityInCart + quantity
+
+    if (totalQuantityAfterAdd > stock) {
+      return {
+        success: false,
+        message: `We don't have ${totalQuantityAfterAdd} of this item in stock. We currently have ${stock} available. Please adjust your quantity or check back later.`
+      }
+    }
+
+    // If validation passes, add to cart
     setCartItems(currentItems => {
-      // Check if product is already in cart
-      const existingItem = currentItems.find(item => item.id === product.id)
-      
       if (existingItem) {
         // Update quantity of existing item
         return currentItems.map(item => 
@@ -83,7 +103,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
         return [...currentItems, { ...product, quantity, priceId: product.priceId }]
       }
     })
-  }, [])
+
+    return { success: true }
+  }, [cartItems])
 
   // Remove item from cart
   const removeFromCart = useCallback((productId: number) => {
@@ -92,14 +114,38 @@ export function CartProvider({ children }: { children: ReactNode }) {
     )
   }, [])
 
-  // Update item quantity
-  const updateQuantity = useCallback((productId: number, quantity: number) => {
+  // Update item quantity with stock validation
+  const updateQuantity = useCallback(async (productId: number, quantity: number) => {
     if (quantity <= 0) {
       // If quantity is 0 or less, remove item
       removeFromCart(productId)
-      return
+      return { success: true }
     }
 
+    // Find the product in cart to get its metadata
+    const cartItem = cartItems.find(item => item.id === productId)
+    if (!cartItem) {
+      return { success: false, message: "Item not found in cart" }
+    }
+
+    // Check stock availability
+    const stock = Number(cartItem.metadata?.stock) || 0
+    
+    if (stock === 0) {
+      return {
+        success: false,
+        message: "Sorry, this item is currently out of stock. Please check back later or browse our other available products."
+      }
+    }
+
+    if (quantity > stock) {
+      return {
+        success: false,
+        message: `We don't have ${quantity} of this item in stock. We currently have ${stock} available. Please adjust your quantity or check back later.`
+      }
+    }
+
+    // If validation passes, update quantity
     setCartItems(currentItems => 
       currentItems.map(item => 
         item.id === productId 
@@ -107,7 +153,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
           : item
       )
     )
-  }, [removeFromCart])
+
+    return { success: true }
+  }, [cartItems, removeFromCart])
 
   // Clear entire cart
   const clearCart = useCallback(() => {

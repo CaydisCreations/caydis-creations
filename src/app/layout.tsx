@@ -5,9 +5,9 @@ import Image from 'next/image'
 import './globals.css'
 import { FaEnvelope, FaInstagram, FaFacebook, FaTwitter } from 'react-icons/fa'
 import CartProviderWrapper from './components/CartProviderWrapper'
-import CartIcon from './components/CartIcon'
-import NavBar from './components/NavBar'
+import Navigation from './components/Navigation'
 import { FirebaseAuthProvider } from './context/FirebaseAuthContext'
+import { Analytics } from '@vercel/analytics/react'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -30,10 +30,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-[#FFF5E6]">
         <CartProviderWrapper>
           <FirebaseAuthProvider>
-            <NavBar />
-            <div className="max-w-7xl mx-auto px-4 pt-8">
-              {children}
-            </div>
+            <Navigation />
+            {children}
             <footer className="bg-[#4A3419] text-[#FFF5E6] p-8 mt-8 shadow-inner">
               <div className="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="space-y-4">
@@ -69,6 +67,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </footer>
           </FirebaseAuthProvider>
         </CartProviderWrapper>
+        <Analytics />
       </body>
     </html>
   )

@@ -9,14 +9,57 @@ import { usePathname } from 'next/navigation';
 import { FiLogIn, FiUserPlus } from 'react-icons/fi';
 import { useCart } from '../context/CartContext';
 
+// Add error boundary for debugging
+const ErrorBoundary = ({ children }: { children: React.ReactNode }) => {
+  try {
+    return <>{children}</>;
+  } catch (error) {
+    console.error('NavBar Error:', error);
+    return (
+      <nav className="bg-[#4A3419] text-[#FFF5E6] sticky top-0 z-50 shadow-lg">
+        <div className="container mx-auto flex justify-between items-center py-3 px-4">
+          <div className="text-xl font-bold">Caydi's Creations</div>
+          <div className="text-sm">Navigation Error</div>
+        </div>
+      </nav>
+    );
+  }
+};
+
 export default function NavBar() {
-  const { user, logout } = useFirebaseAuth();
+  return (
+    <ErrorBoundary>
+      <NavBarContent />
+    </ErrorBoundary>
+  );
+}
+
+function NavBarContent() {
+  // Add try-catch for context usage
+  let user, logout, getCartCount;
+  try {
+    const authContext = useFirebaseAuth();
+    user = authContext?.user;
+    logout = authContext?.logout;
+  } catch (error) {
+    console.error('Firebase Auth Error:', error);
+    user = null;
+    logout = () => {};
+  }
+
+  try {
+    const cartContext = useCart();
+    getCartCount = cartContext?.getCartCount || (() => 0);
+  } catch (error) {
+    console.error('Cart Context Error:', error);
+    getCartCount = () => 0;
+  }
+
   const [showLogin, setShowLogin] = React.useState(true);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const closeTimeout = useRef<NodeJS.Timeout | null>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const pathname = usePathname();
-  const { getCartCount } = useCart();
 
   const openDropdown = () => {
     if (closeTimeout.current) clearTimeout(closeTimeout.current)

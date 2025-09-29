@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FaTimes, FaShoppingCart, FaTrash, FaStar } from 'react-icons/fa'
 import { useCart } from '../context/CartContext'
+import { Toast, useToast } from '../components/Toast'
 import Link from 'next/link'
 import { useFirebaseAuth } from '../context/FirebaseAuthContext';
 
@@ -425,6 +426,7 @@ function ShippingModal({ open, onClose, onConfirm, initialAddress = undefined, c
 
 function CartContent({ onCheckout, cartItems, setLoading, loading, couponCode, setCouponCode, couponValid, couponDetails, validatingCoupon, couponError, validateCoupon, removeCoupon }) {
   const { removeFromCart, updateQuantity, getCartTotal, clearCart, isLoaded } = useCart()
+  const { toast, showToast, hideToast } = useToast()
   const [address, setAddress] = useState({
     name: '',
     email: '',
@@ -569,6 +571,12 @@ function CartContent({ onCheckout, cartItems, setLoading, loading, couponCode, s
 
   return (
     <div className="max-w-4xl mx-auto mt-24 pt-8">
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.isVisible}
+        onClose={hideToast}
+      />
       <motion.header 
         className="text-center"
         initial={{ opacity: 0, y: -20 }}
@@ -621,14 +629,24 @@ function CartContent({ onCheckout, cartItems, setLoading, loading, couponCode, s
 
                 <div className="flex items-center justify-center">
                   <button 
-                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                    onClick={async () => {
+                      const result = await updateQuantity(item.id, item.quantity - 1);
+                      if (!result.success) {
+                        showToast(result.message, 'error');
+                      }
+                    }}
                     className="w-8 h-8 flex items-center justify-center bg-[#E8C39E] text-[#4A3419] rounded-full hover:bg-[#d6b28e]"
                   >
                     -
                   </button>
                   <span className="mx-3 text-[#4A3419] w-8 text-center">{item.quantity}</span>
                   <button 
-                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                    onClick={async () => {
+                      const result = await updateQuantity(item.id, item.quantity + 1);
+                      if (!result.success) {
+                        showToast(result.message, 'error');
+                      }
+                    }}
                     className="w-8 h-8 flex items-center justify-center bg-[#E8C39E] text-[#4A3419] rounded-full hover:bg-[#d6b28e]"
                   >
                     +

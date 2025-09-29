@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FaSearch, FaShoppingCart, FaStar, FaTimes, FaChevronDown } from 'react-icons/fa'
 import { useCart } from '../context/CartContext'
+import { Toast, useToast } from '../components/Toast'
 
 function ProductImageCarousel({ images, alt, height = "h-64", onImageClick }: { images: string[], alt: string, height?: string, onImageClick?: () => void }) {
   const [index, setIndex] = useState(0);
@@ -152,6 +153,7 @@ function ProductsContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const { addToCart } = useCart();
+  const { toast, showToast, hideToast } = useToast();
   const [selectedTags, setSelectedTags] = useState([]);
   const [tagsDropdownOpen, setTagsDropdownOpen] = useState(false);
   const [fetchAttempts, setFetchAttempts] = useState(0);
@@ -275,14 +277,24 @@ function ProductsContent() {
     setModalOpen(false);
   };
 
-  const handleAddToCart = (e, product) => {
+  const handleAddToCart = async (e, product) => {
     e.stopPropagation(); // Prevents triggering handleProductClick when clicking the button
-    addToCart({ ...product, priceId: product.priceId }, 1);
+    const result = await addToCart({ ...product, priceId: product.priceId }, 1);
+    if (!result.success) {
+      showToast(result.message, 'error');
+    } else {
+      showToast('Item added to cart!', 'success');
+    }
   };
 
-  const handleAddToCartFromModal = () => {
-    addToCart({ ...selectedProduct, priceId: selectedProduct.priceId }, quantity);
-    setModalOpen(false);
+  const handleAddToCartFromModal = async () => {
+    const result = await addToCart({ ...selectedProduct, priceId: selectedProduct.priceId }, quantity);
+    if (result.success) {
+      showToast('Item added to cart!', 'success');
+      setModalOpen(false);
+    } else {
+      showToast(result.message, 'error');
+    }
   };
 
   const incrementQuantity = () => {
@@ -302,7 +314,13 @@ function ProductsContent() {
 
 
   return (
-    <div className="space-y-8 pt-8">
+    <div className="max-w-7xl mx-auto px-4 space-y-8 pt-8">
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.isVisible}
+        onClose={hideToast}
+      />
       <motion.header 
         className="text-center"
         initial={{ opacity: 0, y: -20 }}
@@ -418,7 +436,11 @@ function ProductsContent() {
                     </div>
                   )}
                   <h2 className="text-xl font-bold text-[#4A3419] group-hover:text-[#6B4B26] transition-colors">{product.name}</h2>
-                  <p className="text-[#4A3419] mb-2 line-clamp-2">{product.description}</p>
+                  <div className="text-[#4A3419] mb-2 line-clamp-2">
+                    {product.description?.split('\n').map((line, index) => (
+                      <p key={index} className={index > 0 ? 'mt-1' : ''}>{line}</p>
+                    ))}
+                  </div>
                   <div className="flex justify-between items-center mt-4">
                     <span className="text-lg font-bold text-[#4A3419]">${product.price}</span>
                   </div>
@@ -515,7 +537,11 @@ function ProductsContent() {
                     <p className="text-3xl lg:text-4xl font-bold text-[#4A3419]">${selectedProduct.price}</p>
                   </div>
                   
-                  <p className="text-gray-700 mb-6 text-lg leading-relaxed">{selectedProduct.description}</p>
+                  <div className="text-gray-700 mb-6 text-lg leading-relaxed">
+                    {selectedProduct.description?.split('\n').map((line, index) => (
+                      <p key={index} className={index > 0 ? 'mt-2' : ''}>{line}</p>
+                    ))}
+                  </div>
                   
                   <div className="grid grid-cols-2 gap-4 mb-6">
                     <div className="border border-gray-200 p-4 rounded-lg text-center">
