@@ -31,7 +31,9 @@ export function FirebaseAuthProvider({ children }: { children: React.ReactNode }
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('Firebase auth context initializing...');
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      console.log('Firebase auth state changed:', { firebaseUser: !!firebaseUser, email: firebaseUser?.email });
       setUser(firebaseUser);
       setLoading(false);
     });

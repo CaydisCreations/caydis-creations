@@ -17,7 +17,7 @@ export default function SignupPage() {
 
   useEffect(() => {
     if (user && !loading) {
-      router.push('/');
+      router.push('/account');
     }
   }, [user, loading, router]);
 
@@ -64,7 +64,7 @@ export default function SignupPage() {
     }
     try {
       await signup(email, password);
-      router.push('/');
+      router.push('/account');
     } catch (err: any) {
       // Map Firebase error codes to friendly messages
       const code = err.code || err.message || '';
@@ -78,7 +78,7 @@ export default function SignupPage() {
     setError('');
     try {
       await loginWithGoogle();
-      router.push('/');
+      router.push('/account');
     } catch (err: any) {
       setError(err.message || 'Google signup failed');
     }

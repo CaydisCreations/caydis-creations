@@ -40,7 +40,7 @@ export default function AccountPage() {
   }, [saveMsgType]);
 
   useEffect(() => {
-    if (!user) {
+    if (!loading && !user) {
       router.push('/login');
       return;
     }
@@ -322,6 +322,16 @@ export default function AccountPage() {
       }
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center bg-[#FFF5E6] px-2 py-8">
+        <div className="w-full max-w-2xl bg-white rounded-xl shadow-lg p-8 flex flex-col items-center">
+          <div className="text-[#4A3419]">Loading account...</div>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) return null;
 
