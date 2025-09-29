@@ -13,6 +13,10 @@ export interface CartItem {
   quantity: number
   image?: string // Optional image property for product images
   priceId: string // Stripe price ID
+  metadata?: {
+    stock?: string | number
+    [key: string]: any
+  }
 }
 
 // Cart context interface
