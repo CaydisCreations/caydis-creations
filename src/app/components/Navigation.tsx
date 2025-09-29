@@ -1,14 +1,36 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import { useCart } from '../context/CartContext'
+import { useFirebaseAuth } from '../context/FirebaseAuthContext'
 
 export default function Navigation() {
   const pathname = usePathname()
   const isLoginPage = pathname === '/login'
   const isSignupPage = pathname === '/signup'
+  const isAccountPage = pathname === '/account'
   const { getCartCount, isLoaded } = useCart()
+  const { user, loading, logout } = useFirebaseAuth()
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setUserDropdownOpen(false)
+      }
+    }
+
+    if (userDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [userDropdownOpen])
 
   return (
     <nav className="bg-[#4A3419] text-[#FFF5E6] sticky top-0 z-50 shadow-lg">
@@ -65,34 +87,102 @@ export default function Navigation() {
 
             {/* Auth Buttons Container */}
             <div className="hidden md:flex items-center">
-              <div className="bg-[#E8C39E] border border-[#4A3419] rounded-full px-1 py-1 flex items-center gap-0">
-                <a 
-                  href="/login" 
-                  className={`px-4 py-2 rounded-full transition-all duration-200 text-sm font-bold flex items-center gap-2 hover:scale-105 ${
-                    isLoginPage 
-                      ? 'bg-[#4A3419] text-[#E8C39E]' 
-                      : 'bg-[#E8C39E] text-[#4A3419] hover:bg-[#D4B08C]'
-                  }`}
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.716 17.716 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                  </svg>
-                  Log in
-                </a>
-                <a 
-                  href="/signup" 
-                  className={`px-4 py-2 rounded-full transition-all duration-200 text-sm font-bold flex items-center gap-2 hover:scale-105 ${
-                    isSignupPage 
-                      ? 'bg-[#4A3419] text-[#E8C39E]' 
-                      : 'bg-[#E8C39E] text-[#4A3419] hover:bg-[#D4B08C]'
-                  }`}
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM3 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 019.374 21c-2.331 0-4.512-.645-6.374-1.766z" />
-                  </svg>
-                  Sign up
-                </a>
-              </div>
+              {!loading && (
+                <>
+                  {user ? (
+                    /* User is logged in - Show Account Dropdown */
+                    <div className="relative" ref={dropdownRef}>
+                      <button
+                        onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                        className={`px-4 py-2 rounded-full transition-all duration-200 text-sm font-bold flex items-center gap-2 hover:scale-105 ${
+                          isAccountPage 
+                            ? 'bg-[#4A3419] text-[#E8C39E]' 
+                            : 'bg-[#E8C39E] text-[#4A3419] hover:bg-[#D4B08C]'
+                        }`}
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.716 17.716 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                        </svg>
+                        Account
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      
+                      {/* User Dropdown Menu */}
+                      {userDropdownOpen && (
+                        <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50">
+                          <div className="py-2">
+                            <div className="px-4 py-2 text-sm text-gray-500 border-b">
+                              {user.email}
+                            </div>
+                            <a 
+                              href="/account" 
+                              className="block px-4 py-2 text-[#4A3419] hover:bg-[#E8C39E]"
+                              onClick={() => setUserDropdownOpen(false)}
+                            >
+                              My Account
+                            </a>
+                            <a 
+                              href="/account" 
+                              className="block px-4 py-2 text-[#4A3419] hover:bg-[#E8C39E]"
+                              onClick={() => setUserDropdownOpen(false)}
+                            >
+                              Order History
+                            </a>
+                            <a 
+                              href="/account" 
+                              className="block px-4 py-2 text-[#4A3419] hover:bg-[#E8C39E]"
+                              onClick={() => setUserDropdownOpen(false)}
+                            >
+                              Settings
+                            </a>
+                            <button
+                              onClick={() => {
+                                logout()
+                                setUserDropdownOpen(false)
+                              }}
+                              className="block w-full text-left px-4 py-2 text-[#4A3419] hover:bg-[#E8C39E]"
+                            >
+                              Logout
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    /* User is not logged in - Show Login/Signup */
+                    <div className="bg-[#E8C39E] border border-[#4A3419] rounded-full px-1 py-1 flex items-center gap-0">
+                      <a 
+                        href="/login" 
+                        className={`px-4 py-2 rounded-full transition-all duration-200 text-sm font-bold flex items-center gap-2 hover:scale-105 ${
+                          isLoginPage 
+                            ? 'bg-[#4A3419] text-[#E8C39E]' 
+                            : 'bg-[#E8C39E] text-[#4A3419] hover:bg-[#D4B08C]'
+                        }`}
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.716 17.716 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                        </svg>
+                        Log in
+                      </a>
+                      <a 
+                        href="/signup" 
+                        className={`px-4 py-2 rounded-full transition-all duration-200 text-sm font-bold flex items-center gap-2 hover:scale-105 ${
+                          isSignupPage 
+                            ? 'bg-[#4A3419] text-[#E8C39E]' 
+                            : 'bg-[#E8C39E] text-[#4A3419] hover:bg-[#D4B08C]'
+                        }`}
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM3 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 019.374 21c-2.331 0-4.512-.645-6.374-1.766z" />
+                        </svg>
+                        Sign up
+                      </a>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
 
             {/* Mobile Menu Button */}
@@ -115,36 +205,67 @@ export default function Navigation() {
             <a href="/about" className="hover:text-[#E8C39E] transition-colors">About</a>
             <a href="/contact" className="hover:text-[#E8C39E] transition-colors">Contact</a>
             <a href="/terms" className="hover:text-[#E8C39E] transition-colors">Terms</a>
-            <div className="flex gap-2 pt-2">
-              <div className="bg-[#E8C39E] border border-[#4A3419] rounded-full px-1 py-1 flex items-center gap-0 w-full">
-                <a 
-                  href="/login" 
-                  className={`px-4 py-2 rounded-full transition-all duration-200 text-sm font-bold flex-1 text-center flex items-center justify-center gap-2 hover:scale-105 ${
-                    isLoginPage 
-                      ? 'bg-[#4A3419] text-[#E8C39E]' 
-                      : 'bg-[#E8C39E] text-[#4A3419] hover:bg-[#D4B08C]'
-                  }`}
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.716 17.716 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                  </svg>
-                  Log in
-                </a>
-                <a 
-                  href="/signup" 
-                  className={`px-4 py-2 rounded-full transition-all duration-200 text-sm font-bold flex-1 text-center flex items-center justify-center gap-2 hover:scale-105 ${
-                    isSignupPage 
-                      ? 'bg-[#4A3419] text-[#E8C39E]' 
-                      : 'bg-[#E8C39E] text-[#4A3419] hover:bg-[#D4B08C]'
-                  }`}
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM3 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 019.374 21c-2.331 0-4.512-.645-6.374-1.766z" />
-                  </svg>
-                  Sign up
-                </a>
+            {!loading && (
+              <div className="flex gap-2 pt-2">
+                {user ? (
+                  /* Mobile: User is logged in - Show Account Options */
+                  <div className="w-full space-y-2">
+                    <div className="text-sm text-gray-300 mb-2">
+                      Logged in as: {user.email}
+                    </div>
+                    <a 
+                      href="/account" 
+                      className={`block w-full px-4 py-2 rounded-full transition-all duration-200 text-sm font-bold text-center flex items-center justify-center gap-2 hover:scale-105 ${
+                        isAccountPage 
+                          ? 'bg-[#4A3419] text-[#E8C39E]' 
+                          : 'bg-[#E8C39E] text-[#4A3419] hover:bg-[#D4B08C]'
+                      }`}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.716 17.716 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                      </svg>
+                      My Account
+                    </a>
+                    <button
+                      onClick={logout}
+                      className="block w-full px-4 py-2 rounded-full transition-all duration-200 text-sm font-bold text-center bg-red-600 text-white hover:bg-red-700"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                ) : (
+                  /* Mobile: User is not logged in - Show Login/Signup */
+                  <div className="bg-[#E8C39E] border border-[#4A3419] rounded-full px-1 py-1 flex items-center gap-0 w-full">
+                    <a 
+                      href="/login" 
+                      className={`px-4 py-2 rounded-full transition-all duration-200 text-sm font-bold flex-1 text-center flex items-center justify-center gap-2 hover:scale-105 ${
+                        isLoginPage 
+                          ? 'bg-[#4A3419] text-[#E8C39E]' 
+                          : 'bg-[#E8C39E] text-[#4A3419] hover:bg-[#D4B08C]'
+                      }`}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.716 17.716 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                      </svg>
+                      Log in
+                    </a>
+                    <a 
+                      href="/signup" 
+                      className={`px-4 py-2 rounded-full transition-all duration-200 text-sm font-bold flex-1 text-center flex items-center justify-center gap-2 hover:scale-105 ${
+                        isSignupPage 
+                          ? 'bg-[#4A3419] text-[#E8C39E]' 
+                          : 'bg-[#E8C39E] text-[#4A3419] hover:bg-[#D4B08C]'
+                      }`}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM3 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 019.374 21c-2.331 0-4.512-.645-6.374-1.766z" />
+                      </svg>
+                      Sign up
+                    </a>
+                  </div>
+                )}
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
