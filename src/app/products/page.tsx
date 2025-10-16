@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { FaSearch, FaShoppingCart, FaStar, FaTimes, FaChevronDown } from 'react-icons/fa'
 import { useCart } from '../context/CartContext'
 import { Toast, useToast } from '../components/Toast'
+import Head from 'next/head'
 
 function ProductImageCarousel({ images, alt, height = "h-64", onImageClick }: { images: string[], alt: string, height?: string, onImageClick?: () => void }) {
   const [index, setIndex] = useState(0);
@@ -76,6 +77,14 @@ function ProductImageCarousel({ images, alt, height = "h-64", onImageClick }: { 
     }
   };
 
+  // Check if current item is a video
+  const isVideo = (url: string) => {
+    return url.toLowerCase().includes('.mov') || 
+           url.toLowerCase().includes('.mp4') || 
+           url.toLowerCase().includes('.webm') || 
+           url.toLowerCase().includes('.avi');
+  };
+
   return (
     <div 
       className={`relative ${height} rounded-md mb-4 overflow-hidden bg-[#E8C39E] flex items-center justify-center cursor-pointer`}
@@ -86,14 +95,25 @@ function ProductImageCarousel({ images, alt, height = "h-64", onImageClick }: { 
       onClick={handleImageClick}
       tabIndex={0}
       role="region"
-      aria-label={`Image ${index + 1} of ${images.length}`}
+      aria-label={`${isVideo(images[index]) ? 'Video' : 'Image'} ${index + 1} of ${images.length}`}
       style={{ touchAction: 'pan-y pinch-zoom' }}
     >
-      <img 
-        src={images[index]} 
-        alt={`${alt} - Image ${index + 1} of ${images.length}`} 
-        className="object-contain w-full h-full transition-transform duration-300 hover:scale-105" 
-      />
+      {isVideo(images[index]) ? (
+        <video 
+          src={images[index]} 
+          className="object-contain w-full h-full transition-transform duration-300 hover:scale-105"
+          loop
+          muted
+          playsInline
+          preload="metadata"
+        />
+      ) : (
+        <img 
+          src={images[index]} 
+          alt={`${alt} - Image ${index + 1} of ${images.length}`} 
+          className="object-contain w-full h-full transition-transform duration-300 hover:scale-105" 
+        />
+      )}
       {images.length > 1 && (
         <>
           <button 
@@ -135,7 +155,7 @@ function ProductImageCarousel({ images, alt, height = "h-64", onImageClick }: { 
             ))}
           </div>
           <div className="absolute top-4 left-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm z-10">
-            {index + 1} / {images.length}
+            {isVideo(images[index]) ? 'Video' : 'Image'} {index + 1} / {images.length}
           </div>
         </>
       )}

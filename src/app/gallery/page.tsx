@@ -165,12 +165,12 @@ const mediaItems: MediaItem[] = [
   {
     id: 'duffle-bag',
     type: 'image-group',
-    url: 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/duffleBag/IMG_6990.jpg',
+    url: 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Bags/duffleBag/IMG_6990.jpg',
     images: [
-      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/duffleBag/IMG_6990.jpg',      
-      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/duffleBag/IMG_6988.jpg',
-      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/duffleBag/IMG_6989.jpg',
-      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/duffleBag/IMG_6986.jpg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Bags/duffleBag/IMG_6990.jpg',      
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Bags/duffleBag/IMG_6988.jpg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Bags/duffleBag/IMG_6989.jpg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Bags/duffleBag/IMG_6986.jpg',
     ],
     title: 'Duffle Bag',
     description: 'A duffle bag made from recycled t-shirts. See the Recycled Products page for more details.',
@@ -212,9 +212,13 @@ const mediaItems: MediaItem[] = [
   {
     id: 'recycled-yarn',
     type: 'image-group',
-    url: 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Scrunchies/5956c54e-731a-4c33-8490-130c94bb2ed2.jpeg', // Use the first image as the cover
+    url: '/recycledYarn/IMG_5871.jpeg',
     images: [
-      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Scrunchies/5956c54e-731a-4c33-8490-130c94bb2ed2.jpeg',
+      '/recycledYarn/IMG_5871.jpeg',
+      '/recycledYarn/IMG_5872.jpeg',
+      '/recycledYarn/IMG_5873.jpeg',
+      '/recycledYarn/IMG_5874.jpeg',
+      '/recycledYarn/IMG_5875.jpeg',
     ],
     title: 'Recycled Yarn Collection',
     description: 'handmade yarn from clothes. Perfect when you need strong and thick yarn.',
@@ -257,14 +261,19 @@ const mediaItems: MediaItem[] = [
   },
   {
     id: 'neck-pillow-tan-brown-orange-red',
-    type: 'video',
-    url: 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/TravelPillows/NeckPillow_tan_brown_orange_red/neckpillowVid.MOV',
+    type: 'image-group',
+    url: 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/TravelPillows/NeckPillow_tan_brown_orange_red/IMG_6637.jpeg',
+    images: [
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/TravelPillows/NeckPillow_tan_brown_orange_red/neckpillowVid.MOV',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/TravelPillows/NeckPillow_tan_brown_orange_red/IMG_6637.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/TravelPillows/NeckPillow_tan_brown_orange_red/IMG_6638.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/TravelPillows/NeckPillow_tan_brown_orange_red/IMG_6640.jpeg',
+    ],
     title: 'Neck Pillow - Tan, Brown, Orange & Red',
-    description: 'Handmade crochet travel pillow that fills with your own clothes — soft, space-saving, and perfect for cozy travel. Made with durable polyester yarn for comfort and effortless packability.',
-    categories: ['Travel Pillows', 'Accessories', 'Home Decor'],
-    tags: ['neck pillow', 'travel', 'comfort', 'tan', 'brown', 'orange', 'red', 'earth tones', 'relaxation', 'crochet', 'packable', 'travel-friendly'],
+    description: 'A comfortable travel neck pillow featuring warm earth tones of tan, brown, orange, and red. Perfect for long trips, flights, or relaxing at home. Handmade with soft, cozy materials.',
+    categories: ['Travel Pillows', 'Accessories', 'Comfort'],
+    tags: ['neck pillow', 'travel', 'comfort', 'tan', 'brown', 'orange', 'red', 'cozy', 'handmade'],
     date: '2024-10-15',
-    thumbnail: 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/TravelPillows/NeckPillow_tan_brown_orange_red/IMG_6637.jpeg',
   },
 ]
 
@@ -432,6 +441,18 @@ function GalleryContent() {
                         ) : (
                           <DefaultVideoThumbnail title={item.title} />
                         )}
+                        <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+                          <FaPlay className="text-white text-4xl" />
+                        </div>
+                      </>
+                    ) : item.type === 'image-group' && item.images && item.images.some(img => img.toLowerCase().includes('.mov') || img.toLowerCase().includes('.mp4') || img.toLowerCase().includes('.webm')) ? (
+                      <>
+                        <Image
+                          src={item.url}
+                          alt={item.title}
+                          fill
+                          className="object-cover"
+                        />
                         <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
                           <FaPlay className="text-white text-4xl" />
                         </div>
