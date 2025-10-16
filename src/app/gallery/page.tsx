@@ -257,19 +257,14 @@ const mediaItems: MediaItem[] = [
   },
   {
     id: 'neck-pillow-tan-brown-orange-red',
-    type: 'image-group',
+    type: 'video',
     url: 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/TravelPillows/NeckPillow_tan_brown_orange_red/neckpillowVid.MOV',
-    images: [
-      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/TravelPillows/NeckPillow_tan_brown_orange_red/neckpillowVid.MOV',
-      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/TravelPillows/NeckPillow_tan_brown_orange_red/IMG_6637.jpeg',
-      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/TravelPillows/NeckPillow_tan_brown_orange_red/IMG_6638.jpeg',
-      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/TravelPillows/NeckPillow_tan_brown_orange_red/IMG_6640.jpeg',
-    ],
     title: 'Neck Pillow - Tan, Brown, Orange & Red',
     description: 'Handmade crochet travel pillow that fills with your own clothes — soft, space-saving, and perfect for cozy travel. Made with durable polyester yarn for comfort and effortless packability.',
     categories: ['Travel Pillows', 'Accessories', 'Home Decor'],
     tags: ['neck pillow', 'travel', 'comfort', 'tan', 'brown', 'orange', 'red', 'earth tones', 'relaxation', 'crochet', 'packable', 'travel-friendly'],
     date: '2024-10-15',
+    thumbnail: 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/TravelPillows/NeckPillow_tan_brown_orange_red/IMG_6637.jpeg',
   },
 ]
 
