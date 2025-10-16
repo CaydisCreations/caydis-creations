@@ -255,6 +255,22 @@ const mediaItems: MediaItem[] = [
     tags: ['recycled', 'basket', 'upcycled', 'cotton', 'storage', 'home decor', 'eco-friendly'],
     date: '2024-08-03',
   },
+  {
+    id: 'neck-pillow-tan-brown-orange-red',
+    type: 'image-group',
+    url: 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/TravelPillows/NeckPillow_tan_brown_orange_red/neckpillowVid.MOV',
+    images: [
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/TravelPillows/NeckPillow_tan_brown_orange_red/neckpillowVid.MOV',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/TravelPillows/NeckPillow_tan_brown_orange_red/IMG_6637.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/TravelPillows/NeckPillow_tan_brown_orange_red/IMG_6638.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/TravelPillows/NeckPillow_tan_brown_orange_red/IMG_6640.jpeg',
+    ],
+    title: 'Neck Pillow - Tan, Brown, Orange & Red',
+    description: 'Handmade crochet travel pillow that fills with your own clothes — soft, space-saving, and perfect for cozy travel. Made with durable polyester yarn for comfort and effortless packability.',
+    categories: ['Travel Pillows', 'Accessories', 'Home Decor'],
+    tags: ['neck pillow', 'travel', 'comfort', 'tan', 'brown', 'orange', 'red', 'earth tones', 'relaxation', 'crochet', 'packable', 'travel-friendly'],
+    date: '2024-10-15',
+  },
 ]
 
 // Add 'Accessories' to beanie media items
@@ -541,14 +557,28 @@ function ImageGroupCarousel({ images, title }: { images: string[], title: string
   const [index, setIndex] = useState(0);
   const prev = () => setIndex(i => (i === 0 ? images.length - 1 : i - 1));
   const next = () => setIndex(i => (i === images.length - 1 ? 0 : i + 1));
+  
+  const isVideo = (url: string) => url.toLowerCase().includes('.mov') || url.toLowerCase().includes('.mp4') || url.toLowerCase().includes('.webm');
+  
   return (
     <div className="relative aspect-video flex items-center justify-center bg-black">
-      <Image
-        src={images[index]}
-        alt={title}
-        fill
-        className="object-contain"
-      />
+      {isVideo(images[index]) ? (
+        <video
+          src={images[index]}
+          loop
+          autoPlay
+          playsInline
+          muted
+          className="w-full h-full object-contain"
+        />
+      ) : (
+        <Image
+          src={images[index]}
+          alt={title}
+          fill
+          className="object-contain"
+        />
+      )}
       {images.length > 1 && (
         <>
           <button onClick={prev} className="absolute left-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-70 rounded-full p-2 text-[#4A3419] hover:bg-opacity-100">&#8592;</button>
