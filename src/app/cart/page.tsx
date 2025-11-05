@@ -570,7 +570,7 @@ function CartContent({ onCheckout, cartItems, setLoading, loading, couponCode, s
   }
 
   return (
-    <div className="max-w-4xl mx-auto mt-24 pt-8">
+    <div className="max-w-4xl mx-auto mt-20 md:mt-24 pt-4 md:pt-8 px-4 md:px-6">
       <Toast
         message={toast.message}
         type={toast.type}
@@ -578,13 +578,13 @@ function CartContent({ onCheckout, cartItems, setLoading, loading, couponCode, s
         onClose={hideToast}
       />
       <motion.header 
-        className="text-center"
+        className="text-center mb-6 md:mb-8"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1 className="text-4xl font-bold text-[#4A3419]">Your Shopping Cart</h1>
-        <p className="mt-2 text-[#4A3419]">Review your items before checkout</p>
+        <h1 className="text-2xl md:text-4xl font-bold text-[#4A3419]">Your Shopping Cart</h1>
+        <p className="mt-2 text-sm md:text-base text-[#4A3419]">Review your items before checkout</p>
       </motion.header>
 
       {/* Shipping address form */}
@@ -594,75 +594,143 @@ function CartContent({ onCheckout, cartItems, setLoading, loading, couponCode, s
       {/* Removed as per edit hint */}
 
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-        <div className="p-6 border-b border-gray-200">
-          <div className="grid grid-cols-6 gap-4 font-semibold text-[#4A3419] mb-4">
+        {/* Desktop Table Headers */}
+        <div className="hidden md:block p-4 md:p-6 border-b border-gray-200">
+          <div className="grid grid-cols-6 gap-4 font-semibold text-[#4A3419]">
             <div className="col-span-3">Product</div>
             <div className="text-center">Price</div>
             <div className="text-center">Quantity</div>
             <div className="text-right">Total</div>
           </div>
+        </div>
 
+        {/* Cart Items */}
+        <div className="p-4 md:p-6">
           <AnimatePresence>
             {cartItems.map(item => (
               <motion.div 
                 key={item.id}
-                className="grid grid-cols-6 gap-4 py-4 items-center border-b border-gray-100 last:border-b-0"
+                className="mb-4 md:mb-0 pb-4 md:pb-4 border-b border-gray-100 last:border-b-0 last:mb-0"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, x: -100 }}
                 transition={{ duration: 0.3 }}
               >
-                <div className="col-span-3 flex items-center space-x-4">
-                  <div className="bg-[#E8C39E] h-16 w-16 rounded-md overflow-hidden relative">
-                    {/* Product image */}
-                    <img src={item.image} alt={item.name} className="object-contain w-full h-full" />
+                {/* Mobile Layout */}
+                <div className="md:hidden space-y-3">
+                  <div className="flex items-start space-x-3">
+                    <div className="bg-[#E8C39E] h-20 w-20 rounded-md overflow-hidden relative flex-shrink-0">
+                      <img src={item.image} alt={item.name} className="object-contain w-full h-full" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-[#4A3419] text-base mb-1">{item.name}</h3>
+                      <p className="text-xs text-gray-600 mb-2">{item.category}</p>
+                      <div className="text-sm font-semibold text-[#4A3419] mb-2">
+                        ${item.price.toFixed(2)}
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => removeFromCart(item.id)}
+                      className="p-2 hover:bg-red-100 text-red-500 rounded-full transition-colors duration-300 flex-shrink-0"
+                      aria-label="Remove item"
+                    >
+                      <FaTrash size={16} />
+                    </button>
                   </div>
-                  <div>
-                    <h3 className="font-bold text-[#4A3419]">{item.name}</h3>
-                    <p className="text-sm text-gray-600">{item.category}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-[#4A3419]">Quantity:</span>
+                    <div className="flex items-center gap-2">
+                      <button 
+                        onClick={async () => {
+                          const result = await updateQuantity(item.id, item.quantity - 1);
+                          if (!result.success) {
+                            showToast(result.message, 'error');
+                          }
+                        }}
+                        className="w-9 h-9 flex items-center justify-center bg-[#E8C39E] text-[#4A3419] rounded-full hover:bg-[#d6b28e] font-bold text-lg"
+                        aria-label="Decrease quantity"
+                      >
+                        -
+                      </button>
+                      <span className="text-[#4A3419] font-semibold w-8 text-center text-base">{item.quantity}</span>
+                      <button 
+                        onClick={async () => {
+                          const result = await updateQuantity(item.id, item.quantity + 1);
+                          if (!result.success) {
+                            showToast(result.message, 'error');
+                          }
+                        }}
+                        className="w-9 h-9 flex items-center justify-center bg-[#E8C39E] text-[#4A3419] rounded-full hover:bg-[#d6b28e] font-bold text-lg"
+                        aria-label="Increase quantity"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+                    <span className="text-sm font-medium text-[#4A3419]">Total:</span>
+                    <span className="font-bold text-[#4A3419] text-base">
+                      ${(item.price * item.quantity).toFixed(2)}
+                    </span>
                   </div>
                 </div>
 
-                <div className="text-center">
-                  ${item.price.toFixed(2)}
-                </div>
+                {/* Desktop Layout */}
+                <div className="hidden md:grid grid-cols-6 gap-4 items-center">
+                  <div className="col-span-3 flex items-center space-x-4">
+                    <div className="bg-[#E8C39E] h-16 w-16 rounded-md overflow-hidden relative flex-shrink-0">
+                      <img src={item.image} alt={item.name} className="object-contain w-full h-full" />
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="font-bold text-[#4A3419] truncate">{item.name}</h3>
+                      <p className="text-sm text-gray-600 truncate">{item.category}</p>
+                    </div>
+                  </div>
 
-                <div className="flex items-center justify-center">
-                  <button 
-                    onClick={async () => {
-                      const result = await updateQuantity(item.id, item.quantity - 1);
-                      if (!result.success) {
-                        showToast(result.message, 'error');
-                      }
-                    }}
-                    className="w-8 h-8 flex items-center justify-center bg-[#E8C39E] text-[#4A3419] rounded-full hover:bg-[#d6b28e]"
-                  >
-                    -
-                  </button>
-                  <span className="mx-3 text-[#4A3419] w-8 text-center">{item.quantity}</span>
-                  <button 
-                    onClick={async () => {
-                      const result = await updateQuantity(item.id, item.quantity + 1);
-                      if (!result.success) {
-                        showToast(result.message, 'error');
-                      }
-                    }}
-                    className="w-8 h-8 flex items-center justify-center bg-[#E8C39E] text-[#4A3419] rounded-full hover:bg-[#d6b28e]"
-                  >
-                    +
-                  </button>
-                </div>
+                  <div className="text-center">
+                    ${item.price.toFixed(2)}
+                  </div>
 
-                <div className="flex items-center justify-end space-x-2">
-                  <span className="font-bold text-[#4A3419]">
-                    ${(item.price * item.quantity).toFixed(2)}
-                  </span>
-                  <button 
-                    onClick={() => removeFromCart(item.id)}
-                    className="p-2 hover:bg-red-100 text-red-500 rounded-full transition-colors duration-300"
-                  >
-                    <FaTrash size={14} />
-                  </button>
+                  <div className="flex items-center justify-center">
+                    <button 
+                      onClick={async () => {
+                        const result = await updateQuantity(item.id, item.quantity - 1);
+                        if (!result.success) {
+                          showToast(result.message, 'error');
+                        }
+                      }}
+                      className="w-8 h-8 flex items-center justify-center bg-[#E8C39E] text-[#4A3419] rounded-full hover:bg-[#d6b28e]"
+                      aria-label="Decrease quantity"
+                    >
+                      -
+                    </button>
+                    <span className="mx-3 text-[#4A3419] w-8 text-center">{item.quantity}</span>
+                    <button 
+                      onClick={async () => {
+                        const result = await updateQuantity(item.id, item.quantity + 1);
+                        if (!result.success) {
+                          showToast(result.message, 'error');
+                        }
+                      }}
+                      className="w-8 h-8 flex items-center justify-center bg-[#E8C39E] text-[#4A3419] rounded-full hover:bg-[#d6b28e]"
+                      aria-label="Increase quantity"
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  <div className="flex items-center justify-end space-x-2">
+                    <span className="font-bold text-[#4A3419]">
+                      ${(item.price * item.quantity).toFixed(2)}
+                    </span>
+                    <button 
+                      onClick={() => removeFromCart(item.id)}
+                      className="p-2 hover:bg-red-100 text-red-500 rounded-full transition-colors duration-300"
+                      aria-label="Remove item"
+                    >
+                      <FaTrash size={14} />
+                    </button>
+                  </div>
                 </div>
               </motion.div>
             ))}
@@ -670,82 +738,83 @@ function CartContent({ onCheckout, cartItems, setLoading, loading, couponCode, s
         </div>
 
         {/* Coupon Section */}
-        <div className="p-4 bg-gray-50 border-t border-gray-200">
-          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-[#4A3419] mb-1">Have a coupon code?</label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={couponCode}
-                  onChange={(e) => setCouponCode(e.target.value)}
-                  placeholder="Enter coupon code"
-                  className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#4A3419] focus:border-[#4A3419]"
-                  disabled={couponValid}
-                />
-                {!couponValid ? (
-                  <button
-                    onClick={validateCoupon}
-                    disabled={validatingCoupon || !couponCode.trim()}
-                    className="px-4 py-2 bg-[#4A3419] text-white rounded-lg hover:bg-[#6B4B26] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {validatingCoupon ? 'Validating...' : 'Apply'}
-                  </button>
-                ) : (
-                  <button
-                    onClick={removeCoupon}
-                    className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-                  >
-                    Remove
-                  </button>
-                )}
-              </div>
-              {couponError && (
-                <p className="text-red-600 text-sm mt-1">{couponError}</p>
-              )}
-              {couponValid && couponDetails && (
-                <div className="mt-2 p-2 bg-green-100 border border-green-200 rounded-lg">
-                  <p className="text-green-700 text-sm font-medium">
-                    ✓ {couponDetails.name} applied
-                  </p>
-                  <p className="text-green-600 text-xs">
-                    {couponDetails.percent_off ? 
-                      `${couponDetails.percent_off}% off` : 
-                      `$${(couponDetails.amount_off / 100).toFixed(2)} off`
-                    }
-                  </p>
-                </div>
+        <div className="p-4 md:p-6 bg-gray-50 border-t border-gray-200">
+          <div className="space-y-3">
+            <label className="block text-sm font-medium text-[#4A3419]">Have a coupon code?</label>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <input
+                type="text"
+                value={couponCode}
+                onChange={(e) => setCouponCode(e.target.value)}
+                placeholder="Enter coupon code"
+                className="flex-1 border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#4A3419] focus:border-[#4A3419]"
+                disabled={couponValid}
+              />
+              {!couponValid ? (
+                <button
+                  onClick={validateCoupon}
+                  disabled={validatingCoupon || !couponCode.trim()}
+                  className="px-4 py-2.5 bg-[#4A3419] text-white rounded-lg hover:bg-[#6B4B26] transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium whitespace-nowrap"
+                >
+                  {validatingCoupon ? 'Validating...' : 'Apply'}
+                </button>
+              ) : (
+                <button
+                  onClick={removeCoupon}
+                  className="px-4 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm font-medium whitespace-nowrap"
+                >
+                  Remove
+                </button>
               )}
             </div>
+            {couponError && (
+              <p className="text-red-600 text-sm">{couponError}</p>
+            )}
+            {couponValid && couponDetails && (
+              <div className="p-3 bg-green-100 border border-green-200 rounded-lg">
+                <p className="text-green-700 text-sm font-medium">
+                  ✓ {couponDetails.name} applied
+                </p>
+                <p className="text-green-600 text-xs mt-1">
+                  {couponDetails.percent_off ? 
+                    `${couponDetails.percent_off}% off` : 
+                    `$${(couponDetails.amount_off / 100).toFixed(2)} off`
+                  }
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="p-6 bg-[#FFF5E6] border-t border-gray-200">
-          <div className="flex justify-between items-center">
-            <div>
+        {/* Order Summary */}
+        <div className="p-4 md:p-6 bg-[#FFF5E6] border-t border-gray-200">
+          <div className="space-y-4 md:space-y-0 md:flex md:justify-between md:items-start">
+            <div className="mb-4 md:mb-0">
               <button 
                 onClick={clearCart}
-                className="text-red-500 hover:text-red-700 flex items-center"
+                className="text-red-500 hover:text-red-700 flex items-center text-sm font-medium transition-colors"
               >
-                <FaTimes className="mr-2" /> Clear Cart
+                <FaTimes className="mr-2" size={14} /> Clear Cart
               </button>
             </div>
-            <div className="text-right">
-              <div className="text-lg font-semibold text-[#4A3419]">
-                Subtotal: <span className="text-2xl ml-2">${getCartTotal().toFixed(2)}</span>
+            <div className="md:text-right space-y-4">
+              <div>
+                <div className="text-base md:text-lg font-semibold text-[#4A3419]">
+                  Subtotal: <span className="text-xl md:text-2xl ml-2">${getCartTotal().toFixed(2)}</span>
+                </div>
+                <p className="text-xs md:text-sm text-gray-600 mt-1">Taxes and shipping calculated at checkout</p>
               </div>
-              <p className="text-sm text-gray-600 mb-4">Taxes and shipping calculated at checkout</p>
-              <div className="space-x-4">
+              <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <Link
                   href="/products"
-                  className="px-6 py-2 border border-[#4A3419] text-[#4A3419] rounded-lg hover:bg-[#E8C39E] transition-colors duration-300"
+                  className="px-5 py-2.5 border-2 border-[#4A3419] text-[#4A3419] rounded-lg hover:bg-[#E8C39E] transition-colors duration-300 text-center font-medium text-sm md:text-base"
                 >
                   Continue Shopping
                 </Link>
                 <motion.button 
-                  className="px-6 py-2 bg-[#4A3419] text-white rounded-lg hover:bg-[#6B4B26] transition-colors duration-300 disabled:opacity-60"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  className="px-5 py-2.5 bg-[#4A3419] text-white rounded-lg hover:bg-[#6B4B26] transition-colors duration-300 disabled:opacity-60 font-medium text-sm md:text-base"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={onCheckout}
                   disabled={loading}
                 >
