@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 export default function About() {
   const [showFull, setShowFull] = useState(false);
   return (
-    <div className="max-w-4xl mx-auto space-y-12 pt-8">
+    <div className="max-w-4xl mx-auto px-4 md:px-6 lg:px-8 space-y-12 pt-8">
       <header className="text-center">
         <h1 className="text-4xl font-bold text-[#4A3419]">About Caydi's Creations</h1>
         <p className="mt-2 text-[#4A3419]">Hi, I'm Caydance — but everyone knows me as Caydi — the hands and heart behind Caydi's Creations!</p>
