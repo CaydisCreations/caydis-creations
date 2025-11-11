@@ -6,7 +6,6 @@ import { FaRecycle, FaTshirt, FaYarn, FaHeart, FaArrowRight } from 'react-icons/
 import Link from 'next/link'
 
 const duffleBagImages = [
-  'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Scrunchies/5956c54e-731a-4c33-8490-130c94bb2ed2.jpeg',
   '/duffleBag/IMG_6990.jpg',
   '/duffleBag/IMG_6989.jpg',
   '/duffleBag/IMG_6988.jpg',
