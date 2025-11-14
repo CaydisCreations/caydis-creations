@@ -102,6 +102,7 @@ function ProductImageCarousel({ images, alt, height = "h-64", onImageClick }: { 
         <video 
           src={images[index]} 
           className="object-contain w-full h-full transition-transform duration-300 hover:scale-105"
+          autoPlay
           loop
           muted
           playsInline
