@@ -61,6 +61,36 @@ const mediaItems: MediaItem[] = [
     date: '2024-06-10',
   },
   {
+    id: 'childrens-ribbed-beanie',
+    type: 'image-group',
+    url: 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Beanies/ChildrensRibbedPom-Pom/IMG_6988.jpeg',
+    images: [
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Beanies/ChildrensRibbedPom-Pom/IMG_6988.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Beanies/ChildrensRibbedPom-Pom/IMG_6987.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Beanies/ChildrensRibbedPom-Pom/IMG_6981.jpeg',
+    ],
+    title: 'Childrens\' Ribbed Beanie with Pom-Pom',
+    description: 'Multi colored beanie perfect for kids 4-7',
+    categories: ['Beanies', 'Kids'],
+    tags: ['beanies', 'kids', 'children', 'pom-pom', 'ribbed'],
+    date: '2024-12-01',
+  },
+  {
+    id: 'headbands-collection',
+    type: 'image-group',
+    url: 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Headbands/army/Army1.jpeg',
+    images: [
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Headbands/army/Army1.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Headbands/army/Army2.jpeg',
+      'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Headbands/blue_white_brown/IMG_7243.jpeg',
+    ],
+    title: 'Headbands Collection',
+    description: 'A collection of stretchy and comfortable headbands in various colors and sizes',
+    categories: ['Headbands', 'Accessories'],
+    tags: ['headbands', 'accessories', 'army', 'blue', 'multicolor'],
+    date: '2024-12-01',
+  },
+  {
     id: 'scarves-collection',
     type: 'image-group',
     url: 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Scarves/Solid_white/Modeled/IMG_6236.jpeg',
@@ -638,12 +668,12 @@ function ImageGroupCarousel({ images, title }: { images: string[], title: string
           className="w-full h-full object-contain"
         />
       ) : (
-        <Image
-          src={images[index]}
-          alt={title}
-          fill
-          className="object-contain"
-        />
+      <Image
+        src={images[index]}
+        alt={title}
+        fill
+        className="object-contain"
+      />
       )}
       {images.length > 1 && (
         <>

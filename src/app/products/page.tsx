@@ -109,11 +109,11 @@ function ProductImageCarousel({ images, alt, height = "h-64", onImageClick }: { 
           preload="metadata"
         />
       ) : (
-        <img 
-          src={images[index]} 
-          alt={`${alt} - Image ${index + 1} of ${images.length}`} 
-          className="object-contain w-full h-full transition-transform duration-300 hover:scale-105" 
-        />
+      <img 
+        src={images[index]} 
+        alt={`${alt} - Image ${index + 1} of ${images.length}`} 
+        className="object-contain w-full h-full transition-transform duration-300 hover:scale-105" 
+      />
       )}
       {images.length > 1 && (
         <>
@@ -170,6 +170,7 @@ function ProductsContent() {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedSizeVariant, setSelectedSizeVariant] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
@@ -250,6 +251,9 @@ function ProductsContent() {
         results = [...startsWith, ...includes];
       }
       
+      // Group size variants together
+      results = groupSizeVariants(results);
+      
       // Reorder products to move specific product to 14th position
       results = reorderProducts(results);
       
@@ -258,6 +262,58 @@ function ProductsContent() {
     }, 300);
     return () => clearTimeout(timer);
   }, [selectedCategory, searchTerm, selectedTags, allProducts]);
+
+  // Function to group size variants together
+  const groupSizeVariants = (products) => {
+    const variantGroups = {
+      'Army Headband': ['Army Headband - 10 inches', 'Army Headband - 8.5 inches'],
+      'Blue Multicolor Headband': ['Blue Multicolor Headband - 10 inches', 'Blue Multicolor Headband - 8.5 inches']
+    };
+
+    const processed = new Set();
+    const grouped = [];
+    const variantMap = new Map(); // Map base name to array of variant products
+
+    // First, identify and group variants
+    products.forEach(product => {
+      let isVariant = false;
+      for (const [baseName, variantNames] of Object.entries(variantGroups)) {
+        if (variantNames.includes(product.name)) {
+          isVariant = true;
+          if (!variantMap.has(baseName)) {
+            variantMap.set(baseName, []);
+          }
+          variantMap.get(baseName).push(product);
+          processed.add(product.id);
+          break;
+        }
+      }
+      if (!isVariant) {
+        grouped.push(product);
+      }
+    });
+
+    // Add grouped variants as single products with variant info
+    variantMap.forEach((variants, baseName) => {
+      // Sort variants by size (larger first)
+      variants.sort((a, b) => {
+        const sizeA = a.metadata?.measurements?.match(/(\d+\.?\d*)/)?.[1] || '0';
+        const sizeB = b.metadata?.measurements?.match(/(\d+\.?\d*)/)?.[1] || '0';
+        return parseFloat(sizeB) - parseFloat(sizeA);
+      });
+
+      // Use the first variant as the main product, but add variants array
+      const mainProduct = {
+        ...variants[0],
+        name: baseName,
+        variants: variants,
+        hasVariants: true
+      };
+      grouped.push(mainProduct);
+    });
+
+    return grouped;
+  };
 
   // Function to reorder products
   const reorderProducts = (products) => {
@@ -290,6 +346,12 @@ function ProductsContent() {
 
   const handleProductClick = (product) => {
     setSelectedProduct(product);
+    // If product has variants, select the first one by default
+    if (product.hasVariants && product.variants && product.variants.length > 0) {
+      setSelectedSizeVariant(product.variants[0]);
+    } else {
+      setSelectedSizeVariant(null);
+    }
     setModalOpen(true);
     setQuantity(1); // Reset quantity when opening modal
   };
@@ -300,6 +362,11 @@ function ProductsContent() {
 
   const handleAddToCart = async (e, product) => {
     e.stopPropagation(); // Prevents triggering handleProductClick when clicking the button
+    // If product has variants, open modal instead to allow size selection
+    if (product.hasVariants && product.variants && product.variants.length > 0) {
+      handleProductClick(product);
+      return;
+    }
     const result = await addToCart({ ...product, priceId: product.priceId }, 1);
     if (!result.success) {
       showToast(result.message, 'error');
@@ -309,7 +376,9 @@ function ProductsContent() {
   };
 
   const handleAddToCartFromModal = async () => {
-    const result = await addToCart({ ...selectedProduct, priceId: selectedProduct.priceId }, quantity);
+    // Use selected variant if available, otherwise use main product
+    const productToAdd = selectedSizeVariant || selectedProduct;
+    const result = await addToCart({ ...productToAdd, priceId: productToAdd.priceId }, quantity);
     if (result.success) {
       showToast('Item added to cart!', 'success');
       setModalOpen(false);
@@ -517,22 +586,30 @@ function ProductsContent() {
             >
               {/* Image Section - Full screen size */}
               <div className="lg:w-2/3 relative h-full">
-                {selectedProduct.images && selectedProduct.images.length > 0 ? (
-                  <ProductImageCarousel 
-                    images={selectedProduct.images} 
-                    alt={selectedProduct.name} 
-                    height="h-full" 
-                    onImageClick={() => handleProductClick(selectedProduct)} 
-                  />
-                ) : (
-                  <div className="bg-[#E8C39E] h-full relative flex items-center justify-center">
-                    <img 
-                      src={selectedProduct.image} 
-                      alt={selectedProduct.name} 
-                      className="object-contain w-full h-full" 
-                    />
-                  </div>
-                )}
+                {(() => {
+                  const currentProduct = selectedSizeVariant || selectedProduct;
+                  const images = currentProduct.images || (currentProduct.image ? [currentProduct.image] : []);
+                  if (images.length > 0) {
+                    return (
+                      <ProductImageCarousel 
+                        images={images} 
+                        alt={currentProduct.name} 
+                        height="h-full" 
+                        onImageClick={() => handleProductClick(selectedProduct)} 
+                      />
+                    );
+                  } else {
+                    return (
+                      <div className="bg-[#E8C39E] h-full relative flex items-center justify-center">
+                        <img 
+                          src={currentProduct.image} 
+                          alt={currentProduct.name} 
+                          className="object-contain w-full h-full" 
+                        />
+                      </div>
+                    );
+                  }
+                })()}
                 <button 
                   className="absolute top-4 right-4 bg-white p-3 rounded-full shadow-lg hover:bg-[#E8C39E] transition-colors duration-300 z-20"
                   onClick={closeModal}
@@ -555,7 +632,7 @@ function ProductsContent() {
                   </div>
                   
                   <div className="flex items-center justify-between mb-6">
-                    <p className="text-3xl lg:text-4xl font-bold text-[#4A3419]">${selectedProduct.price}</p>
+                    <p className="text-3xl lg:text-4xl font-bold text-[#4A3419]">${selectedSizeVariant?.price || selectedProduct.price}</p>
                   </div>
                   
                   <div className="text-gray-700 mb-6 text-lg leading-relaxed">
@@ -563,30 +640,64 @@ function ProductsContent() {
                       <p key={index} className={index > 0 ? 'mt-2' : ''}>{line}</p>
                     ))}
                   </div>
+
+                  {/* Size Variant Selector */}
+                  {selectedProduct.hasVariants && selectedProduct.variants && (
+                    <div className="mb-6">
+                      <label className="block text-sm font-semibold text-[#4A3419] mb-2">Select Size:</label>
+                      <div className="grid grid-cols-2 gap-3">
+                        {selectedProduct.variants.map((variant) => {
+                          const isSelected = selectedSizeVariant?.id === variant.id;
+                          const measurements = variant.metadata?.measurements || variant.metadata?.size || '';
+                          return (
+                            <button
+                              key={variant.id}
+                              onClick={() => setSelectedSizeVariant(variant)}
+                              className={`p-3 border-2 rounded-lg text-left transition-all ${
+                                isSelected
+                                  ? 'border-[#4A3419] bg-[#E8C39E]'
+                                  : 'border-gray-200 hover:border-[#E8C39E]'
+                              }`}
+                            >
+                              <div className="font-medium text-[#4A3419]">{measurements}</div>
+                              <div className="text-xs text-gray-600 mt-1">
+                                Stock: {variant.metadata?.stock || 0}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                   
                   <div className="grid grid-cols-2 gap-4 mb-6">
                     <div className="border border-gray-200 p-4 rounded-lg text-center">
                       <span className="block text-sm text-gray-500 mb-1">Material</span>
-                      <span className="font-medium text-[#4A3419]">{selectedProduct.metadata?.material || 'Acrylic'}</span>
+                      <span className="font-medium text-[#4A3419]">{(selectedSizeVariant || selectedProduct).metadata?.material || 'Acrylic'}</span>
                     </div>
                     <div className="border border-gray-200 p-4 rounded-lg text-center">
                       <span className="block text-sm text-gray-500 mb-1">Size</span>
-                      <span className="font-medium text-[#4A3419]">{selectedProduct.metadata?.size || 'Standard'}</span>
+                      <span className="font-medium text-[#4A3419]">{(selectedSizeVariant || selectedProduct).metadata?.size || (selectedSizeVariant || selectedProduct).metadata?.measurements || 'Standard'}</span>
                     </div>
                   </div>
 
                   {/* Stock Status */}
-                  {typeof selectedProduct.metadata?.stock !== 'undefined' && (
-                    Number(selectedProduct.metadata.stock) === 0 ? (
-                      <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                        <span className="text-red-600 font-bold text-lg">Sold Out</span>
-                      </div>
-                    ) : (
-                      <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                        <span className="text-green-700 font-semibold text-lg">In Stock: {selectedProduct.metadata.stock}</span>
-                      </div>
-                    )
-                  )}
+                  {(() => {
+                    const currentProduct = selectedSizeVariant || selectedProduct;
+                    const stock = Number(currentProduct.metadata?.stock);
+                    if (typeof stock !== 'undefined') {
+                      return stock === 0 ? (
+                        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                          <span className="text-red-600 font-bold text-lg">Sold Out</span>
+                        </div>
+                      ) : (
+                        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                          <span className="text-green-700 font-semibold text-lg">In Stock: {stock}</span>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
 
                   {/* Quantity Selector */}
                   <div className="flex items-center justify-between mb-6">
@@ -616,7 +727,10 @@ function ProductsContent() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleAddToCartFromModal}
-                  disabled={Number(selectedProduct.metadata?.stock) === 0}
+                  disabled={(() => {
+                    const currentProduct = selectedSizeVariant || selectedProduct;
+                    return Number(currentProduct.metadata?.stock) === 0;
+                  })()}
                 >
                   <FaShoppingCart size={20} />
                   Add to Cart
