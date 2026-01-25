@@ -78,7 +78,8 @@ function ProductImageCarousel({ images, alt, height = "h-64", onImageClick }: { 
   };
 
   // Check if current item is a video
-  const isVideo = (url: string) => {
+  const isVideo = (url: string | undefined) => {
+    if (!url) return false;
     return url.toLowerCase().includes('.mov') || 
            url.toLowerCase().includes('.mp4') || 
            url.toLowerCase().includes('.webm') || 
@@ -254,6 +255,9 @@ function ProductsContent() {
       // Group size variants together
       results = groupSizeVariants(results);
       
+      // Group lining variants together
+      results = groupLiningVariants(results);
+      
       // Reorder products to move specific product to 14th position
       results = reorderProducts(results);
       
@@ -307,7 +311,53 @@ function ProductsContent() {
         ...variants[0],
         name: baseName,
         variants: variants,
-        hasVariants: true
+        hasVariants: true,
+        variantType: 'size'
+      };
+      grouped.push(mainProduct);
+    });
+
+    return grouped;
+  };
+
+  // Function to group lining variants together
+  const groupLiningVariants = (products) => {
+    const processed = new Set();
+    const grouped = [];
+    const variantMap = new Map(); // Map parent product name to array of variant products
+
+    // First, identify products with lining variants
+    products.forEach(product => {
+      // Check if product has lining variant metadata
+      if (product.metadata?.hasLiningVariants === 'true' && product.metadata?.parentProduct) {
+        const parentName = product.metadata.parentProduct;
+        
+        if (!variantMap.has(parentName)) {
+          variantMap.set(parentName, []);
+        }
+        variantMap.get(parentName).push(product);
+        processed.add(product.id);
+      } else if (!processed.has(product.id)) {
+        grouped.push(product);
+      }
+    });
+
+    // Add grouped variants as single products with variant info
+    variantMap.forEach((variants, parentName) => {
+      // Sort variants by lining type (alphabetically for consistency)
+      variants.sort((a, b) => {
+        const liningA = a.metadata?.liningName || '';
+        const liningB = b.metadata?.liningName || '';
+        return liningA.localeCompare(liningB);
+      });
+
+      // Use the first variant as the main product (it should have all images)
+      const mainProduct = {
+        ...variants[0],
+        name: parentName,
+        variants: variants,
+        hasVariants: true,
+        variantType: 'lining'
       };
       grouped.push(mainProduct);
     });
@@ -588,7 +638,43 @@ function ProductsContent() {
               <div className="lg:w-2/3 relative h-full">
                 {(() => {
                   const currentProduct = selectedSizeVariant || selectedProduct;
-                  const images = currentProduct.images || (currentProduct.image ? [currentProduct.image] : []);
+                  let images = currentProduct.images || (currentProduct.image ? [currentProduct.image] : []);
+                  
+                  // Get lining-specific image if a lining variant is selected
+                  if (selectedProduct.variantType === 'lining' && selectedSizeVariant) {
+                    const liningImageMap = {
+                      'Pink Handbag': {
+                        'flower': 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Bags/red_pink_orange_purple/IMG_6117.jpeg',
+                        'solid-pink': 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Bags/red_pink_orange_purple/IMG_6216.jpeg',
+                        'Solid Pink Lining': 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Bags/red_pink_orange_purple/IMG_6216.jpeg',
+                        'Flower Lining': 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Bags/red_pink_orange_purple/IMG_6117.jpeg'
+                      },
+                      'Dark Rainbow Handbag': {
+                        'leaf': 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Bags/rainbow/IMG_6217.jpeg',
+                        'solid-green': 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Bags/rainbow/IMG_6121.jpeg',
+                        'Leaf Lining': 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Bags/rainbow/IMG_6217.jpeg',
+                        'Solid Green Lining': 'https://caydiscreations.s3.us-east-2.amazonaws.com/Public/Bags/rainbow/IMG_6121.jpeg'
+                      }
+                    };
+                    
+                    const liningType = selectedSizeVariant.metadata?.liningType;
+                    const liningName = selectedSizeVariant.metadata?.liningName;
+                    const productName = selectedProduct.name;
+                    
+                    // Try liningType first, then liningName as fallback
+                    let liningImage = null;
+                    if (liningImageMap[productName]) {
+                      liningImage = liningImageMap[productName][liningType] || 
+                                   liningImageMap[productName][liningName] || 
+                                   null;
+                    }
+                    
+                    if (liningImage) {
+                      // Put the lining-specific image first, then add other images
+                      images = [liningImage, ...images.filter(img => img !== liningImage)];
+                    }
+                  }
+                  
                   if (images.length > 0) {
                     return (
                       <ProductImageCarousel 
@@ -636,13 +722,13 @@ function ProductsContent() {
                   </div>
                   
                   <div className="text-gray-700 mb-6 text-lg leading-relaxed">
-                    {selectedProduct.description?.split('\n').map((line, index) => (
+                    {(selectedSizeVariant || selectedProduct).description?.split('\n').map((line, index) => (
                       <p key={index} className={index > 0 ? 'mt-2' : ''}>{line}</p>
                     ))}
                   </div>
 
                   {/* Size Variant Selector */}
-                  {selectedProduct.hasVariants && selectedProduct.variants && (
+                  {selectedProduct.hasVariants && selectedProduct.variants && selectedProduct.variantType === 'size' && (
                     <div className="mb-6">
                       <label className="block text-sm font-semibold text-[#4A3419] mb-2">Select Size:</label>
                       <div className="grid grid-cols-2 gap-3">
@@ -669,6 +755,35 @@ function ProductsContent() {
                       </div>
                     </div>
                   )}
+
+                  {/* Lining Variant Selector */}
+                  {selectedProduct.hasVariants && selectedProduct.variants && selectedProduct.variantType === 'lining' && (
+                    <div className="mb-6">
+                      <label className="block text-sm font-semibold text-[#4A3419] mb-2">Select Inner Lining:</label>
+                      <div className="grid grid-cols-2 gap-3">
+                        {selectedProduct.variants.map((variant) => {
+                          const isSelected = selectedSizeVariant?.id === variant.id;
+                          const liningName = variant.metadata?.liningName || variant.description?.match(/Inner Lining: ([^\n]+)/)?.[1] || 'Standard';
+                          return (
+                            <button
+                              key={variant.id}
+                              onClick={() => setSelectedSizeVariant(variant)}
+                              className={`p-3 border-2 rounded-lg text-left transition-all ${
+                                isSelected
+                                  ? 'border-[#4A3419] bg-[#E8C39E]'
+                                  : 'border-gray-200 hover:border-[#E8C39E]'
+                              }`}
+                            >
+                              <div className="font-medium text-[#4A3419]">{liningName}</div>
+                              <div className="text-xs text-gray-600 mt-1">
+                                Stock: {variant.metadata?.stock || 0}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                   
                   <div className="grid grid-cols-2 gap-4 mb-6">
                     <div className="border border-gray-200 p-4 rounded-lg text-center">
@@ -676,8 +791,15 @@ function ProductsContent() {
                       <span className="font-medium text-[#4A3419]">{(selectedSizeVariant || selectedProduct).metadata?.material || 'Acrylic'}</span>
                     </div>
                     <div className="border border-gray-200 p-4 rounded-lg text-center">
-                      <span className="block text-sm text-gray-500 mb-1">Size</span>
-                      <span className="font-medium text-[#4A3419]">{(selectedSizeVariant || selectedProduct).metadata?.size || (selectedSizeVariant || selectedProduct).metadata?.measurements || 'Standard'}</span>
+                      <span className="block text-sm text-gray-500 mb-1">
+                        {selectedProduct.variantType === 'lining' ? 'Inner Lining' : 'Size'}
+                      </span>
+                      <span className="font-medium text-[#4A3419]">
+                        {selectedProduct.variantType === 'lining' 
+                          ? ((selectedSizeVariant || selectedProduct).metadata?.liningName || (selectedSizeVariant || selectedProduct).description?.match(/Inner Lining: ([^\n]+)/)?.[1] || 'Standard')
+                          : ((selectedSizeVariant || selectedProduct).metadata?.size || (selectedSizeVariant || selectedProduct).metadata?.measurements || 'Standard')
+                        }
+                      </span>
                     </div>
                   </div>
 
